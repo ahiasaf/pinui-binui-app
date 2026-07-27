@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ניהול פינוי בינוי</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#24466E">
+<style>
+  :root {
+    --paper:#F4F6F8; --surface:#FFFFFF; --surface-2:#F9FAFB;
+    --ink:#16202E; --ink-2:#4A5670; --ink-3:#7A8699;
+    --rule:#DDE2E9;
+    --accent:#24466E; --on-accent:#FFFFFF; --accent-soft:#E9EEF6;
+    --ok:#2E7A52; --warn:#9C7016; --stop:#A5382D;
+    --radius:10px;
+  }
+  body.dark {
+    --paper:#0F141C; --surface:#171F2A; --surface-2:#1C2531;
+    --ink:#E7EBF2; --ink-2:#9DA9BC; --ink-3:#7A8699;
+    --rule:#29323F;
+    --accent:#88ACD9; --on-accent:#0F141C; --accent-soft:#1C2836;
+    --ok:#5EBB8B; --warn:#D9AE52; --stop:#E27B71;
+  }
+  * { box-sizing:border-box; margin:0; padding:0;
+      font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif; }
+  body { background:var(--paper); color:var(--ink); display:flex; justify-content:center;
+         min-height:100vh; -webkit-font-smoothing:antialiased; }
+  .app { width:100%; max-width:480px; background:var(--surface); min-height:100vh;
+         display:flex; flex-direction:column; position:relative; }
+
+  header { background:var(--accent); color:var(--on-accent); padding:14px 18px;
+           display:flex; justify-content:space-between; align-items:center; }
+  header h1 { font-size:1.05rem; font-weight:800; letter-spacing:-.01em; }
+  .hbtns { display:flex; gap:14px; }
+  .icon { background:none; border:none; color:inherit; font-size:1.05rem; cursor:pointer; opacity:.85; }
+
+  .content { padding:18px; flex:1; overflow-y:auto; }
+  .view { display:none; flex-direction:column; gap:14px; }
+  .view.on { display:flex; animation:fade .3s ease; }
+  @keyframes fade { from{opacity:0} to{opacity:1} }
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+
+  #splash { position:fixed; inset:0; background:var(--accent); color:var(--on-accent); z-index:99;
+            display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+            transition:opacity .4s, visibility .4s; }
+  #splash.off { opacity:0; visibility:hidden; }
+  #splash b { font-size:1.3rem; font-weight:800; }
+
+  /* ---------- מסך בית ---------- */
+  .goal { background:var(--accent); color:var(--on-accent); border-radius:var(--radius); padding:20px; text-align:center; }
+  .goal .pct { font-size:2.6rem; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  .goal .of { font-size:.85rem; opacity:.85; margin-top:5px; }
+  .goal .bar { height:7px; background:rgba(255,255,255,.25); border-radius:4px; margin:14px 0 8px; overflow:hidden; position:relative; }
+  .goal .bar i { display:block; height:100%; background:var(--on-accent); }
+  .goal .bar u { position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--on-accent); opacity:.55; }
+  .goal .need { font-size:.92rem; font-weight:700; }
+
+  .ask { text-align:center; color:var(--ink-2); font-weight:700; margin-top:6px; }
+  .times { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; }
+  .time { background:var(--surface-2); border:1px solid var(--rule); border-radius:var(--radius);
+          padding:16px 4px; font-size:1.05rem; font-weight:800; color:var(--accent); cursor:pointer; }
+  .time small { display:block; font-size:.68rem; font-weight:600; color:var(--ink-3); margin-top:2px; }
+  .time:active { transform:scale(.97); }
+
+  .strip { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+  .cell { background:var(--surface-2); border:1px solid var(--rule); border-radius:var(--radius);
+          padding:12px 8px; text-align:center; cursor:pointer; }
+  .cell b { display:block; font-size:1.4rem; font-weight:800; font-variant-numeric:tabular-nums; }
+  .cell span { font-size:.72rem; color:var(--ink-3); }
+
+  /* ---------- כרטיס הסבב ---------- */
+  .top { display:flex; justify-content:space-between; align-items:center; color:var(--ink-3); font-size:.82rem; }
+  .top button { background:none; border:none; color:var(--ink-3); font-size:1.2rem; cursor:pointer; }
+  .name { font-size:1.75rem; font-weight:800; text-align:center; line-height:1.2; letter-spacing:-.01em; }
+  .where { text-align:center; color:var(--ink-3); font-size:.85rem; }
+  .tags { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+  .tag { font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:20px;
+         background:var(--accent-soft); color:var(--accent); }
+  .tag.w { background:rgba(156,112,22,.14); color:var(--warn); }
+
+  .note { background:var(--surface-2); border:1px solid var(--rule); border-radius:var(--radius);
+          padding:14px; font-size:.95rem; line-height:1.65; color:var(--ink-2); white-space:pre-wrap; }
+  .note .when { display:block; margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);
+                color:var(--ink-3); font-size:.78rem; }
+  .why { text-align:center; color:var(--accent); font-weight:700; font-size:.88rem; }
+
+  .btn { display:block; width:100%; text-align:center; border:1px solid transparent;
+         border-radius:var(--radius); padding:16px; font-size:1.05rem; font-weight:800; cursor:pointer; }
+  .btn:active { transform:scale(.985); }
+  .btn.p { background:var(--accent); color:var(--on-accent); }
+  .btn.g { background:transparent; border-color:var(--rule); color:var(--ink-2); font-size:.92rem; padding:12px; }
+  .btn.ok { background:var(--ok); color:#fff; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+
+  /* ---------- סיום שיחה ---------- */
+  .label { font-size:.78rem; color:var(--ink-3); font-weight:700; }
+  .seg { display:grid; gap:6px; }
+  .seg.c4 { grid-template-columns:repeat(4,1fr); }
+  .seg button { background:var(--surface-2); border:1px solid var(--rule); border-radius:8px;
+                padding:12px 2px; font-size:.8rem; font-weight:700; color:var(--ink-2); cursor:pointer; }
+  .seg button.on { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+  .mic { width:92px; height:92px; border-radius:50%; margin:4px auto; border:2px solid var(--rule);
+         background:var(--surface-2); color:var(--accent); font-size:1.9rem; cursor:pointer;
+         display:flex; align-items:center; justify-content:center; }
+  .mic.rec { background:var(--stop); color:#fff; border-color:var(--stop); animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(165,56,45,.6)} 70%{box-shadow:0 0 0 14px rgba(165,56,45,0)} 100%{box-shadow:0 0 0 0 rgba(165,56,45,0)} }
+  textarea, input[type=text], input[type=date] {
+    width:100%; background:var(--surface-2); border:1px solid var(--rule); border-radius:var(--radius);
+    padding:12px; font-size:.95rem; color:inherit; resize:vertical; outline:none; }
+  textarea:focus, input:focus { border-color:var(--accent); }
+  .flagline { background:rgba(156,112,22,.12); color:var(--warn); border-radius:8px;
+              padding:10px 12px; font-size:.82rem; font-weight:700; }
+
+  /* ---------- פרטים ---------- */
+  .card { background:var(--surface-2); border:1px solid var(--rule); border-radius:var(--radius); padding:14px; }
+  .card h3 { font-size:.95rem; margin-bottom:8px; }
+  .kv { display:flex; justify-content:space-between; gap:12px; padding:6px 0;
+        border-bottom:1px solid var(--rule); font-size:.88rem; }
+  .kv:last-child { border-bottom:0; }
+  .kv span { color:var(--ink-3); }
+  .hist { font-size:.85rem; color:var(--ink-2); padding:8px 0; border-bottom:1px solid var(--rule); }
+  .hist b { color:var(--ink); }
+
+  /* ---------- התחברות ---------- */
+  .pins { display:flex; justify-content:center; gap:14px; margin:18px 0; }
+  .pins i { width:16px; height:16px; border-radius:50%; border:2px solid var(--accent); }
+  .pins i.f { background:var(--accent); }
+  .pad { display:grid; grid-template-columns:repeat(3,1fr); gap:11px; max-width:280px; margin:0 auto; direction:ltr; }
+  .pad button { background:var(--surface-2); border:1px solid var(--rule); border-radius:var(--radius);
+                padding:16px 0; font-size:1.3rem; font-weight:700; color:var(--accent); cursor:pointer; }
+
+  .msg { text-align:center; color:var(--ink-3); font-size:.9rem; padding:30px 10px; }
+  .queued { background:var(--warn); color:#fff; text-align:center; font-size:.8rem;
+            font-weight:700; padding:7px; display:none; }
+  .queued.on { display:block; }
+  #banner { position:fixed; bottom:0; left:0; right:0; background:var(--accent); color:var(--on-accent);
+            text-align:center; padding:12px; font-weight:700; display:none; cursor:pointer; z-index:50; }
+</style>
+</head>
+<body>
+
+<div id="splash"><b>ניהול פינוי בינוי</b><span style="opacity:.7">טוען…</span></div>
+
+<div class="app">
+  <header>
+    <h1 id="hdr">ניהול פינוי בינוי</h1>
+    <div class="hbtns">
+      <button class="icon" onclick="toggleDark()" title="מצב לילה">◐</button>
+      <button class="icon" onclick="logout()" title="יציאה">⏻</button>
+    </div>
+  </header>
+  <div class="queued" id="queued"></div>
+
+  <div class="content">
+
+    <!-- התחברות -->
+    <div id="v-auth" class="view">
+      <div style="text-align:center;font-weight:800;font-size:1.1rem">קוד כניסה</div>
+      <div class="pins" id="pins"><i></i><i></i><i></i><i></i></div>
+      <div class="pad">
+        <button onclick="pin(1)">1</button><button onclick="pin(2)">2</button><button onclick="pin(3)">3</button>
+        <button onclick="pin(4)">4</button><button onclick="pin(5)">5</button><button onclick="pin(6)">6</button>
+        <button onclick="pin(7)">7</button><button onclick="pin(8)">8</button><button onclick="pin(9)">9</button>
+        <button onclick="pinClear()">✕</button><button onclick="pin(0)">0</button><button onclick="pinDel()">⌫</button>
+      </div>
+      <div class="msg" id="auth-msg"></div>
+    </div>
+
+    <!-- בית -->
+    <div id="v-home" class="view">
+      <div class="goal">
+        <div class="pct" id="g-pct">—</div>
+        <div class="of" id="g-of"></div>
+        <div class="bar"><i id="g-bar"></i><u id="g-mark"></u></div>
+        <div class="need" id="g-need"></div>
+      </div>
+
+      <div class="ask">כמה זמן יש לך?</div>
+      <div class="times">
+        <button class="time" onclick="startRound(15)">15<small>דקות</small></button>
+        <button class="time" onclick="startRound(30)">30<small>דקות</small></button>
+        <button class="time" onclick="startRound(60)">60<small>דקות</small></button>
+        <button class="time" onclick="startRound(0)">1<small>דייר</small></button>
+      </div>
+
+      <div class="strip">
+        <div class="cell" onclick="startDeck('completion')"><b id="c-comp">0</b><span>השלמות</span></div>
+        <div class="cell" onclick="startUpdates()"><b id="c-upd">0</b><span>לעדכן</span></div>
+        <div class="cell" onclick="startDeck('trace')"><b id="c-trace">0</b><span>לאיתור</span></div>
+      </div>
+
+      <input type="text" id="q" placeholder="חיפוש דייר לפי שם, טלפון או בניין" oninput="search()">
+      <div id="q-out"></div>
+    </div>
+
+    <!-- סבב -->
+    <div id="v-round" class="view">
+      <div class="top">
+        <button onclick="endRound()" title="יציאה">✕</button>
+        <span id="r-count"></span>
+      </div>
+      <div class="name" id="r-name" onclick="openDetail()"></div>
+      <div class="where" id="r-where"></div>
+      <div class="tags" id="r-tags"></div>
+      <div class="note" id="r-note"></div>
+      <div class="why" id="r-why"></div>
+      <button class="btn p" id="r-act" onclick="primaryAction()">חייג</button>
+      <div class="row2">
+        <button class="btn g" onclick="nextCard()">דלג</button>
+        <button class="btn g" onclick="snooze()">לא עכשיו</button>
+      </div>
+      <button class="btn g" onclick="openAfter()">רשום בלי לחייג</button>
+    </div>
+
+    <!-- סיום שיחה -->
+    <div id="v-after" class="view">
+      <div class="top"><button onclick="show('v-round')">›</button><span id="a-name"></span></div>
+
+      <div class="label">מה קרה?</div>
+      <div class="seg c4" id="a-outcome">
+        <button onclick="pickOutcome('לא ענה',this)">לא ענה</button>
+        <button onclick="pickOutcome('דיברנו',this)">דיברנו</button>
+        <button onclick="pickOutcome('התקדם',this)">התקדם</button>
+        <button onclick="pickOutcome('חתם',this)">חתם</button>
+      </div>
+
+      <button class="mic" id="mic">◉</button>
+      <textarea id="a-summary" rows="3" placeholder="מה קרה בשיחה…"></textarea>
+
+      <div class="label">מתי שוב?</div>
+      <div class="seg c4" id="a-when">
+        <button onclick="pickWhen(2,this)">יומיים</button>
+        <button onclick="pickWhen(7,this)">שבוע</button>
+        <button onclick="pickWhen(30,this)">חודש</button>
+        <button onclick="pickWhen(-1,this)">תאריך</button>
+      </div>
+      <input type="date" id="a-date" style="display:none">
+      <input type="text" id="a-free" style="display:none" placeholder="אחרי פסח · בעוד שבועיים · כשיחזור מחו״ל">
+
+      <div class="flagline" id="a-missing" style="display:none"></div>
+      <input type="text" id="a-fill" style="display:none">
+
+      <button class="btn p" onclick="saveAfter()">הבא ←</button>
+    </div>
+
+    <!-- עדכון וואטסאפ -->
+    <div id="v-update" class="view">
+      <div class="top"><button onclick="endRound()">✕</button><span id="u-count"></span></div>
+      <div class="name" id="u-name"></div>
+      <div class="where" id="u-where"></div>
+      <textarea id="u-text" rows="10"></textarea>
+      <button class="btn ok" onclick="sendUpdate()">פתח בוואטסאפ</button>
+      <button class="btn g" onclick="nextUpdate()">דלג</button>
+    </div>
+
+    <!-- פרטים -->
+    <div id="v-detail" class="view">
+      <div class="top"><button onclick="show(backTo)">›</button><span>כרטיס דייר</span></div>
+      <div class="name" id="d-name"></div>
+      <div class="where" id="d-where"></div>
+      <div class="card" id="d-contacts"></div>
+      <button class="btn g" onclick="editContact(null)">+ הוסף איש קשר</button>
+      <div class="card" id="d-info"></div>
+      <div class="card" id="d-hist"></div>
+      <button class="btn g" onclick="markObjector()">סמן כמתנגד</button>
+    </div>
+
+    <!-- עריכת איש קשר -->
+    <div id="v-edit" class="view">
+      <div class="top"><button onclick="show('v-detail')">›</button><span id="e-title"></span></div>
+      <div class="label">שם</div>
+      <input type="text" id="e-name">
+      <div class="label">טלפון</div>
+      <input type="text" id="e-phone" inputmode="tel">
+      <div class="label">מייל</div>
+      <input type="text" id="e-email" inputmode="email">
+      <div class="label">כתובת מגורים</div>
+      <input type="text" id="e-address" placeholder="לאן באים להחתים אותו">
+      <div class="label">מתי אפשר להתקשר</div>
+      <input type="text" id="e-hours" placeholder="אחרי 10:30 · רק בין 14:00-15:00">
+      <div class="label">הערה</div>
+      <textarea id="e-notes" rows="2" placeholder="מי זה ולמה דווקא איתו מדברים"></textarea>
+      <label style="display:flex;gap:9px;align-items:center;font-size:.92rem;font-weight:700">
+        <input type="checkbox" id="e-dom" style="width:20px;height:20px">
+        זה איש הקשר הראשי — אותו אראה בכרטיס
+      </label>
+      <button class="btn p" onclick="saveContact()">שמור</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="banner" onclick="applyUpdate()">עדכון חדש זמין — לחץ לרענון</div>
+
+<script>
+// ============================================================
+// הגדרות
+// ============================================================
+var API = localStorage.getItem('pbApi') || '';   // כתובת ה-Apps Script
+var pinCode = localStorage.getItem('pbPin') || '';
+var DEFAULT_CALL_MINUTES = 8;   // עד שיצטבר מספיק מידע אמיתי
+
+var db = { project:{}, apartments:[] };
+var round = [], idx = 0, current = null, backTo = 'v-home';
+var outcome = '', whenDays = 7, roundMode = 'call';
+var typed = '';
+
+if (localStorage.getItem('pbDark') === '1') document.body.classList.add('dark');
+
+// ============================================================
+// תור כתיבה — המערכת חייבת לעבוד בחדר מדרגות בלי קליטה.
+// כל כתיבה נכנסת לתור מקומי ונשלחת כשיש רשת. המסך אף פעם לא ממתין.
+// ============================================================
+function queue(payload) {
+  var q = JSON.parse(localStorage.getItem('pbQueue') || '[]');
+  q.push(payload);
+  localStorage.setItem('pbQueue', JSON.stringify(q));
+  showQueue();
+  flush();
+}
+
+function flush() {
+  var q = JSON.parse(localStorage.getItem('pbQueue') || '[]');
+  if (!q.length || !API) return;
+  var item = q[0];
+  fetch(API, { method:'POST', body: JSON.stringify(item) })
+    .then(function (r) { return r.json(); })
+    .then(function () {
+      var rest = JSON.parse(localStorage.getItem('pbQueue') || '[]');
+      rest.shift();
+      localStorage.setItem('pbQueue', JSON.stringify(rest));
+      showQueue();
+      if (rest.length) flush();
+    })
+    .catch(function () { /* אין רשת — יישלח בפעם הבאה */ });
+}
+
+function showQueue() {
+  var n = JSON.parse(localStorage.getItem('pbQueue') || '[]').length;
+  var el = document.getElementById('queued');
+  el.className = n ? 'queued on' : 'queued';
+  el.textContent = n ? n + ' עדכונים ממתינים לרשת' : '';
+}
+window.addEventListener('online', flush);
+
+// ============================================================
+// טעינה — פותחים מיד מהמטמון, מרעננים ברקע
+// ============================================================
+window.onload = function () {
+  if (!API) {
+    var url = prompt('הדבק את כתובת ה-Apps Script (מסתיימת ב-/exec):');
+    if (url) { API = url.trim(); localStorage.setItem('pbApi', API); }
+  }
+  var cached = localStorage.getItem('pbData');
+  if (cached) {
+    try { db = JSON.parse(cached); } catch (e) {}
+  }
+  hideSplash();
+  showQueue();
+  if (pinCode) { show('v-home'); render(); refresh(); }
+  else show('v-auth');
+  registerSW();
+};
+
+function hideSplash() { document.getElementById('splash').classList.add('off'); }
+
+function refresh() {
+  if (!API || !pinCode) return Promise.resolve();
+  return fetch(API + '?pin=' + encodeURIComponent(pinCode))
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.status !== 'ok') return;
+      db = data;
+      localStorage.setItem('pbData', JSON.stringify(db));
+      render();
+    })
+    .catch(function () { /* עובדים מהמטמון */ });
+}
+
+// ============================================================
+// התחברות
+// ============================================================
+function pin(n) {
+  if (typed.length >= 4) return;
+  typed += n;
+  paintPins();
+  if (typed.length === 4) setTimeout(tryAuth, 150);
+}
+function pinDel() { typed = typed.slice(0, -1); paintPins(); }
+function pinClear() { typed = ''; paintPins(); }
+function paintPins() {
+  var dots = document.querySelectorAll('#pins i');
+  for (var i = 0; i < dots.length; i++) dots[i].className = i < typed.length ? 'f' : '';
+}
+function tryAuth() {
+  var candidate = typed;
+  document.getElementById('auth-msg').textContent = 'בודק…';
+  fetch(API + '?pin=' + encodeURIComponent(candidate))
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.status !== 'ok') {
+        document.getElementById('auth-msg').textContent = 'קוד שגוי';
+        pinClear();
+        return;
+      }
+      pinCode = candidate;
+      localStorage.setItem('pbPin', pinCode);
+      db = data;
+      localStorage.setItem('pbData', JSON.stringify(db));
+      document.getElementById('auth-msg').textContent = '';
+      show('v-home');
+      render();
+    })
+    .catch(function () { document.getElementById('auth-msg').textContent = 'אין חיבור לרשת'; });
+}
+function logout() {
+  localStorage.removeItem('pbPin');
+  pinCode = ''; pinClear();
+  show('v-auth');
+}
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('pbDark', document.body.classList.contains('dark') ? '1' : '0');
+}
+function show(id) {
+  var views = document.querySelectorAll('.view');
+  for (var i = 0; i < views.length; i++) views[i].classList.remove('on');
+  document.getElementById(id).classList.add('on');
+}
+
+// ============================================================
+// חישובי יעד
+// ============================================================
+function stats() {
+  var total = Number(db.project['סך דירות']) || db.apartments.length || 1;
+  var signed = db.apartments.filter(function (a) { return a.status === 'signed'; }).length;
+  var near = Number(db.project['יעד קרוב']) || 50;
+  var toNear = Math.max(0, Math.ceil(total * near / 100) - signed);
+  return { total: total, signed: signed, pct: signed / total * 100, near: near, toNear: toNear };
+}
+
+function render() {
+  var s = stats();
+  document.getElementById('g-pct').textContent = s.pct.toFixed(1) + '%';
+  document.getElementById('g-of').textContent = s.signed + ' מתוך ' + s.total + ' דירות';
+  document.getElementById('g-bar').style.width = Math.min(100, s.pct) + '%';
+  document.getElementById('g-mark').style.right = s.near + '%';
+  document.getElementById('g-need').textContent = s.toNear > 0
+    ? 'עוד ' + s.toNear + ' חתימות ל־' + s.near + '%'
+    : 'עברת את היעד הקרוב 🎉';
+  document.getElementById('hdr').textContent = db.project['שם'] || 'ניהול פינוי בינוי';
+  document.getElementById('c-comp').textContent = deck('completion').length;
+  document.getElementById('c-trace').textContent = deck('trace').length;
+  document.getElementById('c-upd').textContent = updateCandidates().length;
+}
+
+// ============================================================
+// חפיסות
+// ============================================================
+function deck(kind) {
+  return db.apartments.filter(function (a) {
+    if (kind === 'completion') return a.status === 'signed' && a.missing.length > 0;
+    if (kind === 'trace') return a.status === 'trace';
+    return a.status === 'open';
+  });
+}
+
+function daysSince(ymd) {
+  if (!ymd) return 9999;
+  var then = new Date(ymd + 'T00:00:00');
+  if (isNaN(then.getTime())) return 9999;
+  return Math.floor((Date.now() - then.getTime()) / 86400000);
+}
+function today() { return new Date().toISOString().slice(0, 10); }
+function addDays(n) {
+  var d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+// ============================================================
+// מנוע התעדוף
+//
+// כל כרטיס נושא איתו משפט שמסביר למה הוא צף. מנוע שלא יודע
+// להסביר את עצמו — לא סומכים עליו, ולכן מפסיקים להשתמש בו.
+// ============================================================
+function score(a) {
+  if (a.snoozedUntil && a.snoozedUntil > today()) return null;
+  if (a.status === 'objector' || a.status === 'not_relevant') return null;
+
+  var pts = 0, why = '';
+
+  if (a.nextAt) {
+    var over = daysSince(a.nextAt);
+    if (over >= 0) {
+      pts += 100 + Math.min(over, 30);
+      why = over === 0 ? 'הבטחת לחזור אליו היום'
+          : over === 1 ? 'הבטחת לחזור אליו אתמול'
+          : 'הבטחת לחזור אליו לפני ' + over + ' ימים';
+    } else {
+      return null;   // נקבע תאריך עתידי — לא מציקים לו לפני הזמן
+    }
+  }
+
+  if (a.status === 'signed' && a.missing.length) {
+    pts += 70;
+    if (!why) why = 'חתם — חסר רק ' + a.missing.join(', ');
+  }
+
+  // ביום הראשון אין עדיין מגעים, וכל הדירות הפתוחות שוות בניקוד.
+  // רשימת המרכזיים היא מה שמכריע את הסדר עד שיצטברו נתונים אמיתיים.
+  if (a.flags.indexOf('focus') !== -1) {
+    pts += 40;
+    if (!why) why = 'ברשימת המרכזיים שלך';
+  }
+
+  if (a.flags.indexOf('influencer') !== -1) {
+    pts += 25;
+    if (!why) why = 'משפיען — חתימתו תגרור אחרים';
+  }
+
+  // מותנה-ברוב: לא חסימה אלא הזדמנות מתוזמנת. הוא צף כשהמספר זז,
+  // כי זה בדיוק מה שהוא חיכה לו.
+  if (a.flags.indexOf('awaits_majority') !== -1) {
+    var s = stats();
+    if (s.toNear <= 5) {
+      pts += 45;
+      if (!why) why = 'ביקש להמתין לרוב — התקרבנו ליעד';
+    }
+  }
+
+  var gap = daysSince(a.lastAt);
+  var cadence = a.cadence || 21;
+  if (gap >= cadence) {
+    pts += Math.min(60, 20 + (gap - cadence));
+    if (!why) {
+      why = a.lastAt ? 'עברו ' + gap + ' ימים מאז ששוחחתם' : 'עוד לא דיברת איתו';
+    }
+  }
+
+  if (a.noAnswerStreak >= 3) {
+    pts += 10;
+    why = 'לא עונה כבר ' + a.noAnswerStreak + ' פעמים — נסה וואטסאפ';
+  }
+
+  // שעת המענה נלמדת מההיסטוריה בלי שום הזנה ידנית
+  var hour = new Date().getHours();
+  if (a.answerHours && a.answerHours.length >= 2) {
+    var avg = a.answerHours.reduce(function (x, y) { return x + y; }, 0) / a.answerHours.length;
+    if (Math.abs(avg - hour) <= 1.5) pts += 15;
+  }
+
+  if (pts <= 0) return null;
+  return { apt: a, pts: pts, why: why || 'מוכן לפנייה' };
+}
+
+function buildRound(minutes) {
+  var pool = [];
+  db.apartments.forEach(function (a) {
+    if (a.status !== 'open' && !(a.status === 'signed' && a.missing.length)) return;
+    var s = score(a);
+    if (s) pool.push(s);
+  });
+  pool.sort(function (x, y) { return y.pts - x.pts; });
+
+  if (!minutes) return pool.slice(0, 1);
+
+  // ממלאים את הזמן לפי אורך שיחה משוער ולא לפי מספר קבוע של כרטיסים.
+  //
+  // ההשלמות זולות ומניבות, ולכן הן תמיד בראש הניקוד — אבל סבב שכולו
+  // תיאומים טכניים הוא לא יום עבודה. לכן לכל היותר אחת מהן נכנסת לסבב,
+  // וכל השאר הוא שכנוע, שזו העבודה האמיתית.
+  var out = [], spent = 0, completions = 0;
+  for (var i = 0; i < pool.length; i++) {
+    var isCompletion = pool[i].apt.status === 'signed';
+    if (isCompletion && completions >= 1 && out.length) continue;
+    var cost = isCompletion ? 4 : DEFAULT_CALL_MINUTES;
+    if (spent + cost > minutes && out.length) break;
+    out.push(pool[i]);
+    spent += cost;
+    if (isCompletion) completions++;
+  }
+  return out;
+}
+
+// ============================================================
+// הסבב
+// ============================================================
+function startRound(minutes) {
+  roundMode = 'call';
+  round = buildRound(minutes);
+  idx = 0;
+  if (!round.length) { alert('אין כרגע דיירים שדורשים טיפול. כל הכבוד.'); return; }
+  showCard();
+}
+
+function startDeck(kind) {
+  roundMode = 'call';
+  round = deck(kind).map(function (a) {
+    return { apt: a, pts: 0, why: kind === 'trace' ? 'צריך למצוא דרך ליצור קשר' : 'חסר: ' + a.missing.join(', ') };
+  });
+  idx = 0;
+  if (!round.length) { alert('החפיסה הזו ריקה.'); return; }
+  showCard();
+}
+
+function dominant(a) {
+  for (var i = 0; i < a.contacts.length; i++) if (a.contacts[i].dominant) return a.contacts[i];
+  return a.contacts[0] || { name: '(אין איש קשר)', phone: '' };
+}
+
+var TAGS = {
+  focus:'מרכזי', russian:'רוסית', over70:'70+', influencer:'משפיען',
+  awaits_majority:'ממתין לרוב', abroad:'בחו״ל', inheritance:'ירושה',
+  ownership_change:'שינוי בעלות'
+};
+
+function showCard() {
+  if (idx >= round.length) { finishRound(); return; }
+  current = round[idx];
+  var a = current.apt, c = dominant(a);
+
+  document.getElementById('r-count').textContent = (idx + 1) + ' מתוך ' + round.length;
+  document.getElementById('r-name').textContent = c.name;
+  document.getElementById('r-where').textContent =
+    a.building + (a.apartment ? ' · דירה ' + a.apartment : '') + (c.phone ? ' · ' + c.phone : '');
+
+  var tags = document.getElementById('r-tags');
+  tags.innerHTML = '';
+  a.flags.forEach(function (f) {
+    if (!TAGS[f]) return;
+    var el = document.createElement('span');
+    el.className = 'tag' + (f === 'awaits_majority' || f === 'abroad' ? ' w' : '');
+    el.textContent = TAGS[f];
+    tags.appendChild(el);
+  });
+  if (c.hourWindow) {
+    var h = document.createElement('span');
+    h.className = 'tag w'; h.textContent = c.hourWindow;
+    tags.appendChild(h);
+  }
+
+  var note = a.lastNote || c.notes || 'אין עדיין רישום.';
+  var when = a.lastAt ? 'דיברתם לפני ' + daysSince(a.lastAt) + ' ימים' : 'טרם תועדה שיחה';
+  document.getElementById('r-note').innerHTML = '';
+  document.getElementById('r-note').appendChild(document.createTextNode(note));
+  var w = document.createElement('span');
+  w.className = 'when'; w.textContent = when;
+  document.getElementById('r-note').appendChild(w);
+
+  document.getElementById('r-why').textContent = '↑ ' + current.why;
+  document.getElementById('r-act').textContent = c.phone ? 'חייג ' + c.phone : 'אין מספר — פתח כרטיס';
+  show('v-round');
+}
+
+function primaryAction() {
+  var c = dominant(current.apt);
+  if (c.phone) window.location.href = 'tel:' + c.phone;
+  else { openDetail(); return; }
+  setTimeout(openAfter, 400);
+}
+
+function nextCard() { idx++; showCard(); }
+
+function snooze() {
+  var days = parseInt(prompt('לא לגעת בו כמה ימים?', '30'), 10);
+  if (!days) return;
+  var until = addDays(days);
+  current.apt.snoozedUntil = until;
+  queue({ pin: pinCode, action: 'set_state', apartment: current.apt.id, snoozedUntil: until });
+  nextCard();
+}
+
+function endRound() { show('v-home'); render(); }
+function finishRound() {
+  alert('סיימת את הסבב. ' + round.length + ' דיירים טופלו.');
+  endRound();
+}
+
+// ============================================================
+// סיום שיחה — חמש שניות
+// ============================================================
+function openAfter() {
+  outcome = ''; whenDays = 7;
+  document.getElementById('a-name').textContent = dominant(current.apt).name;
+  document.getElementById('a-summary').value = '';
+  document.getElementById('a-date').style.display = 'none';
+  document.getElementById('a-free').style.display = 'none';
+  document.getElementById('a-free').value = '';
+  clearSeg('a-outcome'); clearSeg('a-when');
+  document.querySelectorAll('#a-when button')[1].classList.add('on');
+
+  // איסוף מידע חסר בעלות אפס — נשאל רק במה שבאמת חסר
+  var c = dominant(current.apt);
+  var need = !c.address ? 'כתובת' : (!c.email ? 'מייל' : '');
+  var flag = document.getElementById('a-missing');
+  var fill = document.getElementById('a-fill');
+  if (need) {
+    flag.style.display = 'block';
+    flag.textContent = 'חסרה ' + need + ' — שווה לבקש עכשיו';
+    fill.style.display = 'block';
+    fill.placeholder = need;
+    fill.value = '';
+    fill.dataset.field = need === 'כתובת' ? 'address' : 'email';
+  } else {
+    flag.style.display = 'none';
+    fill.style.display = 'none';
+    fill.dataset.field = '';
+  }
+  show('v-after');
+}
+
+function clearSeg(id) {
+  var b = document.querySelectorAll('#' + id + ' button');
+  for (var i = 0; i < b.length; i++) b[i].classList.remove('on');
+}
+function pickOutcome(value, el) { outcome = value; clearSeg('a-outcome'); el.classList.add('on'); }
+function pickWhen(days, el) {
+  whenDays = days;
+  clearSeg('a-when'); el.classList.add('on');
+  document.getElementById('a-date').style.display = days === -1 ? 'block' : 'none';
+  document.getElementById('a-free').style.display = days === -1 ? 'block' : 'none';
+}
+
+// "מתי שוב" מקבל גם עברית חופשית, כי ככה באמת נרשמים דברים בשטח
+function parseFreeWhen(text) {
+  var t = String(text || '').trim();
+  if (!t) return '';
+  var weeks = t.match(/(\d+)\s*שבוע/);
+  if (weeks) return addDays(parseInt(weeks[1], 10) * 7);
+  if (/שבועיים/.test(t)) return addDays(14);
+  if (/חודשיים/.test(t)) return addDays(60);
+  var months = t.match(/(\d+)\s*חודש/);
+  if (months) return addDays(parseInt(months[1], 10) * 30);
+  var days = t.match(/(\d+)\s*ימים|(\d+)\s*יום/);
+  if (days) return addDays(parseInt(days[1] || days[2], 10));
+  if (/חודש/.test(t)) return addDays(30);
+  if (/שבוע/.test(t)) return addDays(7);
+  return '';
+}
+
+function saveAfter() {
+  var a = current.apt;
+  var summary = document.getElementById('a-summary').value.trim();
+  var nextAt;
+
+  if (whenDays === -1) {
+    nextAt = document.getElementById('a-date').value || parseFreeWhen(document.getElementById('a-free').value);
+    if (!nextAt) { alert('לא הצלחתי להבין מתי. בחר תאריך או כתוב "בעוד שבועיים".'); return; }
+  } else {
+    nextAt = addDays(whenDays);
+  }
+
+  var c = dominant(a);
+  queue({
+    pin: pinCode, action: 'log_contact', apartment: a.id, contact: c.name,
+    kind: 'שיחה', outcome: outcome || 'דיברנו', summary: summary,
+    nextAt: nextAt, cadence: whenDays > 0 ? whenDays : 0
+  });
+
+  // עדכון מקומי מיידי — המסך לא ממתין לשרת אף פעם
+  a.lastAt = today();
+  a.lastNote = summary || a.lastNote;
+  a.lastOutcome = outcome;
+  a.nextAt = nextAt;
+  if (outcome === 'לא ענה') a.noAnswerStreak++; else a.noAnswerStreak = 0;
+  if (outcome === 'חתם') {
+    a.status = 'signed';
+    queue({ pin: pinCode, action: 'set_state', apartment: a.id, status: 'signed' });
+  }
+
+  var fill = document.getElementById('a-fill');
+  if (fill.dataset.field && fill.value.trim()) {
+    var payload = { pin: pinCode, action: 'update_contact', apartment: a.id, name: c.name };
+    payload[fill.dataset.field] = fill.value.trim();
+    c[fill.dataset.field] = fill.value.trim();
+    queue(payload);
+  }
+
+  localStorage.setItem('pbData', JSON.stringify(db));
+  render();
+  nextCard();
+}
+
+// ============================================================
+// הקלטה קולית
+// ============================================================
+var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+var micBtn = document.getElementById('mic');
+if (Recognition) {
+  var rec = new Recognition();
+  rec.lang = 'he-IL';
+  rec.continuous = true;
+  rec.interimResults = false;
+  micBtn.onclick = function () {
+    if (micBtn.classList.contains('rec')) rec.stop(); else rec.start();
+  };
+  rec.onstart = function () { micBtn.classList.add('rec'); };
+  rec.onend = function () { micBtn.classList.remove('rec'); };
+  rec.onresult = function (e) {
+    var text = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) text += e.results[i][0].transcript;
+    }
+    if (text) {
+      var box = document.getElementById('a-summary');
+      box.value = (box.value + ' ' + text).trim();
+    }
+  };
+} else {
+  micBtn.style.display = 'none';
+}
+
+// ============================================================
+// סבב עדכונים בוואטסאפ
+//
+// לא נשלח למי שחתם, למתנגד, ולמי שנגעת בו בשבוע האחרון —
+// הודעה גנרית באמצע חוט אישי חי מזיקה יותר משהיא מועילה.
+// ============================================================
+function updateCandidates() {
+  return db.apartments.filter(function (a) {
+    if (a.status !== 'open') return false;
+    if (daysSince(a.lastAt) < 7) return false;
+    var c = dominant(a);
+    return !!c.phone;
+  });
+}
+
+function updateText(a) {
+  var s = stats();
+  var c = dominant(a);
+  var first = String(c.name).split(' ').slice(-1)[0] || c.name;
+  var me = db.project['שם המחתים'] || 'אחיאסף';
+  var place = db.project['שם'] || 'המתחם';
+  return 'שלום ' + first + ',\n\n' +
+    'כאן ' + me + ' מצוות פרויקט ההתחדשות ב' + place + '.\n\n' +
+    'רציתי לעדכן שהתהליך ממשיך להתקדם — כבר ' + s.signed +
+    ' משפחות במתחם חתמו על ההסכם, ומדי שבוע מצטרפות נוספות.\n\n' +
+    'אשמח לעמוד לרשותך לכל שאלה או התלבטות.\n\n' +
+    'בברכה,\n' + me + ' · אחראי קשרי דיירים';
+}
+
+function startUpdates() {
+  roundMode = 'update';
+  round = updateCandidates().map(function (a) { return { apt: a }; });
+  idx = 0;
+  if (!round.length) { alert('אין כרגע דיירים שמתאימים לעדכון.'); return; }
+  showUpdate();
+}
+
+function showUpdate() {
+  if (idx >= round.length) { endRound(); return; }
+  current = round[idx];
+  var a = current.apt, c = dominant(a);
+  document.getElementById('u-count').textContent = (idx + 1) + ' מתוך ' + round.length;
+  document.getElementById('u-name').textContent = c.name;
+  document.getElementById('u-where').textContent = a.building + ' · דירה ' + a.apartment;
+  document.getElementById('u-text').value = updateText(a);
+  show('v-update');
+}
+
+function nextUpdate() { idx++; showUpdate(); }
+
+function sendUpdate() {
+  var a = current.apt, c = dominant(a);
+  var text = document.getElementById('u-text').value;
+  var phone = c.phone.replace(/\D/g, '').replace(/^0/, '972');
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(text), '_blank');
+
+  queue({
+    pin: pinCode, action: 'log_contact', apartment: a.id, contact: c.name,
+    kind: 'וואטסאפ', outcome: 'עדכון', summary: 'נשלח עדכון התקדמות', nextAt: '', cadence: 0
+  });
+  a.lastAt = today();
+  localStorage.setItem('pbData', JSON.stringify(db));
+  nextUpdate();
+}
+
+// ============================================================
+// כרטיס דייר מלא
+// ============================================================
+function openDetail() {
+  backTo = roundMode === 'update' ? 'v-update' : (roundMode === 'search' ? 'v-home' : 'v-round');
+  var a = current.apt;
+  document.getElementById('d-name').textContent = dominant(a).name;
+  document.getElementById('d-where').textContent =
+    a.building + ' · דירה ' + a.apartment + ' · חלקה ' + a.plot + '/' + a.subplot;
+
+  var box = document.getElementById('d-contacts');
+  box.innerHTML = '<h3>אנשי קשר — לחיצה לעריכה</h3>';
+  a.contacts.forEach(function (c, i) {
+    var row = document.createElement('div');
+    row.className = 'kv';
+    row.style.cursor = 'pointer';
+    row.onclick = function () { editContact(i); };
+    var who = document.createElement('b');
+    who.textContent = c.name + (c.dominant ? ' ★' : '');
+    var tel = document.createElement('span');
+    tel.textContent = c.phone || 'אין מספר';
+    row.appendChild(who);
+    row.appendChild(tel);
+    box.appendChild(row);
+  });
+
+  var info = document.getElementById('d-info');
+  info.innerHTML = '<h3>פרטים</h3>';
+  [['מצב', a.status], ['חוסרים', a.missing.join(', ') || '—'],
+   ['מקום חתימה', a.signingPlace || '—'], ['מגע הבא', a.nextAt || '—'],
+   ['מס׳ מגעים', a.contactCount]].forEach(function (pair) {
+    var row = document.createElement('div');
+    row.className = 'kv';
+    row.innerHTML = '<span>' + pair[0] + '</span><b>' + pair[1] + '</b>';
+    info.appendChild(row);
+  });
+
+  var hist = document.getElementById('d-hist');
+  hist.innerHTML = '<h3>מה נרשם</h3>';
+  a.contacts.forEach(function (c) {
+    if (!c.notes) return;
+    var row = document.createElement('div');
+    row.className = 'hist';
+    row.innerHTML = '<b>' + c.name + ':</b> ' + c.notes;
+    hist.appendChild(row);
+  });
+
+  show('v-detail');
+}
+
+// ============================================================
+// חיפוש — כדי שאפשר יהיה להגיע לכל דייר, ולא רק למי שהמנוע החליט להציף.
+// כשמישהו מזכיר שם באמצע היום, צריך למצוא אותו בשלוש שניות.
+// ============================================================
+function search() {
+  var term = document.getElementById('q').value.trim();
+  var out = document.getElementById('q-out');
+  out.innerHTML = '';
+  if (term.length < 2) return;
+
+  var digits = term.replace(/\D/g, '');
+  var hits = db.apartments.filter(function (a) {
+    if (a.building.indexOf(term) !== -1) return true;
+    return a.contacts.some(function (c) {
+      return c.name.indexOf(term) !== -1 || (digits.length >= 3 && c.phone.indexOf(digits) !== -1);
+    });
+  }).slice(0, 12);
+
+  hits.forEach(function (a) {
+    var c = dominant(a);
+    var row = document.createElement('div');
+    row.className = 'kv';
+    row.style.cursor = 'pointer';
+    row.onclick = function () {
+      current = { apt: a, why: 'נפתח מחיפוש' };
+      roundMode = 'search';
+      backTo = 'v-home';
+      openDetail();
+    };
+    var who = document.createElement('b');
+    who.textContent = c.name;
+    var where = document.createElement('span');
+    where.textContent = a.building + ' · ' + STATUS_HE[a.status];
+    row.appendChild(who);
+    row.appendChild(where);
+    out.appendChild(row);
+  });
+  if (!hits.length) out.innerHTML = '<div class="msg">לא נמצא</div>';
+}
+
+var STATUS_HE = {
+  open:'פתוח', signed:'חתם', objector:'מתנגד', trace:'לאיתור', not_relevant:'עמידר'
+};
+
+// ============================================================
+// עריכת אנשי קשר
+//
+// המידע מגיע תוך כדי שיחה — "תדבר עם הבת, היא מבינה בזה" — ואם אי אפשר
+// לרשום אותו ברגע שהוא נאמר, הוא הולך לאיבוד. לכן העריכה יושבת בתוך
+// כרטיס הדייר ולא במסך הגדרות נפרד.
+// ============================================================
+var editIndex = null;
+
+function editContact(index) {
+  editIndex = index;
+  var c = index === null
+    ? { name:'', phone:'', email:'', address:'', hourWindow:'', notes:'', dominant:false }
+    : current.apt.contacts[index];
+  document.getElementById('e-title').textContent = index === null ? 'איש קשר חדש' : 'עריכת פרטים';
+  document.getElementById('e-name').value = c.name;
+  document.getElementById('e-phone').value = c.phone || '';
+  document.getElementById('e-email').value = c.email || '';
+  document.getElementById('e-address').value = c.address || '';
+  document.getElementById('e-hours').value = c.hourWindow || '';
+  document.getElementById('e-notes').value = c.notes || '';
+  document.getElementById('e-dom').checked = !!c.dominant;
+  show('v-edit');
+}
+
+function saveContact() {
+  var a = current.apt;
+  var name = document.getElementById('e-name').value.trim();
+  if (!name) { alert('צריך שם.'); return; }
+
+  var fields = {
+    phone: document.getElementById('e-phone').value.replace(/\D/g, ''),
+    email: document.getElementById('e-email').value.trim(),
+    address: document.getElementById('e-address').value.trim(),
+    hourWindow: document.getElementById('e-hours').value.trim(),
+    notes: document.getElementById('e-notes').value.trim()
+  };
+  var dominant = document.getElementById('e-dom').checked;
+
+  if (editIndex === null) {
+    var added = { name: name, dominant: dominant, hints: {} };
+    for (var k in fields) added[k] = fields[k];
+    a.contacts.push(added);
+    var payload = { pin: pinCode, action: 'add_contact', apartment: a.id, name: name, dominant: dominant };
+    for (var k2 in fields) payload[k2] = fields[k2];
+    queue(payload);
+  } else {
+    var c = a.contacts[editIndex];
+    var update = { pin: pinCode, action: 'update_contact', apartment: a.id, name: c.name };
+    if (name !== c.name) update.newName = name;
+    for (var k3 in fields) { update[k3] = fields[k3]; c[k3] = fields[k3]; }
+    update.dominant = dominant;
+    c.name = name;
+    queue(update);
+  }
+
+  // דומיננטיות היא בלעדית גם מקומית, אחרת הכרטיס יציג שניים
+  if (dominant) {
+    a.contacts.forEach(function (other) { other.dominant = false; });
+    (editIndex === null ? a.contacts[a.contacts.length - 1] : a.contacts[editIndex]).dominant = true;
+  }
+
+  localStorage.setItem('pbData', JSON.stringify(db));
+  openDetail();
+}
+
+function markObjector() {
+  if (!confirm('לסמן את הדירה כמתנגדת? היא תצא מהחפיסה.')) return;
+  current.apt.status = 'objector';
+  queue({ pin: pinCode, action: 'set_state', apartment: current.apt.id, status: 'objector' });
+  localStorage.setItem('pbData', JSON.stringify(db));
+  render();
+  show(backTo);
+  nextCard();
+}
+
+// ============================================================
+// Service Worker
+// ============================================================
+var waiting = null, refreshing = false;
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('sw.js').then(function (reg) {
+    reg.update();
+    if (reg.waiting && navigator.serviceWorker.controller) showBanner(reg.waiting);
+    reg.addEventListener('updatefound', function () {
+      var w = reg.installing;
+      w.addEventListener('statechange', function () {
+        if (w.state === 'installed' && navigator.serviceWorker.controller) showBanner(w);
+      });
+    });
+  }).catch(function () {});
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (refreshing) return;
+    refreshing = true;
+    location.reload();
+  });
+}
+function showBanner(worker) {
+  waiting = worker;
+  document.getElementById('banner').style.display = 'block';
+}
+function applyUpdate() {
+  document.getElementById('banner').style.display = 'none';
+  if (waiting) waiting.postMessage({ type: 'SKIP_WAITING' });
+  else location.reload();
+}
+</script>
+</body>
+</html>
