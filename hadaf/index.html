@@ -116,6 +116,116 @@ header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
 body.dark .count b{color:var(--blue-l)} body.dark .count.g b{color:var(--green)}
 .count span{font-size:.73rem;color:var(--ink-3);font-weight:700;margin-top:5px;display:block}
 
+/* ============================================================
+   מסך הבית — במה, לא רשימה.
+   הדבר הראשון שרואים הוא החומר עצמו, לא תיאור שלו.
+   ============================================================ */
+.stage{position:relative;overflow:hidden;border-radius:24px;padding:22px 20px 24px;
+  color:#fff;box-shadow:var(--sh-3);
+  background:radial-gradient(130% 105% at 78% -10%,#2C63B6 0%,var(--blue) 34%,var(--blue-d) 78%)}
+.stage .g{position:absolute;border-radius:50%}
+.stage .g1{left:-70px;bottom:-90px;width:210px;height:210px;background:var(--green);opacity:.22}
+.stage .g2{left:52px;bottom:-120px;width:190px;height:190px;background:var(--cyan);opacity:.14}
+.stage>*{position:relative}
+.stage .eyebrow{display:flex;align-items:center;gap:9px;font-size:.7rem;font-weight:800;
+  letter-spacing:.13em;color:var(--gold-l);margin-bottom:12px}
+.stage .eyebrow s{flex:1;height:1px;background:rgba(255,255,255,.16);text-decoration:none}
+.stage h2{font-size:1.62rem;font-weight:800;line-height:1.15;letter-spacing:-.04em;
+  text-wrap:balance}
+.stage .meta{font-size:.85rem;opacity:.72;font-weight:700;margin-top:7px}
+
+/* בחירת שכבה — שני מתגים, לא שני כרטיסים זהים */
+.picker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;
+  background:rgba(0,0,0,.2);padding:5px;border-radius:15px}
+.pick{border:none;background:none;color:rgba(255,255,255,.62);cursor:pointer;
+  padding:10px 6px;border-radius:11px;font-weight:800;font-size:.86rem;
+  transition:background .2s,color .2s;line-height:1.3}
+.pick small{display:block;font-size:.65rem;opacity:.75;font-weight:700;margin-top:1px}
+.pick.on{background:rgba(255,255,255,.16);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+
+/* הכרטיס המרחף — השקף הראשון של השבוע, בפרספקטיבה */
+.showcase{margin:18px -4px 0;perspective:1100px}
+.showcase .frame{border-radius:14px;overflow:hidden;box-shadow:0 22px 50px rgba(0,0,0,.42);
+  transform:rotateX(7deg) scale(.97);transform-origin:50% 0;cursor:pointer;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);
+  transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.showcase .frame:active{transform:rotateX(0deg) scale(.99)}
+.showcase img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.showcase .empty{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:7px;color:rgba(255,255,255,.6);font-weight:800;font-size:.86rem;
+  background:rgba(255,255,255,.06)}
+.stage .acts{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:16px}
+.stage .acts button{border:none;border-radius:13px;padding:15px;font-weight:800;
+  font-size:.97rem;cursor:pointer}
+.stage .acts .go{background:#fff;color:var(--blue-d);box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.stage .acts .alt{background:rgba(255,255,255,.14);color:#fff;
+  border:1px solid rgba(255,255,255,.18)!important;padding-inline:18px}
+.stage .acts button:active{transform:scale(.98)}
+
+/* סרט שקפים — גלילה אופקית, שוברת את הערימה האנכית */
+.strip-wrap{margin:0 -16px;padding:0 16px}
+.filmstrip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filmstrip::-webkit-scrollbar{display:none}
+.filmstrip img{flex:none;width:196px;aspect-ratio:16/9;object-fit:cover;border-radius:11px;
+  scroll-snap-align:start;cursor:pointer;box-shadow:var(--sh-1);background:var(--sunk)}
+.filmstrip img:active{transform:scale(.98)}
+.filmstrip .end{flex:none;width:150px;border-radius:11px;background:var(--surface);
+  box-shadow:var(--sh-1);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:5px;cursor:pointer;font-weight:800;font-size:.85rem;
+  color:var(--blue);scroll-snap-align:start}
+body.dark .filmstrip .end{color:var(--blue-l)}
+
+/* המסלול בזעיר אנפין — כל השנה במבט אחד */
+.mini{background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--sh-1)}
+.mini .cap{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:13px}
+.mini .cap b{font-size:.95rem;font-weight:800;letter-spacing:-.02em}
+.mini .cap span{font-size:.74rem;color:var(--ink-3);font-weight:700}
+.mini .rail{display:flex;gap:5px;align-items:center;overflow-x:auto;
+  scrollbar-width:none;padding:5px 0}
+.mini .rail::-webkit-scrollbar{display:none}
+.mini .rail i{flex:none;width:9px;height:9px;border-radius:50%;background:var(--sunk)}
+.mini .rail i.done{background:var(--ink-3)}
+.mini .rail i.off{background:transparent;box-shadow:inset 0 0 0 1.5px var(--rule);
+  width:7px;height:7px}
+.mini .rail i.now{width:26px;border-radius:6px;
+  background:linear-gradient(90deg,var(--gold-l),var(--gold));
+  box-shadow:0 2px 8px rgba(192,143,43,.4)}
+.mini .rail i.fin{width:9px;height:9px;background:var(--gold);opacity:.55}
+
+/* בנטו — גדלים משתנים במקום ערימה אחידה */
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.bx{background:var(--surface);border-radius:var(--r-m);padding:16px;box-shadow:var(--sh-1);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.bx.w{grid-column:span 2}
+.bx.tap{cursor:pointer}
+.bx.tap:active{transform:scale(.99)}
+.bx .n{font-size:2.15rem;font-weight:800;line-height:1;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums}
+.bx .lb{font-size:.75rem;color:var(--ink-3);font-weight:700;margin-top:5px}
+.bx .ti{font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.bx .ds{font-size:.83rem;color:var(--ink-2);font-weight:600;margin-top:5px;line-height:1.55}
+.bx.blue{background:linear-gradient(150deg,var(--blue),var(--blue-d));color:#fff}
+.bx.blue .lb,.bx.blue .ds{color:rgba(255,255,255,.75)}
+.bx.gold{background:linear-gradient(150deg,var(--gold-l),var(--gold));color:#fff}
+.bx.gold .lb,.bx.gold .ds{color:rgba(255,255,255,.85)}
+.bx .n.g{color:var(--green-d)} body.dark .bx .n.g{color:var(--green)}
+.bx .arrow{position:absolute;left:14px;bottom:13px;font-size:1rem;opacity:.35}
+
+/* ארבע דרכי הלימוד — שורה נגללת, לא פסקה */
+.ways{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;
+  margin:0 -16px;padding:2px 16px 6px}
+.ways::-webkit-scrollbar{display:none}
+.way{flex:none;width:168px;background:var(--surface);border-radius:var(--r-m);
+  padding:15px;box-shadow:var(--sh-1);border-top:3px solid var(--gold)}
+.way b{display:block;font-size:.92rem;font-weight:800;letter-spacing:-.02em;margin-bottom:5px}
+.way span{font-size:.79rem;color:var(--ink-2);font-weight:600;line-height:1.55}
+
+/* חשיפה בגלילה */
+.rv{opacity:0;transform:translateY(16px)}
+.rv.in{opacity:1;transform:none;transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1)}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
 /* ---------- כותרות מקטע ---------- */
 .sec{display:flex;align-items:center;gap:11px;margin:6px 2px -2px}
 .sec b{font-size:.76rem;font-weight:800;color:var(--ink-3);letter-spacing:.1em;white-space:nowrap}
@@ -428,31 +538,12 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 
     <!-- ===== בית ===== -->
     <div id="v-home" class="view">
-      <div class="hero">
-        <span class="glow g1"></span><span class="glow g2"></span><span class="glow g3"></span>
-        <span class="yr">◆ שנת תשפ"ז</span>
-        <h2>דף אחד בשבוע.<br>מסכת שלמה בשנה.</h2>
-        <div class="rule"></div>
-        <div class="sub">כיתות ז׳ לומדות מסכת תענית, כיתות ח׳ מסכת מגילה —
-          יחד, בכל ישיבות בני עקיבא.</div>
-      </div>
-
-      <div class="counts">
-        <div class="count"><b id="c-inst">0</b><span>ישיבות בתוכנית</span></div>
-        <div class="count g"><b id="c-stud">350</b><span>תלמידים למדו בתשפ"ו</span></div>
-      </div>
-
-      <div class="sec"><b>הלימוד השבוע</b><i></i></div>
-      <div style="display:flex;flex-direction:column;gap:12px" id="track-cards"></div>
-
-      <div class="card">
-        <h3>איך לומדים?</h3>
-        <p>כל אחד באופן שליבו חפץ — בבית עם אבא או אח גדול, בחברותא עם אברכי הישיבה,
-           או בחבורת לימוד בליווי איש צוות. הקצב אחיד: דף לשבוע.</p>
-      </div>
-
-      <button class="btn g" onclick="show('sfarim')">רכישת גמרות במחיר מוזל</button>
-      <button class="btn g" onclick="show('insts')">הישיבות שכבר בתוכנית</button>
+      <div id="stage"></div>
+      <div class="strip-wrap rv"><div class="filmstrip" id="filmstrip"></div></div>
+      <div class="rv" id="mini"></div>
+      <div class="rv" id="bento"></div>
+      <div class="sec rv"><b>איך לומדים</b><i></i></div>
+      <div class="ways rv" id="ways"></div>
     </div>
 
     <!-- ===== מסלול ===== -->
@@ -554,7 +645,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '2.0.0';
+var APP_VERSION = '2.1.0';
 
 var API    = localStorage.getItem('dfApi') || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -623,31 +714,163 @@ function show(v) {
 function backToTrack() { openTrack(state.track.id); }
 function backToWeek()  { openWeek(state.track.id, state.week); }
 
-/* ---------- בית ---------- */
+/* ============================================================
+   מסך הבית.
+   הכלל שמנחה אותו: מנהל שנוחת כאן צריך לראות את החומר עצמו
+   בשלוש השניות הראשונות — לא תיאור שלו, ולא שני כפתורים
+   שמאחוריהם מסתתר הכול.
+   ============================================================ */
+var homeTrack = localStorage.getItem('dfHomeTrack') || 'megila';
+
+function weekOf(tr) { var wi = weekIndex(); return wi < 0 ? 0 : wi; }
+function contentFor(id) {
+  var tr = trackById(id), i = weekOf(tr);
+  return { tr:tr, i:i, row:tr.cal[i], c:CONTENT[id + '-' + (i + 1)] };
+}
+function slideSrc(c, n) {
+  // בגרסה העצמאית השקפים מוטמעים; אחרת הם קבצים בתיקייה
+  if (typeof SLIDE_DATA !== 'undefined')
+    return SLIDE_DATA[n < 10 ? '0' + n : String(n)] || '';
+  return c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg';
+}
+
+function pickTrack(id) {
+  homeTrack = id;
+  localStorage.setItem('dfHomeTrack', id);
+  renderHome();
+}
+
 function renderHome() {
-  document.getElementById('c-inst').textContent =
-    INSTITUTIONS.filter(function (i) { return i.joined; }).length;
-  document.getElementById('c-stud').textContent = PROGRAM.lastYear.students;
+  var w = contentFor(homeTrack), tr = w.tr, row = w.row, c = w.c;
+  var wi = weekIndex();
+  var when = wi < 0 ? 'נפתח בפרשת בראשית' : 'שבוע ' + (wi + 1) + ' מתוך ' + tr.cal.length;
 
-  var h = '', wi = weekIndex();
-  TRACKS.forEach(function (tr) {
-    var row = wi < 0 ? tr.cal[0] : tr.cal[wi];
-    var tone = tr.id === 'taanit' ? 't-b' : 't-g';
-    var done = dafDone(tr), pct = Math.round(done / tr.dapim * 100);
-    var line = wi < 0 ? 'פותחים בפרשת בראשית — <b>דף ב׳</b>'
-             : !row[2] ? '<b>שבוע חופשה</b> · ' + esc(row[1])
-             : row[2] === 'סיום' ? '<b>חגיגת סיום המסכת</b>'
-             : 'השבוע: <b>דף ' + esc(row[2]) + '</b> · ' + esc(row[1]);
-
-    h += '<div class="track ' + tone + '" onclick="openTrack(\'' + tr.id + '\')">' +
-         '<span class="stripe"></span><div class="in">' +
-         '<div class="top"><div><h3>מסכת ' + esc(tr.masechet) + '</h3>' +
-         '<div class="now">' + line + '</div></div>' +
-         '<span class="grade">' + esc(tr.gradeFull) + '</span></div>' +
-         '<div class="foot"><div class="prog"><i style="width:' + pct + '%"></i></div>' +
-         '<span class="pn">' + done + '/' + tr.dapim + '</span></div></div></div>';
+  /* ---- הבמה ---- */
+  var s = '<div class="stage"><span class="g g1"></span><span class="g g2"></span>' +
+          '<div class="picker">';
+  TRACKS.forEach(function (t) {
+    s += '<button class="pick' + (t.id === homeTrack ? ' on' : '') +
+         '" onclick="pickTrack(\'' + t.id + '\')">מסכת ' + esc(t.masechet) +
+         '<small>' + esc(t.gradeFull) + '</small></button>';
   });
-  document.getElementById('track-cards').innerHTML = h;
+  s += '</div><div class="eyebrow">' + esc(when) + '<s></s>' +
+       (row[2] && row[2] !== 'סיום' ? 'דף ' + esc(row[2]) : '') + '</div>' +
+       '<h2>' + esc(c ? c.title : (row[2] ? 'דף ' + row[2] : row[1])) + '</h2>' +
+       '<div class="meta">' + esc(row[1]) + ' · ' + esc(row[0]) + '</div>';
+
+  if (c && c.deck) {
+    s += '<div class="showcase"><div class="frame" onclick="openFromHome(0)">' +
+         '<img src="' + slideSrc(c, 1) + '" alt="השקף הראשון"></div></div>' +
+         '<div class="acts">' +
+         '<button class="go" onclick="openFromHome(0)">▶ הצגה על המסך</button>' +
+         '<button class="alt" onclick="openWeek(\'' + homeTrack + '\',' + w.i + ')">הדף</button>' +
+         '</div>';
+  } else {
+    s += '<div class="showcase"><div class="frame"><div class="empty">' +
+         '<span>המצגת לשבוע זה בהכנה</span></div></div></div>' +
+         '<div class="acts"><button class="go" onclick="openWeek(\'' +
+         homeTrack + '\',' + w.i + ')">לדף ולחומרי הלימוד</button>' +
+         '<button class="alt" onclick="openTrack(\'' + homeTrack + '\')">המסלול</button></div>';
+  }
+  document.getElementById('stage').innerHTML = s + '</div>';
+
+  /* ---- סרט השקפים ---- */
+  var f = '';
+  if (c && c.deck) {
+    for (var n = 1; n <= Math.min(c.deck.n, 6); n++)
+      f += '<img loading="lazy" src="' + slideSrc(c, n) + '" alt="שקף ' + n +
+           '" onclick="openFromHome(' + (n - 1) + ')">';
+    f += '<div class="end" onclick="openFromHome(0)"><span>כל ' + c.deck.n +
+         ' השקפים</span><span style="font-size:1.2rem">←</span></div>';
+  }
+  document.getElementById('filmstrip').innerHTML = f;
+  document.querySelector('.strip-wrap').style.display = f ? '' : 'none';
+
+  /* ---- המסלול בזעיר אנפין ---- */
+  var done = dafDone(tr), pct = Math.round(done / tr.dapim * 100);
+  var rail = '';
+  // לפני שהתוכנית יוצאת לדרך מסמנים את שבוע הפתיחה — כדי שרואים מאיפה מתחילים
+  var mark = wi < 0 ? 0 : wi;
+  tr.cal.forEach(function (r, i) {
+    var cls = !r[2] ? 'off' : r[2] === 'סיום' ? 'fin'
+            : i === mark ? 'now' : (wi >= 0 && i < wi) ? 'done' : '';
+    rail += '<i class="' + cls + '"></i>';
+  });
+  document.getElementById('mini').innerHTML =
+    '<div class="mini" onclick="openTrack(\'' + homeTrack + '\')" style="cursor:pointer">' +
+    '<div class="cap"><b>המסלול השנתי — מסכת ' + esc(tr.masechet) + '</b>' +
+    '<span>' + done + '/' + tr.dapim + ' · ' + pct + '%</span></div>' +
+    '<div class="rail">' + rail + '</div>' +
+    '<div style="font-size:.79rem;color:var(--ink-3);font-weight:700;margin-top:10px">' +
+    'דף בשבוע — וסיום המסכת בא׳ סיוון ←</div></div>';
+
+  /* ---- בנטו ---- */
+  var joined = INSTITUTIONS.filter(function (i) { return i.joined; }).length;
+  // כל עוד אף ישיבה לא אישרה, המספר החזק הוא זה של שנה שעברה — לא אפס.
+  var lead = joined
+    ? { n:joined, lb:'ישיבות בתוכנית השנה', tap:' tap" onclick="show(\'insts\')' }
+    : { n:PROGRAM.lastYear.students, lb:'תלמידים למדו בתשפ"ו את מסכת ' +
+        PROGRAM.lastYear.masechet, tap:'' };
+  var side = joined
+    ? { n:PROGRAM.lastYear.students, lb:'תלמידים למדו בתשפ"ו' }
+    : { n:INSTITUTIONS.length, lb:'ישיבות ברשת' };
+
+  document.getElementById('bento').innerHTML =
+    '<div class="bento">' +
+      '<div class="bx blue' + lead.tap + '">' +
+        '<div><div class="n">' + lead.n + '</div>' +
+        '<div class="lb">' + lead.lb + '</div></div>' +
+        (joined ? '<span class="arrow">←</span>' : '') + '</div>' +
+      '<div class="bx tap" onclick="show(\'insts\')">' +
+        '<div><div class="n g">' + side.n + '</div>' +
+        '<div class="lb">' + side.lb + '</div></div>' +
+        '<span class="arrow">←</span></div>' +
+      '<div class="bx gold w tap" onclick="openWeek(\'' + homeTrack + '\',' + w.i + ')">' +
+        '<div class="ti">החידה השבועית</div>' +
+        '<div class="ds">שאלה אחת על הדף, פתוחה כל השבוע — ובסופו הגרלת פרסים.</div>' +
+        '<span class="arrow">←</span></div>' +
+      '<div class="bx w tap" onclick="show(\'sfarim\')">' +
+        '<div class="ti">גמרות במחיר מוזל — 15 ₪ במקום 25 ₪</div>' +
+        '<div class="ds">רכישה מרוכזת לכל הרשת. שתי מהדורות, לפי דרך הלימוד שמתאימה לכם.</div>' +
+        '<span class="arrow">←</span></div>' +
+    '</div>';
+
+  /* ---- דרכי הלימוד ---- */
+  var WAYS = [
+    ['בבית', 'עם אבא או עם אח גדול, בזמן שנוח לכם.'],
+    ['בחברותא', 'עם אברכי הישיבה — חיבור טבעי בין בוגרים לצעירים.'],
+    ['בחבורה', 'קבוצת לימוד בליווי איש צוות מהישיבה.'],
+    ['לבד', 'עם המצגת והביאור שבאפליקציה, בקצב שלכם.']
+  ];
+  document.getElementById('ways').innerHTML = WAYS.map(function (x) {
+    return '<div class="way"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>';
+  }).join('');
+
+  reveal();
+}
+
+function openFromHome(i) {
+  var w = contentFor(homeTrack);
+  openWeek(homeTrack, w.i);
+  deckOpen(i);
+}
+
+/* חשיפה עדינה בגלילה — נותנת קצב לעמוד בלי להסיח */
+function reveal() {
+  var els = document.querySelectorAll('#v-home .rv');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < els.length; i++) els[i].className += ' in';
+    return;
+  }
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e, k) {
+      if (!e.isIntersecting) return;
+      var el = e.target;
+      setTimeout(function () { el.classList.add('in'); }, k * 70);
+      io.unobserve(el);
+    });
+  }, { rootMargin:'0px 0px -8% 0px' });
+  for (var j = 0; j < els.length; j++) { els[j].classList.remove('in'); io.observe(els[j]); }
 }
 
 /* ---------- מסלול כמסע ---------- */
