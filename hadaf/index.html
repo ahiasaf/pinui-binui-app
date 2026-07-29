@@ -5,286 +5,403 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>הדף השבועי של בני עקיבא</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#17468F">
+<meta name="theme-color" content="#0E2E63">
 <meta property="og:title" content="הדף השבועי של בני עקיבא">
 <meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — כיתות ז׳ מסכת תענית, כיתות ח׳ מסכת מגילה.">
 <meta property="og:type" content="website">
 <style>
-  :root{
-    --ba-blue:#17468F; --ba-blue-d:#0E2E63; --ba-blue-l:#2E6BC4;
-    --ba-cyan:#29ABE2; --ba-green:#7CB342; --ba-green-d:#4F8A1E;
-    --ba-gold:#C9A227;
-    --paper:#F2F5F9; --surface:#FFFFFF; --surface-2:#F7F9FC;
-    --ink:#13233D; --ink-2:#4A5A76; --ink-3:#8695AC;
-    --rule:#DCE3ED;
-    --accent:var(--ba-blue); --accent-soft:#E8EFF9;
-    --ok:#2E7A52; --warn:#9C7016; --stop:#A5382D;
-    --r:12px; --r-s:9px;
-    --shadow:0 1px 2px rgba(19,35,61,.06), 0 4px 16px rgba(19,35,61,.06);
-  }
-  body.dark{
-    --paper:#0C1220; --surface:#141C2C; --surface-2:#1A2436;
-    --ink:#E8EDF6; --ink-2:#9BABC4; --ink-3:#728299;
-    --rule:#25314A;
-    --accent:#7FA8E5; --accent-soft:#1B2740;
-    --ba-gold:#DDB84B;
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
-  }
-  *{box-sizing:border-box;margin:0;padding:0;
-    font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif}
-  html,body{overflow-x:hidden}
-  body{background:var(--paper);color:var(--ink);display:flex;justify-content:center;
-       min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5}
-  .app{width:100%;max-width:560px;background:var(--surface);min-height:100vh;
-       display:flex;flex-direction:column;position:relative;box-shadow:var(--shadow)}
+/* ============================================================
+   שפת העיצוב לקוחה מהמצגות ומהסימנייה המודפסת:
+   קלף חם, כחול וירוק של בני עקיבא, זהב לרגעים חשובים.
+   ============================================================ */
+:root{
+  --blue:#17468F; --blue-d:#0B2550; --blue-l:#3574CE; --cyan:#29ABE2;
+  --green:#6FA83B; --green-d:#4A821C; --gold:#C08F2B; --gold-l:#E3B44A;
 
-  header{background:var(--ba-blue);color:#fff;padding:12px 16px;display:flex;
-         justify-content:space-between;align-items:center;gap:10px;
-         position:sticky;top:0;z-index:40}
-  body.dark header{background:var(--ba-blue-d)}
-  header .brand{display:flex;align-items:center;gap:9px;min-width:0;cursor:pointer}
-  header .mark{width:30px;height:30px;border-radius:50%;background:#fff;flex:none;
-               display:flex;align-items:center;justify-content:center;overflow:hidden}
-  header .mark svg{width:22px;height:22px}
-  header h1{font-size:.98rem;font-weight:800;letter-spacing:-.01em;white-space:nowrap;
-            overflow:hidden;text-overflow:ellipsis}
-  .hbtns{display:flex;gap:6px;flex:none}
-  .icon{background:rgba(255,255,255,.13);border:none;color:#fff;width:32px;height:32px;
-        border-radius:8px;font-size:.95rem;cursor:pointer;display:flex;align-items:center;
-        justify-content:center}
-  .icon:active{transform:scale(.94)}
+  --paper:#F3ECDC; --surface:#FFFDF8; --surface-2:#F7F1E4; --sunk:#EFE6D3;
+  --ink:#1B2A45; --ink-2:#5A6780; --ink-3:#96A0B2;
+  --rule:#E5DAC3; --rule-2:#EFE7D7;
 
-  .content{padding:16px;flex:1}
-  .view{display:none;flex-direction:column;gap:14px}
-  .view.on{display:flex;animation:fade .25s ease}
-  @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  --ok:#3B7D57; --warn:#A87A1C; --stop:#A5382D;
+  --r:20px; --r-m:15px; --r-s:11px;
+  --sh-1:0 1px 2px rgba(37,29,12,.05), 0 2px 8px rgba(37,29,12,.05);
+  --sh-2:0 2px 4px rgba(37,29,12,.06), 0 10px 26px rgba(37,29,12,.08);
+  --sh-3:0 10px 40px rgba(11,37,80,.20);
+  --pat:rgba(23,70,143,.05);
+}
+body.dark{
+  --paper:#0C121D; --surface:#161F2E; --surface-2:#1C2637; --sunk:#111926;
+  --ink:#ECF0F7; --ink-2:#9DAABF; --ink-3:#6F7C91;
+  --rule:#293449; --rule-2:#212B3C;
+  --gold:#DDB44F; --gold-l:#EAC876;
+  --sh-1:0 1px 2px rgba(0,0,0,.4);
+  --sh-2:0 2px 6px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.35);
+  --sh-3:0 10px 40px rgba(0,0,0,.5);
+  --pat:rgba(160,190,255,.045);
+}
+*{box-sizing:border-box;margin:0;padding:0;
+  font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif}
+html,body{overflow-x:hidden}
+body{background:var(--paper);color:var(--ink);min-height:100vh;line-height:1.55;
+     -webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+/* מרקם קלף עדין — נותן עומק בלי להעמיס.
+   הצבע מקודד בתוך ה-SVG, ולכן יש גרסה נפרדת למצב לילה. */
+body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-size:58px 58px;opacity:.13;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='54' height='54'><g fill='%2317468F'><path d='M27 6l3.2 6.4L27 18.8 23.8 12.4z'/><circle cx='6' cy='33' r='1.7'/><circle cx='48' cy='33' r='1.7'/><path d='M27 35.2l2.2 4.4L27 44l-2.2-4.4z'/></g></svg>")}
+body.dark:before{opacity:.17;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='54' height='54'><g fill='%236E8CC4'><path d='M27 6l3.2 6.4L27 18.8 23.8 12.4z'/><circle cx='6' cy='33' r='1.7'/><circle cx='48' cy='33' r='1.7'/><path d='M27 35.2l2.2 4.4L27 44l-2.2-4.4z'/></g></svg>")}
+.app{width:100%;max-width:580px;min-height:100vh;display:flex;flex-direction:column;
+     position:relative;z-index:1;background:transparent}
 
-  #splash{position:fixed;inset:0;background:var(--ba-blue);color:#fff;z-index:99;
-          display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;
-          transition:opacity .35s,visibility .35s;text-align:center;padding:20px}
-  #splash.off{opacity:0;visibility:hidden}
-  #splash b{font-size:1.15rem;font-weight:800}
-  #splash small{opacity:.65;font-size:.82rem}
+/* ---------- כותרת ---------- */
+header{position:sticky;top:0;z-index:40;padding:12px 16px;display:flex;
+  justify-content:space-between;align-items:center;gap:10px;color:#fff;
+  background:linear-gradient(165deg,var(--blue) 0%,var(--blue-d) 100%);
+  box-shadow:0 2px 18px rgba(11,37,80,.28)}
+header .brand{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
+header .mark{width:34px;height:34px;border-radius:50%;background:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 3px rgba(255,255,255,.16)}
+header .mark svg{width:23px;height:23px}
+header h1{font-size:1rem;font-weight:800;letter-spacing:-.015em;white-space:nowrap}
+header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
+.hbtns{display:flex;gap:7px;flex:none}
+.icon{background:rgba(255,255,255,.14);border:none;color:#fff;width:35px;height:35px;
+  border-radius:11px;font-size:.98rem;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:background .15s,transform .12s}
+.icon:hover{background:rgba(255,255,255,.24)}
+.icon:active{transform:scale(.92)}
 
-  .hero{background:linear-gradient(135deg,var(--ba-blue-d),var(--ba-blue) 55%,var(--ba-blue-l));
-        color:#fff;border-radius:var(--r);padding:22px 18px;position:relative;overflow:hidden}
-  .hero:after{content:"";position:absolute;left:-30px;bottom:-46px;width:150px;height:150px;
-              border-radius:50%;background:var(--ba-green);opacity:.20}
-  .hero:before{content:"";position:absolute;left:22px;bottom:-62px;width:150px;height:150px;
-               border-radius:50%;background:var(--ba-cyan);opacity:.16}
-  .hero h2{font-size:1.5rem;font-weight:800;line-height:1.15;letter-spacing:-.02em;position:relative}
-  .hero .sub{font-size:.92rem;opacity:.9;margin-top:7px;position:relative;max-width:32ch}
-  .hero .yr{display:inline-block;background:rgba(255,255,255,.16);border-radius:20px;
-            padding:3px 11px;font-size:.72rem;font-weight:700;margin-bottom:9px;position:relative}
+.content{padding:18px 16px 30px;flex:1}
+.view{display:none;flex-direction:column;gap:16px}
+.view.on{display:flex;animation:rise .3s cubic-bezier(.22,1,.36,1)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-  .counts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .count{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r);
-         padding:14px 10px;text-align:center}
-  .count b{display:block;font-size:1.75rem;font-weight:800;font-variant-numeric:tabular-nums;
-           color:var(--ba-blue);line-height:1.1}
-  body.dark .count b{color:var(--accent)}
-  .count span{font-size:.74rem;color:var(--ink-3);font-weight:600}
-  .count.g b{color:var(--ba-green-d)}
-  body.dark .count.g b{color:var(--ba-green)}
+#splash{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;gap:10px;
+  align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;
+  background:linear-gradient(165deg,var(--blue) 0%,var(--blue-d) 100%);
+  transition:opacity .4s,visibility .4s}
+#splash.off{opacity:0;visibility:hidden}
+#splash b{font-size:1.2rem;font-weight:800;letter-spacing:-.02em}
+#splash i{width:44px;height:2px;background:var(--gold-l);border-radius:2px;display:block}
 
-  .tracks{display:flex;flex-direction:column;gap:11px}
-  .track{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;
-         background:var(--surface);cursor:pointer;box-shadow:var(--shadow)}
-  .track:active{transform:scale(.995)}
-  .track .bar{height:5px}
-  .track.t-blue .bar{background:var(--ba-blue)}
-  .track.t-green .bar{background:var(--ba-green)}
-  .track .in{padding:14px}
-  .track .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-  .track .grade{font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:20px;flex:none}
-  .track.t-blue .grade{background:var(--accent-soft);color:var(--ba-blue)}
-  .track.t-green .grade{background:rgba(124,179,66,.16);color:var(--ba-green-d)}
-  body.dark .track.t-blue .grade{color:var(--accent)}
-  body.dark .track.t-green .grade{color:var(--ba-green)}
-  .track h3{font-size:1.2rem;font-weight:800;letter-spacing:-.01em}
-  .track .now{font-size:.86rem;color:var(--ink-2);margin-top:5px}
-  .track .now b{color:var(--ink);font-weight:800}
-  .track .prog{height:6px;background:var(--rule);border-radius:4px;margin-top:12px;overflow:hidden}
-  .track .prog i{display:block;height:100%;border-radius:4px}
-  .track.t-blue .prog i{background:var(--ba-blue)}
-  .track.t-green .prog i{background:var(--ba-green)}
-  .track .pmeta{display:flex;justify-content:space-between;font-size:.72rem;
-                color:var(--ink-3);margin-top:6px;font-variant-numeric:tabular-nums}
+/* ---------- גיבור ---------- */
+.hero{position:relative;overflow:hidden;border-radius:var(--r);padding:26px 22px 24px;
+  color:#fff;box-shadow:var(--sh-3);
+  background:linear-gradient(150deg,var(--blue-d) 0%,var(--blue) 45%,var(--blue-l) 115%)}
+.hero .glow{position:absolute;border-radius:50%;filter:blur(2px)}
+.hero .g1{left:-54px;bottom:-72px;width:190px;height:190px;background:var(--green);opacity:.24}
+.hero .g2{left:44px;bottom:-96px;width:170px;height:170px;background:var(--cyan);opacity:.18}
+.hero .g3{right:-40px;top:-56px;width:130px;height:130px;background:var(--gold);opacity:.16}
+.hero>*{position:relative}
+.hero .yr{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.2);border-radius:30px;padding:4px 13px;
+  font-size:.7rem;font-weight:800;letter-spacing:.05em;margin-bottom:12px}
+.hero h2{font-size:1.72rem;font-weight:800;line-height:1.14;letter-spacing:-.035em}
+.hero .rule{width:46px;height:3px;background:var(--gold-l);border-radius:3px;margin:14px 0 11px}
+.hero .sub{font-size:.93rem;opacity:.88;max-width:33ch;line-height:1.6}
 
-  .bm{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--surface)}
-  .bm .head{padding:14px;color:#fff;text-align:center}
-  .bm.t-blue .head{background:var(--ba-blue)}
-  .bm.t-green .head{background:var(--ba-green-d)}
-  .bm .head b{display:block;font-size:1.15rem;font-weight:800}
-  .bm .head span{font-size:.78rem;opacity:.85}
-  .wk{display:grid;grid-template-columns:46px 1fr auto;gap:10px;align-items:center;
-      padding:9px 12px;border-bottom:1px solid var(--rule);cursor:pointer}
-  .wk:last-child{border-bottom:0}
-  .wk:active{background:var(--surface-2)}
-  .wk .daf{width:38px;height:38px;border-radius:50%;border:2px solid var(--rule);
-           display:flex;align-items:center;justify-content:center;font-weight:800;
-           font-size:.92rem;color:var(--ink-2);flex:none}
-  .bm.t-blue .wk.cur .daf{background:var(--ba-blue);border-color:var(--ba-blue);color:#fff}
-  .bm.t-green .wk.cur .daf{background:var(--ba-green-d);border-color:var(--ba-green-d);color:#fff}
-  .wk.done .daf{border-color:var(--ink-3);color:var(--ink-3)}
-  .wk .mid{min-width:0}
-  .wk .p{font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .wk .d{font-size:.74rem;color:var(--ink-3)}
-  .wk .go{font-size:1rem;font-weight:700;color:var(--ink-3)}
-  .wk.off{opacity:.55;cursor:default}
-  .wk.off .daf{border-style:dashed;font-size:.62rem;font-weight:700}
-  .wk.siyum .daf{border-color:var(--ba-gold);color:var(--ba-gold);font-size:.6rem}
-  .chapline{background:var(--surface-2);padding:6px 12px;font-size:.72rem;font-weight:800;
-            color:var(--ink-3);border-bottom:1px solid var(--rule)}
-  .cur-badge{font-size:.62rem;font-weight:800;background:var(--ba-gold);color:#fff;
-             border-radius:10px;padding:2px 7px;margin-inline-start:6px;vertical-align:middle}
+/* ---------- מונים ---------- */
+.counts{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.count{background:var(--surface);border-radius:var(--r-m);padding:17px 12px 15px;
+  text-align:center;box-shadow:var(--sh-1);position:relative;overflow:hidden}
+.count:after{content:"";position:absolute;inset:auto 0 0 0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:.5}
+.count.g:after{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.count b{display:block;font-size:2.1rem;font-weight:800;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--blue)}
+.count.g b{color:var(--green-d)}
+body.dark .count b{color:var(--blue-l)} body.dark .count.g b{color:var(--green)}
+.count span{font-size:.73rem;color:var(--ink-3);font-weight:700;margin-top:5px;display:block}
 
-  .card{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r);padding:14px}
-  .card h3{font-size:1rem;font-weight:800;margin-bottom:8px}
-  .card p{font-size:.9rem;color:var(--ink-2);line-height:1.6}
-  .sec-t{font-size:.74rem;font-weight:800;color:var(--ink-3);letter-spacing:.02em;margin-top:4px}
-  .btn{display:block;width:100%;text-align:center;border:1px solid transparent;
-       border-radius:var(--r-s);padding:14px;font-size:1rem;font-weight:800;cursor:pointer}
-  .btn:active{transform:scale(.985)}
-  .btn.p{background:var(--ba-blue);color:#fff}
-  .btn.gr{background:var(--ba-green-d);color:#fff}
-  .btn.g{background:transparent;border-color:var(--rule);color:var(--ink-2);
-         font-size:.9rem;padding:11px}
-  .btn:disabled{opacity:.45}
-  .back{background:none;border:none;color:var(--ink-3);font-size:.85rem;font-weight:700;
-        cursor:pointer;padding:2px 0;text-align:start}
-  .links{display:grid;gap:8px}
-  .lnk{display:flex;align-items:center;gap:10px;background:var(--surface-2);
-       border:1px solid var(--rule);border-radius:var(--r-s);padding:12px 13px;
-       text-decoration:none;color:var(--ink);font-weight:700;font-size:.92rem}
-  .lnk small{color:var(--ink-3);font-weight:600;font-size:.74rem;display:block}
-  .lnk .ic{width:30px;height:30px;border-radius:8px;background:var(--accent-soft);
-           color:var(--ba-blue);display:flex;align-items:center;justify-content:center;
-           flex:none;font-weight:800}
-  body.dark .lnk .ic{color:var(--accent)}
+/* ---------- כותרות מקטע ---------- */
+.sec{display:flex;align-items:center;gap:11px;margin:6px 2px -2px}
+.sec b{font-size:.76rem;font-weight:800;color:var(--ink-3);letter-spacing:.1em;white-space:nowrap}
+.sec i{flex:1;height:1px;background:linear-gradient(90deg,var(--rule),transparent)}
 
-  .wtop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-  .wtop .l{min-width:0}
-  .wtop .k{font-size:.74rem;font-weight:800;color:var(--ink-3)}
-  .wtop h2{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
-  .dafbig{width:56px;height:56px;border-radius:50%;color:#fff;display:flex;flex:none;
-          align-items:center;justify-content:center;font-size:1.25rem;font-weight:800}
-  .t-blue .dafbig{background:var(--ba-blue)}
-  .t-green .dafbig{background:var(--ba-green-d)}
+/* ---------- כרטיסי מסלול ---------- */
+.track{position:relative;border-radius:var(--r);overflow:hidden;cursor:pointer;
+  background:var(--surface);box-shadow:var(--sh-2);
+  transition:transform .18s cubic-bezier(.22,1,.36,1),box-shadow .18s}
+.track:hover{transform:translateY(-2px)}
+.track:active{transform:scale(.988)}
+.track .stripe{position:absolute;inset:0 auto 0 0;width:6px}
+.track.t-b .stripe{background:linear-gradient(180deg,var(--blue-l),var(--blue))}
+.track.t-g .stripe{background:linear-gradient(180deg,var(--green),var(--green-d))}
+.track .in{padding:18px 18px 16px}
+.track .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.track h3{font-size:1.32rem;font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.track .grade{font-size:.7rem;font-weight:800;padding:5px 11px;border-radius:30px;flex:none;
+  letter-spacing:.03em}
+.track.t-b .grade{background:rgba(23,70,143,.1);color:var(--blue)}
+.track.t-g .grade{background:rgba(111,168,59,.16);color:var(--green-d)}
+body.dark .track.t-b .grade{background:rgba(53,116,206,.2);color:#8CB4F0}
+body.dark .track.t-g .grade{background:rgba(111,168,59,.2);color:#9AD165}
+.track .now{font-size:.9rem;color:var(--ink-2);margin-top:7px}
+.track .now b{color:var(--ink);font-weight:800}
+.track .foot{display:flex;align-items:center;gap:12px;margin-top:16px}
+.track .prog{flex:1;height:8px;background:var(--sunk);border-radius:20px;overflow:hidden}
+.track .prog i{display:block;height:100%;border-radius:20px;transition:width .5s ease}
+.track.t-b .prog i{background:linear-gradient(90deg,var(--blue),var(--blue-l))}
+.track.t-g .prog i{background:linear-gradient(90deg,var(--green-d),var(--green))}
+.track .pn{font-size:.74rem;font-weight:800;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;flex:none}
 
-  .slides{display:grid;gap:9px}
-  .slide{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r);padding:14px}
-  .slide .k{font-size:.66rem;font-weight:800;color:var(--ink-3);letter-spacing:.03em;
-            margin-bottom:5px}
-  .slide h4{font-size:1.02rem;font-weight:800;line-height:1.3;margin-bottom:6px}
-  .slide p{font-size:.92rem;color:var(--ink-2);white-space:pre-wrap;line-height:1.65}
+/* ---------- מסלול כמסע ---------- */
+.bm{border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh-2)}
+.bm .head{padding:20px 16px;color:#fff;text-align:center;position:relative;overflow:hidden}
+.bm.t-b .head{background:linear-gradient(150deg,var(--blue-d),var(--blue) 70%,var(--blue-l))}
+.bm.t-g .head{background:linear-gradient(150deg,#2F5A12,var(--green-d) 65%,var(--green))}
+.bm .head b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.03em}
+.bm .head i{display:block;width:38px;height:2px;background:var(--gold-l);
+  border-radius:2px;margin:9px auto 8px}
+.bm .head span{font-size:.78rem;opacity:.85;font-weight:600}
+.trail{padding:8px 16px 18px}
 
-  #deck{position:fixed;inset:0;background:var(--ba-blue-d);color:#fff;z-index:80;
-        display:none;flex-direction:column;padding:22px}
-  #deck.on{display:flex}
-  #deck .dtop{display:flex;justify-content:space-between;align-items:center;
-              font-size:.8rem;opacity:.6;flex:none}
-  #deck .dbody{flex:1;display:flex;flex-direction:column;justify-content:center;
-               align-items:center;gap:16px;text-align:center;padding:16px 0;
-               overflow-y:auto;min-height:0}
-  #deck #d-img{display:none;max-width:100%;max-height:100%;width:auto;height:auto;
-               object-fit:contain;border-radius:6px}
-  #deck #d-text{display:flex;flex-direction:column;justify-content:center;gap:16px;width:100%}
+.step{position:relative;display:grid;grid-template-columns:44px 1fr;gap:14px;
+  align-items:center;padding:7px 0;cursor:pointer}
+/* קו המסע — עובר מאחורי העיגולים */
+.step:before{content:"";position:absolute;top:0;bottom:0;right:21px;width:2px;
+  background:var(--rule);z-index:0}
+.step:first-of-type:before{top:50%}
+.step.last:before{bottom:50%}
+.step.done:before,.step.cur:before{background:var(--rule)}
+.step .dot{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.98rem;
+  background:var(--surface);border:2px solid var(--rule);color:var(--ink-3);
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.step:active .dot{transform:scale(.9)}
+.step.done .dot{background:var(--sunk);border-color:var(--rule);color:var(--ink-3)}
+.bm.t-b .step.cur .dot{background:linear-gradient(150deg,var(--blue-l),var(--blue));
+  border-color:var(--blue);color:#fff;box-shadow:0 0 0 5px rgba(23,70,143,.14),var(--sh-2);
+  width:52px;height:52px;font-size:1.15rem}
+.bm.t-g .step.cur .dot{background:linear-gradient(150deg,var(--green),var(--green-d));
+  border-color:var(--green-d);color:#fff;box-shadow:0 0 0 5px rgba(111,168,59,.18),var(--sh-2);
+  width:52px;height:52px;font-size:1.15rem}
+.step.cur{grid-template-columns:52px 1fr;padding:12px 0}
+.step.cur:before{right:25px}
+.step.off{cursor:default;opacity:.6}
+.step.off .dot{border-style:dashed;font-size:.62rem;font-weight:700;
+  width:34px;height:34px;margin-inline-start:5px}
+.step.siyum .dot{border-color:var(--gold);color:var(--gold);font-size:.6rem;
+  background:rgba(192,143,43,.08)}
+.step .txt{min-width:0}
+.step .p{font-weight:800;font-size:1rem;letter-spacing:-.01em}
+.step.done .p,.step.off .p{font-weight:700;color:var(--ink-2)}
+.step .d{font-size:.75rem;color:var(--ink-3);font-weight:600;margin-top:1px}
+.step.cur .p{font-size:1.12rem}
+.badge{display:inline-block;font-size:.6rem;font-weight:800;letter-spacing:.05em;
+  background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#fff;
+  border-radius:20px;padding:3px 9px;margin-inline-start:7px;vertical-align:middle;
+  box-shadow:0 2px 6px rgba(192,143,43,.35)}
+.chap{display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding-inline-start:2px}
+.chap b{font-size:.7rem;font-weight:800;color:var(--gold);letter-spacing:.12em;white-space:nowrap}
+.chap i{flex:1;height:1px;background:linear-gradient(90deg,var(--rule),transparent)}
+.chap:before{content:"◆";color:var(--gold);font-size:.55rem;opacity:.7}
 
-  /* תצוגה מקדימה של שקפי מצגת בדף השבוע */
-  .thumbs{display:grid;gap:9px}
-  .thumb{width:100%;display:block;border:1px solid var(--rule);border-radius:var(--r-s);
-         cursor:pointer;background:var(--surface-2);aspect-ratio:16/9;object-fit:cover}
-  .thumb:active{transform:scale(.995)}
-  #deck .dk{font-size:clamp(.75rem,1.8vw,1rem);font-weight:800;opacity:.55;letter-spacing:.04em}
-  #deck .dh{font-size:clamp(1.45rem,5vw,3.4rem);font-weight:800;line-height:1.18;
-            letter-spacing:-.02em}
-  #deck .dt{font-size:clamp(.98rem,2.7vw,1.85rem);opacity:.88;white-space:pre-wrap;
-            line-height:1.6;max-width:36ch;margin:0 auto}
-  #deck .dnav{display:flex;gap:10px;flex:none;align-items:center}
-  #deck .dnav button{flex:1;background:rgba(255,255,255,.12);border:none;color:#fff;
-                     padding:15px;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer}
-  #deck .dnav button:disabled{opacity:.3}
-  #deck .dots{display:flex;gap:5px;justify-content:center;flex:none;margin-bottom:12px;flex-wrap:wrap}
-  #deck .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28)}
-  #deck .dots i.on{background:#fff;width:18px;border-radius:3px}
+/* ---------- כללי ---------- */
+.card{background:var(--surface);border-radius:var(--r-m);padding:18px;box-shadow:var(--sh-1)}
+.card h3{font-size:1.05rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em}
+.card p{font-size:.91rem;color:var(--ink-2);line-height:1.68}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  border:none;border-radius:var(--r-s);padding:16px;font-size:1rem;font-weight:800;
+  cursor:pointer;letter-spacing:-.01em;transition:transform .14s,filter .15s;color:#fff}
+.btn:active{transform:scale(.982)}
+.btn.p{background:linear-gradient(140deg,var(--blue-l),var(--blue));box-shadow:var(--sh-2)}
+.btn.gr{background:linear-gradient(140deg,var(--green),var(--green-d));box-shadow:var(--sh-2)}
+.btn.gd{background:linear-gradient(140deg,var(--gold-l),var(--gold));box-shadow:var(--sh-2)}
+.btn.g{background:var(--surface);color:var(--ink-2);box-shadow:var(--sh-1);
+  font-size:.93rem;padding:14px;font-weight:700}
+.btn:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.4;filter:none}
+.back{background:none;border:none;color:var(--ink-3);font-size:.87rem;font-weight:800;
+  cursor:pointer;padding:3px 0;text-align:start;align-self:flex-start}
+.links{display:grid;gap:9px}
+.lnk{display:flex;align-items:center;gap:12px;background:var(--surface);
+  border-radius:var(--r-s);padding:14px;text-decoration:none;color:var(--ink);
+  font-weight:800;font-size:.94rem;box-shadow:var(--sh-1);transition:transform .15s}
+.lnk:active{transform:scale(.99)}
+.lnk small{color:var(--ink-3);font-weight:600;font-size:.75rem;display:block;margin-top:1px}
+.lnk .ic{width:38px;height:38px;border-radius:11px;flex:none;font-weight:800;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(23,70,143,.09);color:var(--blue)}
+body.dark .lnk .ic{background:rgba(53,116,206,.18);color:#8CB4F0}
+.lnk.dim{opacity:.5}
+.msg{text-align:center;color:var(--ink-3);font-size:.9rem;padding:34px 12px;font-weight:600}
 
-  .qwrap{display:grid;gap:10px}
-  .qq{font-size:1.08rem;font-weight:800;line-height:1.4}
-  .opt{background:var(--surface-2);border:1.5px solid var(--rule);border-radius:var(--r-s);
-       padding:14px;font-size:.95rem;font-weight:600;cursor:pointer;text-align:start;
-       display:flex;gap:10px;align-items:flex-start;color:inherit;width:100%}
-  .opt .n{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule);flex:none;
-          display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;
-          color:var(--ink-3)}
-  .opt.sel{border-color:var(--ba-blue);background:var(--accent-soft)}
-  .opt.sel .n{background:var(--ba-blue);border-color:var(--ba-blue);color:#fff}
-  .opt.right{border-color:var(--ok);background:rgba(46,122,82,.1)}
-  .opt.wrong{border-color:var(--stop);background:rgba(165,56,45,.09)}
-  select,input[type=text],input[type=tel]{width:100%;background:var(--surface-2);
-    border:1px solid var(--rule);border-radius:var(--r-s);padding:13px;font-size:.95rem;
-    color:inherit;outline:none}
-  select:focus,input:focus{border-color:var(--ba-blue)}
-  .label{font-size:.76rem;color:var(--ink-3);font-weight:700;margin-bottom:5px}
-  .fld{display:block;margin-bottom:9px}
-  .banner-ok{background:rgba(46,122,82,.12);border:1px solid var(--ok);color:var(--ok);
-             border-radius:var(--r-s);padding:13px;font-weight:800;font-size:.92rem;text-align:center}
+/* ---------- מסך שבוע ---------- */
+.wtop{display:flex;justify-content:space-between;align-items:center;gap:14px;
+  background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--sh-2)}
+.wtop .k{font-size:.73rem;font-weight:800;color:var(--ink-3);letter-spacing:.06em}
+.wtop h2{font-size:1.3rem;font-weight:800;letter-spacing:-.032em;line-height:1.2;margin:3px 0}
+.dafbig{width:66px;height:66px;border-radius:50%;color:#fff;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;
+  box-shadow:var(--sh-2)}
+.t-b .dafbig{background:linear-gradient(150deg,var(--blue-l),var(--blue))}
+.t-g .dafbig{background:linear-gradient(150deg,var(--green),var(--green-d))}
 
-  .sf{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--surface)}
-  .sf .top{padding:13px 14px;color:#fff}
-  .sf.blue .top{background:var(--ba-blue)}
-  .sf.green .top{background:var(--ba-green-d)}
-  .sf .top b{font-size:1.1rem;font-weight:800;display:block}
-  .sf .top span{font-size:.76rem;opacity:.85}
-  .sf .body{padding:13px 14px;display:grid;gap:8px}
-  .sf .body p{font-size:.89rem;color:var(--ink-2);line-height:1.6}
-  .sf .rhythm{font-size:.74rem;font-weight:800;color:var(--ink-3)}
-  .sf .ph{background:var(--surface-2);border:1px dashed var(--rule);border-radius:var(--r-s);
-          padding:22px;text-align:center;color:var(--ink-3);font-size:.78rem;font-weight:700}
-  .price{display:flex;align-items:baseline;gap:8px;justify-content:center;padding:2px 0;flex-wrap:wrap}
-  .price b{font-size:1.7rem;font-weight:800;color:var(--ba-green-d)}
-  .price s{color:var(--ink-3);font-size:.95rem}
-  body.dark .price b{color:var(--ba-green)}
+.thumbs{display:grid;gap:10px}
+.thumb{width:100%;display:block;border-radius:var(--r-s);cursor:pointer;
+  background:var(--sunk);aspect-ratio:16/9;object-fit:cover;box-shadow:var(--sh-1);
+  transition:transform .16s}
+.thumb:active{transform:scale(.99)}
+.slides{display:grid;gap:10px}
+.slide{background:var(--surface);border-radius:var(--r-m);padding:17px;box-shadow:var(--sh-1);
+  cursor:pointer;border-inline-start:3px solid var(--rule-2)}
+.slide .k{font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:6px}
+.slide h4{font-size:1.05rem;font-weight:800;line-height:1.32;margin-bottom:7px;letter-spacing:-.02em}
+.slide p{font-size:.92rem;color:var(--ink-2);white-space:pre-wrap;line-height:1.7}
 
-  .inst{display:flex;align-items:center;gap:9px;padding:9px 2px;
-        border-bottom:1px solid var(--rule);font-size:.9rem}
-  .inst:last-child{border-bottom:0}
-  .inst .v{width:20px;height:20px;border-radius:50%;flex:none;display:flex;
-           align-items:center;justify-content:center;font-size:.66rem;font-weight:800}
-  .inst .v.y{background:var(--ba-green);color:#fff}
-  .inst .v.n{background:var(--rule);color:var(--ink-3)}
-  .inst .nm{flex:1;min-width:0}
-  .inst .tg{font-size:.62rem;font-weight:800;color:var(--ba-gold);flex:none}
+/* ---------- הקרנה ---------- */
+#deck{position:fixed;inset:0;z-index:80;display:none;flex-direction:column;padding:20px;
+  background:radial-gradient(120% 90% at 50% 0%,var(--blue) 0%,var(--blue-d) 70%);color:#fff}
+#deck.on{display:flex}
+#deck .dtop{display:flex;justify-content:space-between;align-items:center;
+  font-size:.8rem;opacity:.6;flex:none;font-weight:700}
+#deck .dbody{flex:1;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;gap:18px;text-align:center;padding:14px 0;min-height:0}
+#deck #d-img{display:none;max-width:100%;max-height:100%;object-fit:contain;
+  border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#deck #d-text{display:flex;flex-direction:column;justify-content:center;gap:18px;width:100%}
+#deck .dk{font-size:clamp(.72rem,1.7vw,1rem);font-weight:800;letter-spacing:.14em;color:var(--gold-l)}
+#deck .dh{font-size:clamp(1.5rem,5.1vw,3.5rem);font-weight:800;line-height:1.16;letter-spacing:-.035em}
+#deck .dt{font-size:clamp(1rem,2.7vw,1.85rem);opacity:.9;white-space:pre-wrap;
+  line-height:1.62;max-width:36ch;margin:0 auto}
+#deck .dots{display:flex;gap:5px;justify-content:center;flex:none;
+  margin-bottom:14px;flex-wrap:wrap}
+#deck .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);
+  transition:width .25s,background .25s}
+#deck .dots i.on{background:var(--gold-l);width:20px;border-radius:3px}
+#deck .dnav{display:flex;gap:11px;flex:none}
+#deck .dnav button{flex:1;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.14);
+  color:#fff;padding:16px;border-radius:13px;font-size:1rem;font-weight:800;cursor:pointer}
+#deck .dnav button:active{transform:scale(.98)}
+#deck .dnav button:disabled{opacity:.28}
 
-  .pins{display:flex;justify-content:center;gap:13px;margin:16px 0}
-  .pins i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ba-blue)}
-  .pins i.f{background:var(--ba-blue)}
-  body.dark .pins i{border-color:var(--accent)}
-  body.dark .pins i.f{background:var(--accent)}
-  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:290px;
-       margin:0 auto;direction:ltr}
-  .pad button{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r-s);
-              padding:16px 0;font-size:1.25rem;font-weight:700;color:var(--ba-blue);cursor:pointer}
-  body.dark .pad button{color:var(--accent)}
-  .pad button:active{transform:scale(.95)}
+/* ---------- חידה ---------- */
+.qq{font-size:1.15rem;font-weight:800;line-height:1.42;letter-spacing:-.02em;
+  background:var(--surface);border-radius:var(--r-m);padding:18px;box-shadow:var(--sh-1);
+  border-inline-start:3px solid var(--gold)}
+.opts{display:grid;gap:10px}
+.opt{background:var(--surface);border:2px solid transparent;border-radius:var(--r-s);
+  padding:15px;font-size:.96rem;font-weight:600;cursor:pointer;text-align:start;
+  display:flex;gap:12px;align-items:center;color:inherit;width:100%;
+  box-shadow:var(--sh-1);transition:transform .14s,border-color .15s}
+.opt:active{transform:scale(.99)}
+.opt .n{width:26px;height:26px;border-radius:9px;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:.76rem;font-weight:800;
+  background:var(--sunk);color:var(--ink-3)}
+.opt.sel{border-color:var(--blue)}
+.opt.sel .n{background:var(--blue);color:#fff}
+.opt.right{border-color:var(--ok);background:rgba(59,125,87,.08)}
+.opt.right .n{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--stop);background:rgba(165,56,45,.07)}
+select,input[type=text],input[type=tel],textarea{width:100%;background:var(--surface);
+  border:1.5px solid var(--rule);border-radius:var(--r-s);padding:14px;font-size:.96rem;
+  color:inherit;outline:none;font-weight:600;transition:border-color .15s}
+select:focus,input:focus,textarea:focus{border-color:var(--blue)}
+.label{font-size:.75rem;color:var(--ink-3);font-weight:800;margin-bottom:6px;letter-spacing:.03em}
+.fld{margin-bottom:11px}
+.done-box{background:linear-gradient(140deg,rgba(59,125,87,.14),rgba(111,168,59,.1));
+  border:1.5px solid var(--ok);color:var(--ok);border-radius:var(--r-m);padding:16px;
+  font-weight:800;font-size:.96rem;text-align:center}
 
-  .strip{text-align:center;font-size:.78rem;font-weight:700;padding:8px;display:none}
-  .strip.on{display:block}
-  #queued{background:var(--warn);color:#fff}
-  #offline{background:var(--ink-3);color:#fff}
-  #upd{position:fixed;bottom:0;left:0;right:0;background:var(--ba-green-d);color:#fff;
-       text-align:center;padding:13px;font-weight:800;font-size:.92rem;display:none;
-       cursor:pointer;z-index:70}
-  #upd.on{display:block}
-  footer{padding:18px 16px 26px;text-align:center;color:var(--ink-3);font-size:.74rem;
-         line-height:1.7;border-top:1px solid var(--rule);margin-top:8px}
-  footer b{color:var(--ink-2)}
+/* ---------- ספרים ---------- */
+.sf{border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh-2)}
+.sf .top{padding:16px 18px;color:#fff}
+.sf.blue .top{background:linear-gradient(150deg,var(--blue-d),var(--blue))}
+.sf.green .top{background:linear-gradient(150deg,var(--green-d),var(--green))}
+.sf .top b{font-size:1.2rem;font-weight:800;display:block;letter-spacing:-.02em}
+.sf .top span{font-size:.77rem;opacity:.85;font-weight:600}
+.sf .body{padding:16px 18px;display:grid;gap:10px}
+.sf .body p{font-size:.9rem;color:var(--ink-2);line-height:1.68}
+.sf .rhythm{font-size:.72rem;font-weight:800;color:var(--gold);letter-spacing:.06em}
+.sf .ph{background:var(--sunk);border:1.5px dashed var(--rule);border-radius:var(--r-s);
+  padding:26px;text-align:center;color:var(--ink-3);font-size:.79rem;font-weight:700}
+.price{display:flex;align-items:baseline;gap:10px;justify-content:center;flex-wrap:wrap;
+  background:var(--surface);border-radius:var(--r-m);padding:16px;box-shadow:var(--sh-1)}
+.price b{font-size:2rem;font-weight:800;color:var(--green-d);letter-spacing:-.03em}
+body.dark .price b{color:var(--green)}
+.price s{color:var(--ink-3);font-size:1rem;font-weight:700}
+.price span{font-size:.79rem;color:var(--ink-3);font-weight:700}
+
+/* ---------- מוסדות ---------- */
+.inst{display:flex;align-items:center;gap:11px;padding:12px 0;font-size:.93rem;font-weight:700}
+.inst+.inst{border-top:1px solid var(--rule-2)}
+.inst .v{width:24px;height:24px;border-radius:50%;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:.68rem;font-weight:800}
+.inst .v.y{background:linear-gradient(140deg,var(--green),var(--green-d));color:#fff}
+.inst .v.n{background:var(--sunk);color:var(--ink-3)}
+.inst .nm{flex:1;min-width:0}
+.inst .tg{font-size:.61rem;font-weight:800;color:var(--gold);flex:none;letter-spacing:.05em}
+
+/* ---------- מוקד שיחות ---------- */
+.callbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cb{background:var(--surface);border-radius:var(--r-s);padding:12px 6px;text-align:center;
+  box-shadow:var(--sh-1);cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.cb.on{border-color:var(--blue)}
+.cb b{display:block;font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums;
+  line-height:1;letter-spacing:-.03em}
+.cb span{font-size:.66rem;color:var(--ink-3);font-weight:700;display:block;margin-top:4px}
+.ct{background:var(--surface);border-radius:var(--r-m);padding:15px;box-shadow:var(--sh-1);
+  border-inline-start:4px solid var(--rule)}
+.ct.s-joined{border-inline-start-color:var(--green)}
+.ct.s-warm{border-inline-start-color:var(--gold)}
+.ct.s-talked{border-inline-start-color:var(--blue-l)}
+.ct.s-no{border-inline-start-color:var(--stop)}
+.ct .h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ct .nm{font-size:1.05rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+.ct .who{font-size:.83rem;color:var(--ink-2);font-weight:700;margin-top:3px}
+.ct .last{font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.05em;flex:none}
+.ct .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.ct .acts a{display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:12px;border-radius:10px;text-decoration:none;font-weight:800;font-size:.9rem;color:#fff}
+.ct .acts .call{background:linear-gradient(140deg,var(--blue-l),var(--blue))}
+.ct .acts .wa{background:linear-gradient(140deg,#3FC152,#1FA637)}
+.ct .acts a:active{transform:scale(.98)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+.chip{border:1.5px solid var(--rule);background:var(--surface);border-radius:30px;
+  padding:6px 12px;font-size:.74rem;font-weight:800;cursor:pointer;color:var(--ink-2)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip.on.j{background:var(--green-d);border-color:var(--green-d)}
+.chip.on.w{background:var(--gold);border-color:var(--gold)}
+.chip.on.x{background:var(--stop);border-color:var(--stop)}
+.ct textarea{margin-top:10px;min-height:44px;font-size:.88rem;padding:11px;font-weight:600}
+
+/* ---------- קוד ---------- */
+.pins{display:flex;justify-content:center;gap:14px;margin:20px 0}
+.pins i{width:15px;height:15px;border-radius:50%;border:2px solid var(--blue);
+  transition:background .15s,transform .15s}
+.pins i.f{background:var(--blue);transform:scale(1.12)}
+body.dark .pins i{border-color:var(--blue-l)} body.dark .pins i.f{background:var(--blue-l)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;max-width:290px;
+  margin:0 auto;direction:ltr}
+.pad button{background:var(--surface);border:none;border-radius:var(--r-s);padding:17px 0;
+  font-size:1.3rem;font-weight:800;color:var(--blue);cursor:pointer;box-shadow:var(--sh-1)}
+body.dark .pad button{color:var(--blue-l)}
+.pad button:active{transform:scale(.94)}
+
+/* ---------- פסים ---------- */
+.strip{text-align:center;font-size:.79rem;font-weight:800;padding:9px;display:none}
+.strip.on{display:block}
+#queued{background:linear-gradient(90deg,var(--gold),var(--gold-l));color:#fff}
+#offline{background:var(--ink-3);color:#fff}
+#upd{position:fixed;bottom:0;left:0;right:0;z-index:70;display:none;cursor:pointer;
+  text-align:center;padding:15px;font-weight:800;font-size:.94rem;color:#fff;
+  background:linear-gradient(140deg,var(--green),var(--green-d));
+  box-shadow:0 -6px 24px rgba(0,0,0,.2)}
+#upd.on{display:block}
+footer{padding:24px 16px 32px;text-align:center;color:var(--ink-3);font-size:.75rem;
+  line-height:1.85;font-weight:600}
+footer b{color:var(--ink-2);font-weight:800}
+footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 auto 12px}
 </style>
 </head>
 <body>
 
-<div id="splash"><b>הדף השבועי של בני עקיבא</b><small>טוען…</small></div>
+<div id="splash"><b>הדף השבועי של בני עקיבא</b><i></i><span style="opacity:.6;font-size:.8rem">תשפ"ז</span></div>
 
 <div class="app">
   <header>
@@ -293,10 +410,10 @@
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2.5 4 7v6.2c0 4.3 3.3 7.4 8 8.3 4.7-.9 8-4 8-8.3V7z" fill="#17468F"/>
           <path d="M12 2.5 4 7v6.2c0 1 .2 2 .5 2.8L12 12z" fill="#29ABE2"/>
-          <path d="M12 12l7.5 4c.3-.8.5-1.8.5-2.8V7z" fill="#7CB342"/>
+          <path d="M12 12l7.5 4c.3-.8.5-1.8.5-2.8V7z" fill="#6FA83B"/>
         </svg>
       </span>
-      <h1>הדף השבועי</h1>
+      <div><h1>הדף השבועי</h1><div class="sub">בני עקיבא · תשפ"ז</div></div>
     </div>
     <div class="hbtns">
       <button class="icon" onclick="toggleDark()" title="מצב לילה">◐</button>
@@ -309,11 +426,13 @@
 
   <div class="content">
 
-    <!-- ========== בית ========== -->
+    <!-- ===== בית ===== -->
     <div id="v-home" class="view">
       <div class="hero">
-        <span class="yr">שנת תשפ"ז</span>
+        <span class="glow g1"></span><span class="glow g2"></span><span class="glow g3"></span>
+        <span class="yr">◆ שנת תשפ"ז</span>
         <h2>דף אחד בשבוע.<br>מסכת שלמה בשנה.</h2>
+        <div class="rule"></div>
         <div class="sub">כיתות ז׳ לומדות מסכת תענית, כיתות ח׳ מסכת מגילה —
           יחד, בכל ישיבות בני עקיבא.</div>
       </div>
@@ -323,8 +442,8 @@
         <div class="count g"><b id="c-stud">350</b><span>תלמידים למדו בתשפ"ו</span></div>
       </div>
 
-      <div class="sec-t">הלימוד השבוע</div>
-      <div class="tracks" id="track-cards"></div>
+      <div class="sec"><b>הלימוד השבוע</b><i></i></div>
+      <div style="display:flex;flex-direction:column;gap:12px" id="track-cards"></div>
 
       <div class="card">
         <h3>איך לומדים?</h3>
@@ -332,81 +451,88 @@
            או בחבורת לימוד בליווי איש צוות. הקצב אחיד: דף לשבוע.</p>
       </div>
 
-      <button class="btn g" onclick="show('sfarim')">רכישת גמרות במחיר מוזל →</button>
-      <button class="btn g" onclick="show('insts')">הישיבות שכבר בתוכנית →</button>
+      <button class="btn g" onclick="show('sfarim')">רכישת גמרות במחיר מוזל</button>
+      <button class="btn g" onclick="show('insts')">הישיבות שכבר בתוכנית</button>
     </div>
 
-    <!-- ========== מסלול ========== -->
+    <!-- ===== מסלול ===== -->
     <div id="v-track" class="view">
       <button class="back" onclick="show('home')">→ חזרה</button>
       <div class="bm" id="bm"></div>
     </div>
 
-    <!-- ========== שבוע ========== -->
+    <!-- ===== שבוע ===== -->
     <div id="v-week" class="view">
       <button class="back" onclick="backToTrack()">→ חזרה למסלול</button>
       <div id="week-body"></div>
     </div>
 
-    <!-- ========== חידה ========== -->
+    <!-- ===== חידה ===== -->
     <div id="v-quiz" class="view">
       <button class="back" onclick="backToWeek()">→ חזרה לדף</button>
       <div id="quiz-body"></div>
     </div>
 
-    <!-- ========== ספרים ========== -->
+    <!-- ===== ספרים ===== -->
     <div id="v-sfarim" class="view">
       <button class="back" onclick="show('home')">→ חזרה</button>
-      <div class="hero" style="padding:18px">
-        <h2 style="font-size:1.25rem">רכישה מרוכזת</h2>
+      <div class="hero" style="padding:22px 20px">
+        <span class="glow g1"></span><span class="glow g3"></span>
+        <h2 style="font-size:1.4rem">רכישה מרוכזת</h2>
+        <div class="rule"></div>
         <div class="sub">שתי מהדורות, שתי דרכי לימוד. כל ישיבה בוחרת את המתאים לה.</div>
       </div>
-      <div class="price"><b>15 ₪</b><s>25 ₪</s>
-        <span style="font-size:.8rem;color:var(--ink-3)">לחוברת, בהזמנה מרוכזת</span></div>
-      <div id="sfarim-list" style="display:grid;gap:12px"></div>
+      <div class="price"><b>15 ₪</b><s>25 ₪</s><span>לחוברת, בהזמנה מרוכזת</span></div>
+      <div id="sfarim-list" style="display:grid;gap:13px"></div>
       <div class="card">
         <h3>הציבו לעצמכם יעד</h3>
         <p>כמה תלמידים תצליחו להכניס לתוכנית השנה? העריכו מספר — והזמינו לפיו במחיר המוזל.</p>
       </div>
-      <button class="btn p" onclick="show('gate')">להזמנה — כניסת רכז</button>
     </div>
 
-    <!-- ========== מוסדות ========== -->
+    <!-- ===== מוסדות ===== -->
     <div id="v-insts" class="view">
       <button class="back" onclick="show('home')">→ חזרה</button>
-      <div class="sec-t">ישיבות בתוכנית — תשפ"ז</div>
-      <div class="card" style="padding:6px 14px" id="inst-list"></div>
-      <p style="font-size:.78rem;color:var(--ink-3);text-align:center">
+      <div class="sec"><b>ישיבות בתוכנית · תשפ"ז</b><i></i></div>
+      <div class="card" style="padding:6px 18px" id="inst-list"></div>
+      <p style="font-size:.78rem;color:var(--ink-3);text-align:center;font-weight:600">
         סימון זהב — ישיבות שלמדו כבר בתשפ"ו.</p>
     </div>
 
-    <!-- ========== שער ========== -->
+    <!-- ===== שער ===== -->
     <div id="v-gate" class="view">
       <button class="back" onclick="show('home')">→ חזרה</button>
-      <div style="text-align:center;font-weight:800;font-size:1.05rem">כניסת צוות</div>
-      <p style="text-align:center;font-size:.85rem;color:var(--ink-3)">
-        הזינו את הקוד שקיבלתם.<br>הלימוד השבועי פתוח לכולם גם בלי קוד.</p>
+      <div style="text-align:center;font-weight:800;font-size:1.15rem;letter-spacing:-.02em">
+        כניסת צוות</div>
+      <p style="text-align:center;font-size:.87rem;color:var(--ink-3);font-weight:600">
+        הלימוד השבועי פתוח לכולם גם בלי קוד.</p>
       <div class="pins" id="pins"><i></i><i></i><i></i><i></i></div>
       <div class="pad" id="pad"></div>
-      <div id="gate-msg" style="text-align:center;font-size:.85rem;color:var(--stop);
-           font-weight:700;min-height:22px"></div>
+      <div id="gate-msg" style="text-align:center;font-size:.86rem;color:var(--stop);
+           font-weight:800;min-height:24px"></div>
+    </div>
+
+    <!-- ===== מוקד שיחות ===== -->
+    <div id="v-calls" class="view">
+      <button class="back" onclick="show('home')">→ יציאה</button>
+      <div id="calls-body"></div>
     </div>
 
   </div>
 
   <footer>
+    <i></i>
     <b>הדף השבועי של בני עקיבא</b><br>
     <span id="f-people"></span><br>
-    <span style="opacity:.7">גרסה <span id="f-ver"></span></span>
+    <span style="opacity:.65">גרסה <span id="f-ver"></span></span>
   </footer>
 </div>
 
-<!-- ========== הקרנה ========== -->
 <div id="deck">
   <div class="dtop">
     <span id="d-where"></span>
     <button onclick="deckClose()" style="background:none;border:none;color:#fff;
-            font-size:1.3rem;cursor:pointer;opacity:.7">✕</button>
+            font-size:1.35rem;cursor:pointer;opacity:.65">✕</button>
   </div>
   <div class="dbody">
     <img id="d-img" alt="">
@@ -428,20 +554,19 @@
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '1.2.0';
+var APP_VERSION = '2.0.0';
 
-var API     = localStorage.getItem('dfApi') || '';
-var myInst  = localStorage.getItem('dfInst') || '';
-var myName  = localStorage.getItem('dfName') || '';
+var API    = localStorage.getItem('dfApi') || '';
+var myInst = localStorage.getItem('dfInst') || '';
+var myName = localStorage.getItem('dfName') || '';
 var teamCode = '';
-var state = { track:null, week:null, deck:[], di:0, ans:-1 };
+var state = { track:null, week:null, deck:[], di:0, ans:-1, filter:'all' };
 
 document.getElementById('f-ver').textContent = APP_VERSION;
 document.getElementById('f-people').textContent =
   PROGRAM.contact.head + ' · ' + PROGRAM.contact.coord;
 if (localStorage.getItem('dfDark') === '1') document.body.classList.add('dark');
 
-/* מוסד מתוך הקישור: ?m=raanana */
 (function () {
   var m = new URLSearchParams(location.search).get('m');
   if (m && INSTITUTIONS.some(function (i) { return i.code === m; })) {
@@ -468,13 +593,17 @@ function dafDone(tr) {
     if (tr.cal[i][2] && tr.cal[i][2] !== 'סיום') n++;
   return n;
 }
-
-var HEBV = { 'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,'י':10,'כ':20,'ל':30 };
+var HEBV = {'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,'י':10,'כ':20,'ל':30};
+function dafKey(d) { return String(d).replace(/["'׳״\s]/g, ''); }
 function dafToNum(d) {
-  var s = String(d).replace(/["'׳״\s]/g, '');
-  var n = 0;
+  var s = dafKey(d), n = 0;
   for (var i = 0; i < s.length; i++) n += (HEBV[s[i]] || 0);
   return n;
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
 }
 
 /* ---------- ניווט ---------- */
@@ -487,6 +616,7 @@ function show(v) {
   if (v === 'home')   renderHome();
   if (v === 'insts')  renderInsts();
   if (v === 'sfarim') renderSfarim();
+  if (v === 'calls')  renderCalls();
   if (v === 'gate')   { teamCode = ''; paintPins();
                         document.getElementById('gate-msg').textContent = ''; }
 }
@@ -495,43 +625,38 @@ function backToWeek()  { openWeek(state.track.id, state.week); }
 
 /* ---------- בית ---------- */
 function renderHome() {
-  var joined = INSTITUTIONS.filter(function (i) { return i.joined; }).length;
-  document.getElementById('c-inst').textContent = joined;
+  document.getElementById('c-inst').textContent =
+    INSTITUTIONS.filter(function (i) { return i.joined; }).length;
   document.getElementById('c-stud').textContent = PROGRAM.lastYear.students;
 
   var h = '', wi = weekIndex();
   TRACKS.forEach(function (tr) {
     var row = wi < 0 ? tr.cal[0] : tr.cal[wi];
-    var tone = tr.id === 'taanit' ? 't-blue' : 't-green';
+    var tone = tr.id === 'taanit' ? 't-b' : 't-g';
     var done = dafDone(tr), pct = Math.round(done / tr.dapim * 100);
-    var line;
-    if (wi < 0)                 line = 'פותחים בפרשת בראשית — <b>דף ב׳</b>';
-    else if (!row[2])           line = '<b>שבוע חופשה</b> · ' + row[1];
-    else if (row[2] === 'סיום') line = '<b>חגיגת סיום המסכת</b>';
-    else                        line = 'השבוע: <b>דף ' + row[2] + '</b> · ' + row[1];
+    var line = wi < 0 ? 'פותחים בפרשת בראשית — <b>דף ב׳</b>'
+             : !row[2] ? '<b>שבוע חופשה</b> · ' + esc(row[1])
+             : row[2] === 'סיום' ? '<b>חגיגת סיום המסכת</b>'
+             : 'השבוע: <b>דף ' + esc(row[2]) + '</b> · ' + esc(row[1]);
 
     h += '<div class="track ' + tone + '" onclick="openTrack(\'' + tr.id + '\')">' +
-         '<div class="bar"></div><div class="in">' +
-         '<div class="row"><div><h3>מסכת ' + tr.masechet + '</h3>' +
+         '<span class="stripe"></span><div class="in">' +
+         '<div class="top"><div><h3>מסכת ' + esc(tr.masechet) + '</h3>' +
          '<div class="now">' + line + '</div></div>' +
-         '<span class="grade">' + tr.gradeFull + '</span></div>' +
-         '<div class="prog"><i style="width:' + pct + '%"></i></div>' +
-         '<div class="pmeta"><span>' + done + ' מתוך ' + tr.dapim + ' דפים</span>' +
-         '<span>' + pct + '%</span></div></div></div>';
+         '<span class="grade">' + esc(tr.gradeFull) + '</span></div>' +
+         '<div class="foot"><div class="prog"><i style="width:' + pct + '%"></i></div>' +
+         '<span class="pn">' + done + '/' + tr.dapim + '</span></div></div></div>';
   });
   document.getElementById('track-cards').innerHTML = h;
 }
 
-/* ---------- סימנייה ---------- */
+/* ---------- מסלול כמסע ---------- */
 function openTrack(id) {
   var tr = trackById(id); state.track = tr;
-  var tone = id === 'taanit' ? 't-blue' : 't-green';
-  var wi = weekIndex();
-  var chaps = CHAPTERS[id];
-  var shown = {};
+  var wi = weekIndex(), chaps = CHAPTERS[id], shown = {};
 
-  var h = '<div class="head"><b>מסכת ' + tr.masechet + '</b><span>' +
-          tr.gradeFull + ' · ' + tr.dapim + ' דפים · תשפ"ז</span></div>';
+  var h = '<div class="head"><b>מסכת ' + esc(tr.masechet) + '</b><i></i><span>' +
+          esc(tr.gradeFull) + ' · ' + tr.dapim + ' דפים · תשפ"ז</span></div><div class="trail">';
 
   tr.cal.forEach(function (row, i) {
     var daf = row[2];
@@ -540,36 +665,33 @@ function openTrack(id) {
       chaps.forEach(function (c, ci) {
         if (!shown[ci] && num >= c.from) {
           shown[ci] = 1;
-          h += '<div class="chapline">' + c.n + '</div>';
+          h += '<div class="chap"><b>' + esc(c.n) + '</b><i></i></div>';
         }
       });
     }
-    var cls = 'wk';
+    var cls = 'step';
     if (!daf) cls += ' off';
     else if (daf === 'סיום') cls += ' siyum';
     if (i === wi) cls += ' cur';
     if (wi >= 0 && i < wi) cls += ' done';
+    if (i === tr.cal.length - 1) cls += ' last';
 
-    var circle = daf ? (daf === 'סיום' ? 'סיום' : daf) : 'חופשה';
-    var open   = (daf && daf !== 'סיום');
-    var click  = open ? ' onclick="openWeek(\'' + id + '\',' + i + ')"' : '';
-
-    h += '<div class="' + cls + '"' + click + '>' +
-         '<span class="daf">' + circle + '</span>' +
-         '<div class="mid"><div class="p">' + row[1] +
-           (i === wi ? '<span class="cur-badge">השבוע</span>' : '') + '</div>' +
-         '<div class="d">' + row[0] + '</div></div>' +
-         // חץ שמאלה — לא עובר היפוך דו-כיווני, ולכן נשאר נכון ב-RTL
-         (open ? '<span class="go">←</span>' : '<span></span>') + '</div>';
+    var open = daf && daf !== 'סיום';
+    h += '<div class="' + cls + '"' +
+         (open ? ' onclick="openWeek(\'' + id + '\',' + i + ')"' : '') + '>' +
+         '<span class="dot">' + (daf ? (daf === 'סיום' ? 'סיום' : esc(daf)) : 'חופשה') + '</span>' +
+         '<div class="txt"><div class="p">' + esc(row[1]) +
+         (i === wi ? '<span class="badge">השבוע</span>' : '') + '</div>' +
+         '<div class="d">' + esc(row[0]) + '</div></div></div>';
   });
 
   var bm = document.getElementById('bm');
-  bm.className = 'bm ' + tone;
-  bm.innerHTML = h;
+  bm.className = 'bm ' + (id === 'taanit' ? 't-b' : 't-g');
+  bm.innerHTML = h + '</div>';
   show('track');
   if (wi > 2) {
-    var cur = bm.querySelector('.wk.cur');
-    if (cur) setTimeout(function () { cur.scrollIntoView({ block:'center' }); }, 60);
+    var cur = bm.querySelector('.step.cur');
+    if (cur) setTimeout(function () { cur.scrollIntoView({ block:'center' }); }, 70);
   }
 }
 
@@ -578,72 +700,63 @@ function openWeek(id, i) {
   var tr = trackById(id); state.track = tr; state.week = i;
   var row = tr.cal[i], key = id + '-' + (i + 1);
   var c = CONTENT[key], q = QUIZ[key];
-  var tone = id === 'taanit' ? 't-blue' : 't-green';
+  var tone = id === 'taanit' ? 't-b' : 't-g';
   var sef = 'https://www.sefaria.org.il/' + tr.sefaria + '.' + dafToNum(row[2]) + 'a?lang=he';
+  var lk = (DAF_LINKS[id] || {})[dafKey(row[2])] || [];
 
   var h = '<div class="' + tone + '"><div class="wtop">' +
-          '<div class="l"><div class="k">מסכת ' + tr.masechet + ' · ' + row[1] + '</div>' +
-          '<h2>' + (c ? c.title : 'דף ' + row[2]) + '</h2>' +
-          '<div class="k" style="font-weight:600;margin-top:3px">' + row[0] + '</div></div>' +
-          '<span class="dafbig">' + row[2] + '</span></div></div>';
+          '<div><div class="k">מסכת ' + esc(tr.masechet) + ' · ' + esc(row[1]) + '</div>' +
+          '<h2>' + esc(c ? c.title : 'דף ' + row[2]) + '</h2>' +
+          '<div class="k" style="font-weight:600">' + esc(row[0]) + '</div></div>' +
+          '<span class="dafbig">' + esc(row[2]) + '</span></div></div>';
 
   if (c && c.deck) {
-    // מצגת תמונות — זו המצגת המקורית, כפי שעוצבה
     state.deck = [];
     for (var n = 1; n <= c.deck.n; n++)
       state.deck.push({ img: c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg' });
-
-    h += '<button class="btn p" style="margin-top:12px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
-         '<div class="sec-t" style="margin-top:6px">' + c.deck.n + ' שקפים</div>' +
+    h += '<button class="btn p" style="margin-top:14px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
+         '<div class="sec" style="margin-top:14px"><b>' + c.deck.n + ' שקפים</b><i></i></div>' +
          '<div class="thumbs">';
-    state.deck.forEach(function (s, i) {
+    state.deck.forEach(function (s, k) {
       h += '<img class="thumb" loading="lazy" src="' + s.img +
-           '" alt="שקף ' + (i + 1) + '" onclick="deckOpen(' + i + ')">';
+           '" alt="שקף ' + (k + 1) + '" onclick="deckOpen(' + k + ')">';
     });
     h += '</div>';
-
   } else if (c) {
     var live = c.slides.filter(function (s) { return s.h || s.t; });
     state.deck = live;
-    h += '<button class="btn p" style="margin-top:12px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
-         '<div class="sec-t" style="margin-top:6px">' + live.length + ' שקפים</div>' +
+    h += '<button class="btn p" style="margin-top:14px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
+         '<div class="sec" style="margin-top:14px"><b>' + live.length + ' שקפים</b><i></i></div>' +
          '<div class="slides">';
-    live.forEach(function (s, i) {
-      h += '<div class="slide" onclick="deckOpen(' + i + ')">' +
-           (s.k ? '<div class="k">' + s.k + '</div>' : '') +
-           (s.h ? '<h4>' + s.h + '</h4>' : '') +
-           (s.t ? '<p>' + s.t + '</p>' : '') + '</div>';
+    live.forEach(function (s, k) {
+      h += '<div class="slide" onclick="deckOpen(' + k + ')">' +
+           (s.k ? '<div class="k">' + esc(s.k) + '</div>' : '') +
+           (s.h ? '<h4>' + esc(s.h) + '</h4>' : '') +
+           (s.t ? '<p>' + esc(s.t) + '</p>' : '') + '</div>';
     });
     h += '</div>';
   } else {
     state.deck = [];
-    h += '<div class="card" style="margin-top:12px;text-align:center">' +
+    h += '<div class="card" style="margin-top:14px;text-align:center">' +
          '<h3>חומרי הלימוד לדף זה בהכנה</h3>' +
          '<p>המצגת והחידה יעלו לקראת השבוע הזה.</p></div>';
   }
 
-  // קישורי צורת הדף והחברותא מגיעים ממסד "יגדיל תורה"; מפתח בלי גרשיים
-  var lk = (DAF_LINKS[id] || {})[String(row[2]).replace(/["'׳״\s]/g, '')] || [];
-  var link = function (href, ic, title, sub) {
+  var lnk = function (href, ic, t, sub) {
     return href
       ? '<a class="lnk" href="' + href + '" target="_blank" rel="noopener">' +
-        '<span class="ic">' + ic + '</span><span>' + title +
-        '<small>' + sub + '</small></span></a>'
-      : '<a class="lnk" href="#" onclick="return notYet()" style="opacity:.55">' +
-        '<span class="ic">' + ic + '</span><span>' + title +
-        '<small>קישור יתווסף</small></span></a>';
+        '<span class="ic">' + ic + '</span><span>' + t + '<small>' + sub + '</small></span></a>'
+      : '<a class="lnk dim" href="#" onclick="return notYet()">' +
+        '<span class="ic">' + ic + '</span><span>' + t + '<small>קישור יתווסף</small></span></a>';
   };
-
-  h += '<div class="sec-t" style="margin-top:14px">הדף עצמו</div><div class="links">' +
-       link(lk[0], '⤓', 'צורת הדף', 'הדף להדפסה') +
-       link(lk[1], 'פ', 'פירוש חברותא', 'ביאור על הדף') +
-       link(sef, 'ג', 'מסכת ' + tr.masechet + ' דף ' + row[2], 'לצפייה בספריא') +
+  h += '<div class="sec" style="margin-top:18px"><b>הדף עצמו</b><i></i></div><div class="links">' +
+       lnk(lk[0], '⤓', 'צורת הדף', 'הדף להדפסה') +
+       lnk(lk[1], 'פ', 'פירוש חברותא', 'ביאור על הדף') +
+       lnk(sef, 'ג', 'מסכת ' + esc(tr.masechet) + ' דף ' + esc(row[2]), 'לצפייה בספריא') +
        '</div>';
 
-  if (q) {
-    h += '<div class="sec-t" style="margin-top:14px">החידה השבועית</div>' +
-         '<button class="btn gr" onclick="openQuiz()">לחידה — ולהגרלה →</button>';
-  }
+  if (q) h += '<div class="sec" style="margin-top:18px"><b>החידה השבועית</b><i></i></div>' +
+              '<button class="btn gr" onclick="openQuiz()">לחידה — ולהגרלה</button>';
 
   document.getElementById('week-body').innerHTML = h;
   show('week');
@@ -667,19 +780,13 @@ function deckGo(d) {
 }
 function deckPaint() {
   var s = state.deck[state.di];
-  var img = document.getElementById('d-img');
-  var txt = document.getElementById('d-text');
-
+  var img = document.getElementById('d-img'), txt = document.getElementById('d-text');
   if (s.img) {
-    img.src = s.img;
-    img.style.display = 'block';
-    txt.style.display = 'none';
-    // טעינה מוקדמת של השקף הבא — כדי שהמעבר בכיתה יהיה מיידי
-    var nx = state.deck[state.di + 1];
+    img.src = s.img; img.style.display = 'block'; txt.style.display = 'none';
+    var nx = state.deck[state.di + 1];          // טעינה מוקדמת — מעבר מיידי בכיתה
     if (nx && nx.img) { var pre = new Image(); pre.src = nx.img; }
   } else {
-    img.style.display = 'none';
-    txt.style.display = 'flex';
+    img.style.display = 'none'; txt.style.display = 'flex';
     document.getElementById('d-k').textContent = s.k || '';
     document.getElementById('d-h').textContent = s.h || '';
     document.getElementById('d-t').textContent = s.t || '';
@@ -695,40 +802,36 @@ document.addEventListener('keydown', function (e) {
   if (document.getElementById('deck').className !== 'on') return;
   if (e.key === 'ArrowLeft')  deckGo(1);
   if (e.key === 'ArrowRight') deckGo(-1);
-  if (e.key === ' ')          { deckGo(1); e.preventDefault(); }
-  if (e.key === 'Escape')     deckClose();
+  if (e.key === ' ') { deckGo(1); e.preventDefault(); }
+  if (e.key === 'Escape') deckClose();
 });
 
 /* ---------- חידה ---------- */
 function openQuiz() {
-  var key = state.track.id + '-' + (state.week + 1);
-  var q = QUIZ[key];
+  var key = state.track.id + '-' + (state.week + 1), q = QUIZ[key];
   if (!q) return;
-
   var opts = '<option value="">— בחרו ישיבה —</option>';
   INSTITUTIONS.forEach(function (i) {
-    opts += '<option value="' + i.code + '"' +
-            (i.code === myInst ? ' selected' : '') + '>' + i.name + '</option>';
+    opts += '<option value="' + i.code + '"' + (i.code === myInst ? ' selected' : '') +
+            '>' + esc(i.name) + '</option>';
   });
 
-  var h = '<div class="sec-t">החידה השבועית · מסכת ' + state.track.masechet +
-          ' דף ' + state.track.cal[state.week][2] + '</div>' +
-          '<div class="qwrap"><div class="qq">' + q.q + '</div>';
+  var h = '<div class="sec"><b>החידה השבועית · דף ' +
+          esc(state.track.cal[state.week][2]) + '</b><i></i></div>' +
+          '<div class="qq">' + esc(q.q) + '</div><div class="opts">';
   q.a.forEach(function (t, i) {
     h += '<button class="opt" id="opt' + i + '" onclick="pickAns(' + i + ')">' +
-         '<span class="n">' + (i + 1) + '</span><span>' + t + '</span></button>';
+         '<span class="n">' + (i + 1) + '</span><span>' + esc(t) + '</span></button>';
   });
-  h += '</div><div style="margin-top:14px">' +
-       '<div class="fld"><div class="label">הישיבה שלי</div>' +
-       '<select id="q-inst">' + opts + '</select></div>' +
+  h += '</div><div style="margin-top:18px">' +
+       '<div class="fld"><div class="label">הישיבה שלי</div><select id="q-inst">' + opts + '</select></div>' +
        '<div class="fld"><div class="label">השם שלי</div>' +
-       '<input type="text" id="q-name" placeholder="שם מלא" value="' + myName + '"></div>' +
+       '<input type="text" id="q-name" placeholder="שם מלא" value="' + esc(myName) + '"></div>' +
        '<div class="fld"><div class="label">טלפון — לשליחת הפרס</div>' +
        '<input type="tel" id="q-phone" placeholder="05X-XXXXXXX"></div></div>' +
        '<button class="btn p" id="q-send" onclick="sendQuiz()" disabled>שליחה</button>' +
-       '<p style="font-size:.75rem;color:var(--ink-3);text-align:center;margin-top:8px">' +
+       '<p style="font-size:.76rem;color:var(--ink-3);text-align:center;margin-top:10px;font-weight:600">' +
        'הפרטים נשמרים במערכת התוכנית בלבד.</p><div id="q-result"></div>';
-
   document.getElementById('quiz-body').innerHTML = h;
   state.ans = -1;
   show('quiz');
@@ -744,14 +847,12 @@ function pickAns(i) {
 }
 function sendQuiz() {
   var key = state.track.id + '-' + (state.week + 1), q = QUIZ[key];
-  var inst  = document.getElementById('q-inst').value;
-  var name  = document.getElementById('q-name').value.trim();
+  var inst = document.getElementById('q-inst').value;
+  var name = document.getElementById('q-name').value.trim();
   var phone = document.getElementById('q-phone').value.trim();
   if (!inst || !name) { alert('נא לבחור ישיבה ולמלא שם.'); return; }
-
   myInst = inst; myName = name;
-  localStorage.setItem('dfInst', inst);
-  localStorage.setItem('dfName', name);
+  localStorage.setItem('dfInst', inst); localStorage.setItem('dfName', name);
 
   var right = state.ans === q.correct;
   for (var k = 0; k < q.a.length; k++) {
@@ -762,42 +863,203 @@ function sendQuiz() {
     el.onclick = null;
   }
   document.getElementById('q-send').disabled = true;
-
   queue({ action:'quiz', week:key, inst:inst, name:name, phone:phone,
           answer:state.ans, correct:right, at:new Date().toISOString() });
-
   document.getElementById('q-result').innerHTML =
-    '<div class="banner-ok" style="margin-top:12px">' +
+    '<div class="done-box" style="margin-top:14px">' +
     (right ? 'תשובה נכונה! נכנסת להגרלה השבועית.'
            : 'התשובה הנכונה מסומנת. נכנסת להגרלה השבועית.') + '</div>';
 }
 
-/* ---------- ספרים ---------- */
+/* ---------- ספרים / מוסדות ---------- */
 function renderSfarim() {
   var h = '';
   SFARIM.forEach(function (s) {
-    h += '<div class="sf ' + s.tone + '">' +
-         '<div class="top"><b>' + s.name + '</b><span>' + s.tag + '</span></div>' +
-         '<div class="body"><div class="ph">תמונת הספר — תתווסף</div>' +
-         '<div class="rhythm">קצב הלימוד · ' + s.rhythm + '</div>' +
-         '<p>' + s.desc + '</p><p><b>למי מתאים:</b> ' + s.who + '</p>' +
-         '</div></div>';
+    h += '<div class="sf ' + s.tone + '"><div class="top"><b>' + esc(s.name) +
+         '</b><span>' + esc(s.tag) + '</span></div><div class="body">' +
+         '<div class="ph">תמונת הספר — תתווסף</div>' +
+         '<div class="rhythm">קצב הלימוד · ' + esc(s.rhythm) + '</div>' +
+         '<p>' + esc(s.desc) + '</p><p><b>למי מתאים:</b> ' + esc(s.who) + '</p></div></div>';
   });
   document.getElementById('sfarim-list').innerHTML = h;
 }
-
-/* ---------- מוסדות ---------- */
 function renderInsts() {
   var h = '';
   INSTITUTIONS.forEach(function (i) {
     h += '<div class="inst"><span class="v ' + (i.joined ? 'y' : 'n') + '">' +
-         (i.joined ? '✓' : '') + '</span><span class="nm">' + i.name + '</span>' +
+         (i.joined ? '✓' : '') + '</span><span class="nm">' + esc(i.name) + '</span>' +
          (i.last ? '<span class="tg">תשפ"ו</span>' : '') + '</div>';
   });
   document.getElementById('inst-list').innerHTML = h;
 }
 
-/* ---------- קוד ---------- */
+/* ============================================================
+   מוקד שיחות — כלי פרטי של רכז התוכנית.
+   אנשי הקשר נשמרים על המכשיר בלבד (localStorage) ואינם נמצאים
+   בקוד: הריפו ציבורי, ואסור שטלפונים של מנהלים יישבו בו.
+   ============================================================ */
+var STAGES = [
+  { k:'new',    t:'לא דיברתי', c:'' },
+  { k:'talked', t:'דיברתי',    c:'' },
+  { k:'warm',   t:'מתעניין',   c:'w' },
+  { k:'joined', t:'הצטרף',     c:'j' },
+  { k:'no',     t:'לא השנה',   c:'x' }
+];
+function contacts()      { try { return JSON.parse(localStorage.getItem('dfContacts') || '[]'); }
+                           catch (e) { return []; } }
+function saveContacts(c) { localStorage.setItem('dfContacts', JSON.stringify(c)); }
+
+// מנקה מספר לחיוג ולוואטסאפ
+function digits(p) { return String(p || '').replace(/[^0-9]/g, ''); }
+function waNum(p) {
+  var d = digits(p);
+  if (d.indexOf('972') === 0) return d;
+  return '972' + d.replace(/^0/, '');
+}
+
+// מפרסר הדבקה מגיליון גוגל: עמודות מופרדות בטאב
+function parseContacts(text) {
+  var out = [];
+  String(text).split(/\r?\n/).forEach(function (line) {
+    if (!line.trim()) return;
+    var cells = line.split('\t');
+    if (cells.length < 2) cells = line.split(/\s{2,}|,/);
+    cells = cells.map(function (c) { return c.trim().replace(/⁩|⁦/g, ''); });
+
+    var name = '', people = [], phones = [], last = false;
+    cells.forEach(function (c) {
+      if (/^(TRUE|כן|V|✓)$/i.test(c)) { last = true; return; }
+      if (/^(FALSE|לא)$/i.test(c)) return;
+      if (!c || c === 'X' || c === 'x') return;
+      if (/^[0-9\-\+\(\)\s]{9,}$/.test(c)) { phones.push(c); return; }
+      if (!name) name = c; else people.push(c);
+    });
+    if (!name) return;
+    out.push({ name:name, who:people.join(' · '), phone:phones[0] || '',
+               phone2:phones[1] || '', last:last, stage:'new', note:'' });
+  });
+  return out;
+}
+
+function renderCalls() {
+  var list = contacts();
+  var el = document.getElementById('calls-body');
+
+  if (!list.length) {
+    el.innerHTML =
+      '<div class="hero" style="padding:22px 20px"><span class="glow g1"></span>' +
+      '<span class="glow g3"></span><h2 style="font-size:1.35rem">מוקד שיחות</h2>' +
+      '<div class="rule"></div><div class="sub">כדי להתחיל, הדביקו את רשימת המוסדות ' +
+      'מגיליון הגוגל. הרשימה נשמרת על המכשיר הזה בלבד ואינה נשלחת לשום מקום.</div></div>' +
+      '<div class="card"><h3>איך מדביקים</h3><p>בגיליון — סמנו את השורות ' +
+      '(בלי שורת הכותרת), העתיקו, והדביקו כאן. כל עמודה בנפרד.</p></div>' +
+      '<textarea id="paste" rows="7" placeholder="הדביקו כאן…"></textarea>' +
+      '<button class="btn p" onclick="importContacts()">ייבוא הרשימה</button>';
+    return;
+  }
+
+  var counts = { all:list.length };
+  STAGES.forEach(function (s) {
+    counts[s.k] = list.filter(function (c) { return c.stage === s.k; }).length;
+  });
+
+  var h = '<div class="hero" style="padding:20px"><span class="glow g1"></span>' +
+          '<span class="glow g3"></span><h2 style="font-size:1.3rem">מוקד שיחות</h2>' +
+          '<div class="rule"></div><div class="sub">' + counts.joined +
+          ' מתוך ' + list.length + ' ישיבות הצטרפו · ' +
+          (list.length - counts.new) + ' שיחות בוצעו</div></div>';
+
+  h += '<div class="callbar">' +
+       '<div class="cb' + (state.filter === 'all' ? ' on' : '') +
+       '" onclick="callFilter(\'all\')"><b>' + counts.all + '</b><span>הכל</span></div>' +
+       '<div class="cb' + (state.filter === 'new' ? ' on' : '') +
+       '" onclick="callFilter(\'new\')"><b>' + counts.new + '</b><span>לא דיברתי</span></div>' +
+       '<div class="cb' + (state.filter === 'warm' ? ' on' : '') +
+       '" onclick="callFilter(\'warm\')"><b>' + counts.warm + '</b><span>מתעניין</span></div>' +
+       '<div class="cb' + (state.filter === 'joined' ? ' on' : '') +
+       '" onclick="callFilter(\'joined\')"><b>' + counts.joined + '</b><span>הצטרפו</span></div>' +
+       '</div>';
+
+  // הממשיכים מתשפ"ו קודם — הם השיחות הקלות והמשכנעות
+  var shown = list.map(function (c, i) { return { c:c, i:i }; })
+    .filter(function (o) { return state.filter === 'all' || o.c.stage === state.filter; })
+    .sort(function (a, b) { return (b.c.last ? 1 : 0) - (a.c.last ? 1 : 0); });
+
+  if (!shown.length) h += '<div class="msg">אין מוסדות בקטגוריה הזו.</div>';
+
+  shown.forEach(function (o) {
+    var c = o.c, i = o.i;
+    h += '<div class="ct s-' + c.stage + '"><div class="h"><div>' +
+         '<div class="nm">' + esc(c.name) + '</div>' +
+         (c.who ? '<div class="who">' + esc(c.who) + '</div>' : '') +
+         '</div>' + (c.last ? '<span class="last">תשפ"ו</span>' : '') + '</div>';
+
+    if (c.phone) {
+      h += '<div class="acts">' +
+           '<a class="call" href="tel:' + digits(c.phone) + '">📞 חייג</a>' +
+           '<a class="wa" href="https://wa.me/' + waNum(c.phone) +
+           '" target="_blank" rel="noopener">וואטסאפ</a></div>';
+      if (c.phone2)
+        h += '<div class="acts" style="margin-top:8px"><a class="call" style="opacity:.8" href="tel:' +
+             digits(c.phone2) + '">📞 מספר נוסף</a>' +
+             '<a class="wa" style="opacity:.8" href="https://wa.me/' + waNum(c.phone2) +
+             '" target="_blank" rel="noopener">וואטסאפ</a></div>';
+    } else {
+      h += '<div style="font-size:.83rem;color:var(--stop);font-weight:800;margin-top:10px">' +
+           'אין מספר טלפון</div>';
+    }
+
+    h += '<div class="chips">';
+    STAGES.forEach(function (s) {
+      h += '<button class="chip ' + s.c + (c.stage === s.k ? ' on' : '') +
+           '" onclick="setStage(' + i + ',\'' + s.k + '\')">' + s.t + '</button>';
+    });
+    h += '</div><textarea rows="1" placeholder="הערה מהשיחה…" ' +
+         'onchange="setNote(' + i + ',this.value)">' + esc(c.note) + '</textarea></div>';
+  });
+
+  h += '<button class="btn g" style="margin-top:8px" onclick="exportCalls()">' +
+       'העתקת סיכום לוואטסאפ</button>' +
+       '<button class="btn g" onclick="wipeContacts()">מחיקת הרשימה מהמכשיר</button>';
+  el.innerHTML = h;
+}
+function callFilter(f) { state.filter = f; renderCalls(); }
+function importContacts() {
+  var t = document.getElementById('paste').value;
+  var parsed = parseContacts(t);
+  if (!parsed.length) { alert('לא זוהו שורות. ודאו שהעתקתם מהגיליון.'); return; }
+  saveContacts(parsed);
+  renderCalls();
+}
+function setStage(i, k) {
+  var l = contacts(); if (!l[i]) return;
+  l[i].stage = k; l[i].at = new Date().toISOString();
+  saveContacts(l); renderCalls();
+}
+function setNote(i, v) {
+  var l = contacts(); if (!l[i]) return;
+  l[i].note = v; saveContacts(l);
+}
+function exportCalls() {
+  var l = contacts();
+  var by = function (k) {
+    return l.filter(function (c) { return c.stage === k; })
+            .map(function (c) { return '• ' + c.name + (c.note ? ' — ' + c.note : ''); }).join('\n');
+  };
+  var txt = 'הדף השבועי — סיכום סבב שיחות\n\n' +
+    'הצטרפו (' + l.filter(function (c) { return c.stage === 'joined'; }).length + '):\n' + by('joined') +
+    '\n\nמתעניינים:\n' + by('warm') +
+    '\n\nלא דיברתי עדיין:\n' + by('new');
+  if (navigator.clipboard) navigator.clipboard.writeText(txt);
+  alert('הסיכום הועתק. אפשר להדביק בוואטסאפ.');
+}
+function wipeContacts() {
+  if (!confirm('למחוק את רשימת אנשי הקשר מהמכשיר? הסטטוסים וההערות יימחקו גם הם.')) return;
+  localStorage.removeItem('dfContacts');
+  renderCalls();
+}
+
+/* ---------- קוד כניסה ---------- */
 (function () {
   var h = '';
   [1,2,3,4,5,6,7,8,9].forEach(function (n) {
@@ -810,7 +1072,7 @@ function renderInsts() {
 function pin(n) {
   if (teamCode.length >= 4) return;
   teamCode += n; paintPins();
-  if (teamCode.length === 4) setTimeout(tryCode, 130);
+  if (teamCode.length === 4) setTimeout(tryCode, 140);
 }
 function pinDel()   { teamCode = teamCode.slice(0, -1); paintPins(); }
 function pinClear() { teamCode = ''; paintPins(); }
@@ -819,8 +1081,9 @@ function paintPins() {
   for (var i = 0; i < 4; i++) p[i].className = i < teamCode.length ? 'f' : '';
 }
 function tryCode() {
-  document.getElementById('gate-msg').textContent = 'החיבור לשרת עדיין לא הוגדר.';
-  teamCode = ''; setTimeout(paintPins, 400);
+  if (teamCode === ADMIN_PIN) { teamCode = ''; paintPins(); show('calls'); return; }
+  document.getElementById('gate-msg').textContent = 'קוד שגוי';
+  teamCode = ''; setTimeout(paintPins, 350);
 }
 
 /* ---------- תור אופליין ---------- */
@@ -840,8 +1103,7 @@ function flush() {
       rest.shift();
       localStorage.setItem('dfQueue', JSON.stringify(rest));
       paintQueue(); flush();
-    })
-    .catch(function () {});
+    }).catch(function () {});
 }
 function paintQueue() {
   var n = JSON.parse(localStorage.getItem('dfQueue') || '[]').length;
@@ -861,29 +1123,20 @@ function toggleDark() {
   localStorage.setItem('dfDark', document.body.classList.contains('dark') ? '1' : '0');
 }
 
-/* ---------- עדכון גרסה ----------
-   אותו מנגנון שכבר הוכח ב"יגדיל תורה": ה-SW החדש ממתין ולא נכנס לתוקף
-   מעצמו, מוצג פס עדכון, ורק לחיצה מפעילה אותו. כך תלמיד באמצע חידה
-   לא נקטע באמצע. הקבצים מוגשים מיד מהמטמון והבדיקה רצה ברקע.        */
+/* ---------- עדכון גרסה (המנגנון של "יגדיל תורה") ---------- */
 var newWorker = null, refreshing = false;
-
 function applyUpdate() {
   document.getElementById('upd').className = '';
   if (newWorker) newWorker.postMessage({ type:'SKIP_WAITING' });
   else location.reload();
 }
-function showUpdateBar(w) {
-  newWorker = w;
-  document.getElementById('upd').className = 'on';
-}
+function showUpdateBar(w) { newWorker = w; document.getElementById('upd').className = 'on'; }
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('sw.js').then(function (reg) {
-    reg.update();                                        // בדיקה בכל פתיחה
-    setInterval(function () { reg.update(); }, 60 * 60 * 1000);
-
+    reg.update();
+    setInterval(function () { reg.update(); }, 3600000);
     if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
-
     reg.addEventListener('updatefound', function () {
       var nw = reg.installing;
       if (!nw) return;
@@ -892,7 +1145,6 @@ function registerSW() {
       });
     });
   }).catch(function () {});
-
   navigator.serviceWorker.addEventListener('controllerchange', function () {
     if (refreshing) return;
     refreshing = true;
@@ -900,13 +1152,10 @@ function registerSW() {
   });
 }
 
-/* ---------- הפעלה ---------- */
 (function boot() {
-  renderHome();
-  paintQueue(); paintNet(); flush();
-  registerSW();
+  renderHome(); paintQueue(); paintNet(); flush(); registerSW();
   show('home');
-  setTimeout(function () { document.getElementById('splash').className = 'off'; }, 300);
+  setTimeout(function () { document.getElementById('splash').className = 'off'; }, 340);
 })();
 </script>
 </body>
