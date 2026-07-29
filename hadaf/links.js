@@ -1,8 +1,129 @@
 /* קישורי דפים — מיובא ממסד הנתונים של "יגדיל תורה".
    [0] = צורת הדף (PDF)   [1] = פירוש חברותא
-   המפתח הוא אות הדף בלי גרשיים, כדי שיתאים לכל וריאציות הכתיב.
-   מגילה מלאה (31 דפים). תענית — עדיין ריק, אין קישורים במסד.        */
+   המפתח הוא אות הדף בלי גרשיים, כדי שיתאים לכל וריאציות הכתיב.   */
 var DAF_LINKS = {
+  "taanit": {
+    "ב": [
+      "https://drive.google.com/file/d/1kbnaCiTq9ChNdr1bKwsF6y49n-XXXEEv/view?usp=drivesdk",
+      "https://drive.google.com/file/d/12JV4XoN5I9P5WUV4cs290cxy08AzBDyd/view?usp=drivesdk"
+    ],
+    "ג": [
+      "https://drive.google.com/file/d/14ZB5Gu6mLSbnXwPL7TYJeZadQ6XCffB4/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1BumonBVUFjQtoBgflCPhEu2vo9q6Kny6/view?usp=drivesdk"
+    ],
+    "ד": [
+      "https://drive.google.com/file/d/1TMpaBVBHJ9XSclwHiK0cRoNOtoIIXYnW/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1cDm5StXXz51fY6TI4ayIS4sr4kgsyDYY/view?usp=drivesdk"
+    ],
+    "ה": [
+      "https://drive.google.com/file/d/1VRD_nHYPPb9JXea0CmY9uPvf3dYM2rs_/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1oSF3XwfI3M3SzKZTc1Dy6YFtF7xION-C/view?usp=drivesdk"
+    ],
+    "ו": [
+      "https://drive.google.com/file/d/1gdW3-_uh1sz7zx5z4Qe_pzQ0uBeaodfL/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1zUsLsEu2Vh7TvtsncWj3SVeDhq0ZEi19/view?usp=drivesdk"
+    ],
+    "ז": [
+      "https://drive.google.com/file/d/1skjXnFU2p0GfsrBzthj8_B9p8qzsaE6m/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1ckplHsOUylWTnhFozCRvr5AnhsW_7Y3S/view?usp=drivesdk"
+    ],
+    "ח": [
+      "https://drive.google.com/file/d/1Z_8coYCxWKUZ11PUraX23vzxxLREjJ2D/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1xK_9dYsSqQwuH1W3roA8tEuGi1lWXMg3/view?usp=drivesdk"
+    ],
+    "ט": [
+      "https://drive.google.com/file/d/11ciDuuX1E6O1Hq6PX3lPhvu8D7LL1K5T/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1hOBzmU-VmCc7NeONBQK-EFr7Yhd80ca7/view?usp=drivesdk"
+    ],
+    "י": [
+      "https://drive.google.com/file/d/1dC3JKUVUCos6VIjpHU6BJGRXAsfNdQUQ/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1MtILOIjgSnT25t6_-oaVUSiNYXXmOh04/view?usp=drivesdk"
+    ],
+    "יא": [
+      "https://drive.google.com/file/d/1D3w0z2R3W2b9w5YAJRS8xU9CnLTHSBXX/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1yuBLm541fFnolPm-DMbEOcvKAwRyIWyY/view?usp=drivesdk"
+    ],
+    "יב": [
+      "https://drive.google.com/file/d/1KUSzqMayZ2BaLphtjcu0N0HUPEDuLJvG/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1_m27z0yNNNVH6OMbxSMq5gtDEkrA4tBU/view?usp=drivesdk"
+    ],
+    "יג": [
+      "https://drive.google.com/file/d/1ZQlQ1e5XKSbD2CiDuFXVx_Q1ah7aTIg7/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1KKf6DEq_7CiPoC0cPBjhnOIpcFfUmbpW/view?usp=drivesdk"
+    ],
+    "יד": [
+      "https://drive.google.com/file/d/1gz8GBXH3n0vly13ocmgL0dyMS3OIvPbc/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1RVrySQXtbNxHwTaMo5_f8cM6BTu-DvWZ/view?usp=drivesdk"
+    ],
+    "טו": [
+      "https://drive.google.com/file/d/10dmqoQ8Twn43CfH5aFeWAv-kMyN-IHvT/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1UN_-6JXwr56dZARGfAVSoNx6-AcdHD3U/view?usp=drivesdk"
+    ],
+    "טז": [
+      "https://drive.google.com/file/d/1HaKUwTTvNDQ_5ML1fLRva7LQOf7STGiR/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1FTPKlaK28nfzJrWt-HdoYJsp4h4UVVOL/view?usp=drivesdk"
+    ],
+    "יז": [
+      "https://drive.google.com/file/d/1lXNy317-_ehG_ZIp74Xnz0o96fE1PxdD/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1dPSOuOcBSTU5g3jGIlmvOdmc_yqif-YH/view?usp=drivesdk"
+    ],
+    "יח": [
+      "https://drive.google.com/file/d/1tEQYEhJv6SGiQddyWGCoZ4Dv2syH2a5d/view?usp=drivesdk",
+      "https://drive.google.com/file/d/100vQRoT_YHfoyC6oNfC_mUTZHy35s21f/view?usp=drivesdk"
+    ],
+    "יט": [
+      "https://drive.google.com/file/d/1gfu6m-7MkinAOPe6Iqlryd5CBuUwhC-V/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1NOsIRIGSNUqJvA4xpbjRcZKfra8XsYAI/view?usp=drivesdk"
+    ],
+    "כ": [
+      "https://drive.google.com/file/d/132yi9Yh00oIzr1rC6rSXG-XoPYyat5fI/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1kMzNXOjy7wuNCcc9-ohZ5u9kk3C-a9Ru/view?usp=drivesdk"
+    ],
+    "כא": [
+      "https://drive.google.com/file/d/17T4km4zHZjRJjhkjpKFMMlpdJubf8gl8/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1JgZG-H4uyFw0VQZBn5FTjSkExj5veihi/view?usp=drivesdk"
+    ],
+    "כב": [
+      "https://drive.google.com/file/d/10qUo0sAJzylaHfuDhzALuM2FFqrIMgxl/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1Ci1a_icmOj6ovJbIUKVxWOrZSQz6feMV/view?usp=drivesdk"
+    ],
+    "כג": [
+      "https://drive.google.com/file/d/13LcNESt9Efa5sodxITvKTKqnJmfi3x45/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1wMtGZN_TPLItGK0F7q-_3huSW-jJVJbY/view?usp=drivesdk"
+    ],
+    "כד": [
+      "https://drive.google.com/file/d/1sQRy-r-9wgrnB7nY8a8mmZjTQ5jrffEd/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1IahziitJ8HB-Vm7K9FyiH_Adjjhqi26t/view?usp=drivesdk"
+    ],
+    "כה": [
+      "https://drive.google.com/file/d/1fXW04Gm0r7HzKinDytv2xeY3_94wR_h6/view?usp=drivesdk",
+      "https://drive.google.com/file/d/10DhhsbD2j2u73HY01-EE8RRajKUtP3w3/view?usp=drivesdk"
+    ],
+    "כו": [
+      "https://drive.google.com/file/d/1EElE25RV6kJG09SC7dcfl0TQZ2_zbshy/view?usp=drivesdk",
+      "https://drive.google.com/file/d/14L6Wa3uU3aT99q_HaNtk6XDtNJEvjDPJ/view?usp=drivesdk"
+    ],
+    "כז": [
+      "https://drive.google.com/file/d/1Gz-MoZW5jkhUZqvztNnnMipL0PnFkl9R/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1Xk_NR-ExpECxjQBz2kTrp307I7V_YbiR/view?usp=drivesdk"
+    ],
+    "כח": [
+      "https://drive.google.com/file/d/1ZPbs-wEYGWrirm_7y2ufYvuYAXTlAtgW/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1ZBZHe4DG6ZUr7ewCxW5n-7jgbTuEAJzj/view?usp=drivesdk"
+    ],
+    "כט": [
+      "https://drive.google.com/file/d/1pKBK1wynQ8FtcHYlu8WvsNaezXHgM4FT/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1wdpRaGj4C9ZKaeqbseVI3zBCxo09bZzR/view?usp=drivesdk"
+    ],
+    "ל": [
+      "https://drive.google.com/file/d/1YJfMCpI6esilHZLMsRRrvAMlVgJiYQbF/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1VF5y6h7SFqj0mJazvq0Qb7mSE6gzynyi/view?usp=drivesdk"
+    ],
+    "לא": [
+      "",
+      "https://drive.google.com/file/d/1MRfAdCDEpCc9TI4DBy74CtPO2CtLK4cH/view?usp=drivesdk"
+    ]
+  },
   "megila": {
     "ב": [
       "https://drive.google.com/file/d/1KJM9IIlEc-rYtDsB5evGvEM3FzVJtABv/view?usp=drivesdk",
@@ -128,6 +249,5 @@ var DAF_LINKS = {
       "",
       "https://drive.google.com/file/d/1cN5K0sacdCX-JnZykeJMKGKvAkHQMVjl/view?usp=drivesdk"
     ]
-  },
-  "taanit": {}
+  }
 };

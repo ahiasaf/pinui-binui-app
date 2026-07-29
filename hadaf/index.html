@@ -186,7 +186,17 @@
   #deck .dtop{display:flex;justify-content:space-between;align-items:center;
               font-size:.8rem;opacity:.6;flex:none}
   #deck .dbody{flex:1;display:flex;flex-direction:column;justify-content:center;
-               gap:16px;text-align:center;padding:16px 0;overflow-y:auto}
+               align-items:center;gap:16px;text-align:center;padding:16px 0;
+               overflow-y:auto;min-height:0}
+  #deck #d-img{display:none;max-width:100%;max-height:100%;width:auto;height:auto;
+               object-fit:contain;border-radius:6px}
+  #deck #d-text{display:flex;flex-direction:column;justify-content:center;gap:16px;width:100%}
+
+  /* תצוגה מקדימה של שקפי מצגת בדף השבוע */
+  .thumbs{display:grid;gap:9px}
+  .thumb{width:100%;display:block;border:1px solid var(--rule);border-radius:var(--r-s);
+         cursor:pointer;background:var(--surface-2);aspect-ratio:16/9;object-fit:cover}
+  .thumb:active{transform:scale(.995)}
   #deck .dk{font-size:clamp(.75rem,1.8vw,1rem);font-weight:800;opacity:.55;letter-spacing:.04em}
   #deck .dh{font-size:clamp(1.45rem,5vw,3.4rem);font-weight:800;line-height:1.18;
             letter-spacing:-.02em}
@@ -399,9 +409,12 @@
             font-size:1.3rem;cursor:pointer;opacity:.7">✕</button>
   </div>
   <div class="dbody">
-    <div class="dk" id="d-k"></div>
-    <div class="dh" id="d-h"></div>
-    <div class="dt" id="d-t"></div>
+    <img id="d-img" alt="">
+    <div id="d-text">
+      <div class="dk" id="d-k"></div>
+      <div class="dh" id="d-h"></div>
+      <div class="dt" id="d-t"></div>
+    </div>
   </div>
   <div class="dots" id="d-dots"></div>
   <div class="dnav">
@@ -415,7 +428,7 @@
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '1.1.0';
+var APP_VERSION = '1.2.0';
 
 var API     = localStorage.getItem('dfApi') || '';
 var myInst  = localStorage.getItem('dfInst') || '';
@@ -574,14 +587,30 @@ function openWeek(id, i) {
           '<div class="k" style="font-weight:600;margin-top:3px">' + row[0] + '</div></div>' +
           '<span class="dafbig">' + row[2] + '</span></div></div>';
 
-  if (c) {
+  if (c && c.deck) {
+    // מצגת תמונות — זו המצגת המקורית, כפי שעוצבה
+    state.deck = [];
+    for (var n = 1; n <= c.deck.n; n++)
+      state.deck.push({ img: c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg' });
+
+    h += '<button class="btn p" style="margin-top:12px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
+         '<div class="sec-t" style="margin-top:6px">' + c.deck.n + ' שקפים</div>' +
+         '<div class="thumbs">';
+    state.deck.forEach(function (s, i) {
+      h += '<img class="thumb" loading="lazy" src="' + s.img +
+           '" alt="שקף ' + (i + 1) + '" onclick="deckOpen(' + i + ')">';
+    });
+    h += '</div>';
+
+  } else if (c) {
     var live = c.slides.filter(function (s) { return s.h || s.t; });
     state.deck = live;
     h += '<button class="btn p" style="margin-top:12px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
          '<div class="sec-t" style="margin-top:6px">' + live.length + ' שקפים</div>' +
          '<div class="slides">';
-    live.forEach(function (s) {
-      h += '<div class="slide">' + (s.k ? '<div class="k">' + s.k + '</div>' : '') +
+    live.forEach(function (s, i) {
+      h += '<div class="slide" onclick="deckOpen(' + i + ')">' +
+           (s.k ? '<div class="k">' + s.k + '</div>' : '') +
            (s.h ? '<h4>' + s.h + '</h4>' : '') +
            (s.t ? '<p>' + s.t + '</p>' : '') + '</div>';
     });
@@ -622,9 +651,9 @@ function openWeek(id, i) {
 function notYet() { alert('הקישור יתווסף בקרוב.'); return false; }
 
 /* ---------- הקרנה ---------- */
-function deckOpen() {
+function deckOpen(i) {
   if (!state.deck.length) return;
-  state.di = 0;
+  state.di = i || 0;
   document.getElementById('d-where').textContent =
     'מסכת ' + state.track.masechet + ' · דף ' + state.track.cal[state.week][2];
   document.getElementById('deck').className = 'on';
@@ -638,9 +667,23 @@ function deckGo(d) {
 }
 function deckPaint() {
   var s = state.deck[state.di];
-  document.getElementById('d-k').textContent = s.k || '';
-  document.getElementById('d-h').textContent = s.h || '';
-  document.getElementById('d-t').textContent = s.t || '';
+  var img = document.getElementById('d-img');
+  var txt = document.getElementById('d-text');
+
+  if (s.img) {
+    img.src = s.img;
+    img.style.display = 'block';
+    txt.style.display = 'none';
+    // טעינה מוקדמת של השקף הבא — כדי שהמעבר בכיתה יהיה מיידי
+    var nx = state.deck[state.di + 1];
+    if (nx && nx.img) { var pre = new Image(); pre.src = nx.img; }
+  } else {
+    img.style.display = 'none';
+    txt.style.display = 'flex';
+    document.getElementById('d-k').textContent = s.k || '';
+    document.getElementById('d-h').textContent = s.h || '';
+    document.getElementById('d-t').textContent = s.t || '';
+  }
   document.getElementById('d-prev').disabled = state.di === 0;
   document.getElementById('d-next').disabled = state.di === state.deck.length - 1;
   var d = '';
