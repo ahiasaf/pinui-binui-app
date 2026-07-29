@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>הדף השבועי של בני עקיבא</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#17468F">
+<meta property="og:title" content="הדף השבועי של בני עקיבא">
+<meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — כיתות ז׳ מסכת תענית, כיתות ח׳ מסכת מגילה.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --ba-blue:#17468F; --ba-blue-d:#0E2E63; --ba-blue-l:#2E6BC4;
+    --ba-cyan:#29ABE2; --ba-green:#7CB342; --ba-green-d:#4F8A1E;
+    --ba-gold:#C9A227;
+    --paper:#F2F5F9; --surface:#FFFFFF; --surface-2:#F7F9FC;
+    --ink:#13233D; --ink-2:#4A5A76; --ink-3:#8695AC;
+    --rule:#DCE3ED;
+    --accent:var(--ba-blue); --accent-soft:#E8EFF9;
+    --ok:#2E7A52; --warn:#9C7016; --stop:#A5382D;
+    --r:12px; --r-s:9px;
+    --shadow:0 1px 2px rgba(19,35,61,.06), 0 4px 16px rgba(19,35,61,.06);
+  }
+  body.dark{
+    --paper:#0C1220; --surface:#141C2C; --surface-2:#1A2436;
+    --ink:#E8EDF6; --ink-2:#9BABC4; --ink-3:#728299;
+    --rule:#25314A;
+    --accent:#7FA8E5; --accent-soft:#1B2740;
+    --ba-gold:#DDB84B;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;
+    font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif}
+  html,body{overflow-x:hidden}
+  body{background:var(--paper);color:var(--ink);display:flex;justify-content:center;
+       min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5}
+  .app{width:100%;max-width:560px;background:var(--surface);min-height:100vh;
+       display:flex;flex-direction:column;position:relative;box-shadow:var(--shadow)}
+
+  header{background:var(--ba-blue);color:#fff;padding:12px 16px;display:flex;
+         justify-content:space-between;align-items:center;gap:10px;
+         position:sticky;top:0;z-index:40}
+  body.dark header{background:var(--ba-blue-d)}
+  header .brand{display:flex;align-items:center;gap:9px;min-width:0;cursor:pointer}
+  header .mark{width:30px;height:30px;border-radius:50%;background:#fff;flex:none;
+               display:flex;align-items:center;justify-content:center;overflow:hidden}
+  header .mark svg{width:22px;height:22px}
+  header h1{font-size:.98rem;font-weight:800;letter-spacing:-.01em;white-space:nowrap;
+            overflow:hidden;text-overflow:ellipsis}
+  .hbtns{display:flex;gap:6px;flex:none}
+  .icon{background:rgba(255,255,255,.13);border:none;color:#fff;width:32px;height:32px;
+        border-radius:8px;font-size:.95rem;cursor:pointer;display:flex;align-items:center;
+        justify-content:center}
+  .icon:active{transform:scale(.94)}
+
+  .content{padding:16px;flex:1}
+  .view{display:none;flex-direction:column;gap:14px}
+  .view.on{display:flex;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  #splash{position:fixed;inset:0;background:var(--ba-blue);color:#fff;z-index:99;
+          display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;
+          transition:opacity .35s,visibility .35s;text-align:center;padding:20px}
+  #splash.off{opacity:0;visibility:hidden}
+  #splash b{font-size:1.15rem;font-weight:800}
+  #splash small{opacity:.65;font-size:.82rem}
+
+  .hero{background:linear-gradient(135deg,var(--ba-blue-d),var(--ba-blue) 55%,var(--ba-blue-l));
+        color:#fff;border-radius:var(--r);padding:22px 18px;position:relative;overflow:hidden}
+  .hero:after{content:"";position:absolute;left:-30px;bottom:-46px;width:150px;height:150px;
+              border-radius:50%;background:var(--ba-green);opacity:.20}
+  .hero:before{content:"";position:absolute;left:22px;bottom:-62px;width:150px;height:150px;
+               border-radius:50%;background:var(--ba-cyan);opacity:.16}
+  .hero h2{font-size:1.5rem;font-weight:800;line-height:1.15;letter-spacing:-.02em;position:relative}
+  .hero .sub{font-size:.92rem;opacity:.9;margin-top:7px;position:relative;max-width:32ch}
+  .hero .yr{display:inline-block;background:rgba(255,255,255,.16);border-radius:20px;
+            padding:3px 11px;font-size:.72rem;font-weight:700;margin-bottom:9px;position:relative}
+
+  .counts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .count{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r);
+         padding:14px 10px;text-align:center}
+  .count b{display:block;font-size:1.75rem;font-weight:800;font-variant-numeric:tabular-nums;
+           color:var(--ba-blue);line-height:1.1}
+  body.dark .count b{color:var(--accent)}
+  .count span{font-size:.74rem;color:var(--ink-3);font-weight:600}
+  .count.g b{color:var(--ba-green-d)}
+  body.dark .count.g b{color:var(--ba-green)}
+
+  .tracks{display:flex;flex-direction:column;gap:11px}
+  .track{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;
+         background:var(--surface);cursor:pointer;box-shadow:var(--shadow)}
+  .track:active{transform:scale(.995)}
+  .track .bar{height:5px}
+  .track.t-blue .bar{background:var(--ba-blue)}
+  .track.t-green .bar{background:var(--ba-green)}
+  .track .in{padding:14px}
+  .track .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .track .grade{font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:20px;flex:none}
+  .track.t-blue .grade{background:var(--accent-soft);color:var(--ba-blue)}
+  .track.t-green .grade{background:rgba(124,179,66,.16);color:var(--ba-green-d)}
+  body.dark .track.t-blue .grade{color:var(--accent)}
+  body.dark .track.t-green .grade{color:var(--ba-green)}
+  .track h3{font-size:1.2rem;font-weight:800;letter-spacing:-.01em}
+  .track .now{font-size:.86rem;color:var(--ink-2);margin-top:5px}
+  .track .now b{color:var(--ink);font-weight:800}
+  .track .prog{height:6px;background:var(--rule);border-radius:4px;margin-top:12px;overflow:hidden}
+  .track .prog i{display:block;height:100%;border-radius:4px}
+  .track.t-blue .prog i{background:var(--ba-blue)}
+  .track.t-green .prog i{background:var(--ba-green)}
+  .track .pmeta{display:flex;justify-content:space-between;font-size:.72rem;
+                color:var(--ink-3);margin-top:6px;font-variant-numeric:tabular-nums}
+
+  .bm{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+  .bm .head{padding:14px;color:#fff;text-align:center}
+  .bm.t-blue .head{background:var(--ba-blue)}
+  .bm.t-green .head{background:var(--ba-green-d)}
+  .bm .head b{display:block;font-size:1.15rem;font-weight:800}
+  .bm .head span{font-size:.78rem;opacity:.85}
+  .wk{display:grid;grid-template-columns:46px 1fr auto;gap:10px;align-items:center;
+      padding:9px 12px;border-bottom:1px solid var(--rule);cursor:pointer}
+  .wk:last-child{border-bottom:0}
+  .wk:active{background:var(--surface-2)}
+  .wk .daf{width:38px;height:38px;border-radius:50%;border:2px solid var(--rule);
+           display:flex;align-items:center;justify-content:center;font-weight:800;
+           font-size:.92rem;color:var(--ink-2);flex:none}
+  .bm.t-blue .wk.cur .daf{background:var(--ba-blue);border-color:var(--ba-blue);color:#fff}
+  .bm.t-green .wk.cur .daf{background:var(--ba-green-d);border-color:var(--ba-green-d);color:#fff}
+  .wk.done .daf{border-color:var(--ink-3);color:var(--ink-3)}
+  .wk .mid{min-width:0}
+  .wk .p{font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wk .d{font-size:.74rem;color:var(--ink-3)}
+  .wk .go{font-size:1rem;font-weight:700;color:var(--ink-3)}
+  .wk.off{opacity:.55;cursor:default}
+  .wk.off .daf{border-style:dashed;font-size:.62rem;font-weight:700}
+  .wk.siyum .daf{border-color:var(--ba-gold);color:var(--ba-gold);font-size:.6rem}
+  .chapline{background:var(--surface-2);padding:6px 12px;font-size:.72rem;font-weight:800;
+            color:var(--ink-3);border-bottom:1px solid var(--rule)}
+  .cur-badge{font-size:.62rem;font-weight:800;background:var(--ba-gold);color:#fff;
+             border-radius:10px;padding:2px 7px;margin-inline-start:6px;vertical-align:middle}
+
+  .card{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r);padding:14px}
+  .card h3{font-size:1rem;font-weight:800;margin-bottom:8px}
+  .card p{font-size:.9rem;color:var(--ink-2);line-height:1.6}
+  .sec-t{font-size:.74rem;font-weight:800;color:var(--ink-3);letter-spacing:.02em;margin-top:4px}
+  .btn{display:block;width:100%;text-align:center;border:1px solid transparent;
+       border-radius:var(--r-s);padding:14px;font-size:1rem;font-weight:800;cursor:pointer}
+  .btn:active{transform:scale(.985)}
+  .btn.p{background:var(--ba-blue);color:#fff}
+  .btn.gr{background:var(--ba-green-d);color:#fff}
+  .btn.g{background:transparent;border-color:var(--rule);color:var(--ink-2);
+         font-size:.9rem;padding:11px}
+  .btn:disabled{opacity:.45}
+  .back{background:none;border:none;color:var(--ink-3);font-size:.85rem;font-weight:700;
+        cursor:pointer;padding:2px 0;text-align:start}
+  .links{display:grid;gap:8px}
+  .lnk{display:flex;align-items:center;gap:10px;background:var(--surface-2);
+       border:1px solid var(--rule);border-radius:var(--r-s);padding:12px 13px;
+       text-decoration:none;color:var(--ink);font-weight:700;font-size:.92rem}
+  .lnk small{color:var(--ink-3);font-weight:600;font-size:.74rem;display:block}
+  .lnk .ic{width:30px;height:30px;border-radius:8px;background:var(--accent-soft);
+           color:var(--ba-blue);display:flex;align-items:center;justify-content:center;
+           flex:none;font-weight:800}
+  body.dark .lnk .ic{color:var(--accent)}
+
+  .wtop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .wtop .l{min-width:0}
+  .wtop .k{font-size:.74rem;font-weight:800;color:var(--ink-3)}
+  .wtop h2{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  .dafbig{width:56px;height:56px;border-radius:50%;color:#fff;display:flex;flex:none;
+          align-items:center;justify-content:center;font-size:1.25rem;font-weight:800}
+  .t-blue .dafbig{background:var(--ba-blue)}
+  .t-green .dafbig{background:var(--ba-green-d)}
+
+  .slides{display:grid;gap:9px}
+  .slide{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r);padding:14px}
+  .slide .k{font-size:.66rem;font-weight:800;color:var(--ink-3);letter-spacing:.03em;
+            margin-bottom:5px}
+  .slide h4{font-size:1.02rem;font-weight:800;line-height:1.3;margin-bottom:6px}
+  .slide p{font-size:.92rem;color:var(--ink-2);white-space:pre-wrap;line-height:1.65}
+
+  #deck{position:fixed;inset:0;background:var(--ba-blue-d);color:#fff;z-index:80;
+        display:none;flex-direction:column;padding:22px}
+  #deck.on{display:flex}
+  #deck .dtop{display:flex;justify-content:space-between;align-items:center;
+              font-size:.8rem;opacity:.6;flex:none}
+  #deck .dbody{flex:1;display:flex;flex-direction:column;justify-content:center;
+               gap:16px;text-align:center;padding:16px 0;overflow-y:auto}
+  #deck .dk{font-size:clamp(.75rem,1.8vw,1rem);font-weight:800;opacity:.55;letter-spacing:.04em}
+  #deck .dh{font-size:clamp(1.45rem,5vw,3.4rem);font-weight:800;line-height:1.18;
+            letter-spacing:-.02em}
+  #deck .dt{font-size:clamp(.98rem,2.7vw,1.85rem);opacity:.88;white-space:pre-wrap;
+            line-height:1.6;max-width:36ch;margin:0 auto}
+  #deck .dnav{display:flex;gap:10px;flex:none;align-items:center}
+  #deck .dnav button{flex:1;background:rgba(255,255,255,.12);border:none;color:#fff;
+                     padding:15px;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer}
+  #deck .dnav button:disabled{opacity:.3}
+  #deck .dots{display:flex;gap:5px;justify-content:center;flex:none;margin-bottom:12px;flex-wrap:wrap}
+  #deck .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28)}
+  #deck .dots i.on{background:#fff;width:18px;border-radius:3px}
+
+  .qwrap{display:grid;gap:10px}
+  .qq{font-size:1.08rem;font-weight:800;line-height:1.4}
+  .opt{background:var(--surface-2);border:1.5px solid var(--rule);border-radius:var(--r-s);
+       padding:14px;font-size:.95rem;font-weight:600;cursor:pointer;text-align:start;
+       display:flex;gap:10px;align-items:flex-start;color:inherit;width:100%}
+  .opt .n{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule);flex:none;
+          display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;
+          color:var(--ink-3)}
+  .opt.sel{border-color:var(--ba-blue);background:var(--accent-soft)}
+  .opt.sel .n{background:var(--ba-blue);border-color:var(--ba-blue);color:#fff}
+  .opt.right{border-color:var(--ok);background:rgba(46,122,82,.1)}
+  .opt.wrong{border-color:var(--stop);background:rgba(165,56,45,.09)}
+  select,input[type=text],input[type=tel]{width:100%;background:var(--surface-2);
+    border:1px solid var(--rule);border-radius:var(--r-s);padding:13px;font-size:.95rem;
+    color:inherit;outline:none}
+  select:focus,input:focus{border-color:var(--ba-blue)}
+  .label{font-size:.76rem;color:var(--ink-3);font-weight:700;margin-bottom:5px}
+  .fld{display:block;margin-bottom:9px}
+  .banner-ok{background:rgba(46,122,82,.12);border:1px solid var(--ok);color:var(--ok);
+             border-radius:var(--r-s);padding:13px;font-weight:800;font-size:.92rem;text-align:center}
+
+  .sf{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+  .sf .top{padding:13px 14px;color:#fff}
+  .sf.blue .top{background:var(--ba-blue)}
+  .sf.green .top{background:var(--ba-green-d)}
+  .sf .top b{font-size:1.1rem;font-weight:800;display:block}
+  .sf .top span{font-size:.76rem;opacity:.85}
+  .sf .body{padding:13px 14px;display:grid;gap:8px}
+  .sf .body p{font-size:.89rem;color:var(--ink-2);line-height:1.6}
+  .sf .rhythm{font-size:.74rem;font-weight:800;color:var(--ink-3)}
+  .sf .ph{background:var(--surface-2);border:1px dashed var(--rule);border-radius:var(--r-s);
+          padding:22px;text-align:center;color:var(--ink-3);font-size:.78rem;font-weight:700}
+  .price{display:flex;align-items:baseline;gap:8px;justify-content:center;padding:2px 0;flex-wrap:wrap}
+  .price b{font-size:1.7rem;font-weight:800;color:var(--ba-green-d)}
+  .price s{color:var(--ink-3);font-size:.95rem}
+  body.dark .price b{color:var(--ba-green)}
+
+  .inst{display:flex;align-items:center;gap:9px;padding:9px 2px;
+        border-bottom:1px solid var(--rule);font-size:.9rem}
+  .inst:last-child{border-bottom:0}
+  .inst .v{width:20px;height:20px;border-radius:50%;flex:none;display:flex;
+           align-items:center;justify-content:center;font-size:.66rem;font-weight:800}
+  .inst .v.y{background:var(--ba-green);color:#fff}
+  .inst .v.n{background:var(--rule);color:var(--ink-3)}
+  .inst .nm{flex:1;min-width:0}
+  .inst .tg{font-size:.62rem;font-weight:800;color:var(--ba-gold);flex:none}
+
+  .pins{display:flex;justify-content:center;gap:13px;margin:16px 0}
+  .pins i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ba-blue)}
+  .pins i.f{background:var(--ba-blue)}
+  body.dark .pins i{border-color:var(--accent)}
+  body.dark .pins i.f{background:var(--accent)}
+  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:290px;
+       margin:0 auto;direction:ltr}
+  .pad button{background:var(--surface-2);border:1px solid var(--rule);border-radius:var(--r-s);
+              padding:16px 0;font-size:1.25rem;font-weight:700;color:var(--ba-blue);cursor:pointer}
+  body.dark .pad button{color:var(--accent)}
+  .pad button:active{transform:scale(.95)}
+
+  .strip{text-align:center;font-size:.78rem;font-weight:700;padding:8px;display:none}
+  .strip.on{display:block}
+  #queued{background:var(--warn);color:#fff}
+  #offline{background:var(--ink-3);color:#fff}
+  #upd{position:fixed;bottom:0;left:0;right:0;background:var(--ba-green-d);color:#fff;
+       text-align:center;padding:13px;font-weight:800;font-size:.92rem;display:none;
+       cursor:pointer;z-index:70}
+  #upd.on{display:block}
+  footer{padding:18px 16px 26px;text-align:center;color:var(--ink-3);font-size:.74rem;
+         line-height:1.7;border-top:1px solid var(--rule);margin-top:8px}
+  footer b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<div id="splash"><b>הדף השבועי של בני עקיבא</b><small>טוען…</small></div>
+
+<div class="app">
+  <header>
+    <div class="brand" onclick="show('home')">
+      <span class="mark">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2.5 4 7v6.2c0 4.3 3.3 7.4 8 8.3 4.7-.9 8-4 8-8.3V7z" fill="#17468F"/>
+          <path d="M12 2.5 4 7v6.2c0 1 .2 2 .5 2.8L12 12z" fill="#29ABE2"/>
+          <path d="M12 12l7.5 4c.3-.8.5-1.8.5-2.8V7z" fill="#7CB342"/>
+        </svg>
+      </span>
+      <h1>הדף השבועי</h1>
+    </div>
+    <div class="hbtns">
+      <button class="icon" onclick="toggleDark()" title="מצב לילה">◐</button>
+      <button class="icon" onclick="show('gate')" title="כניסת צוות">☰</button>
+    </div>
+  </header>
+
+  <div class="strip" id="offline">אין חיבור — מוצג המידע השמור</div>
+  <div class="strip" id="queued"></div>
+
+  <div class="content">
+
+    <!-- ========== בית ========== -->
+    <div id="v-home" class="view">
+      <div class="hero">
+        <span class="yr">שנת תשפ"ז</span>
+        <h2>דף אחד בשבוע.<br>מסכת שלמה בשנה.</h2>
+        <div class="sub">כיתות ז׳ לומדות מסכת תענית, כיתות ח׳ מסכת מגילה —
+          יחד, בכל ישיבות בני עקיבא.</div>
+      </div>
+
+      <div class="counts">
+        <div class="count"><b id="c-inst">0</b><span>ישיבות בתוכנית</span></div>
+        <div class="count g"><b id="c-stud">350</b><span>תלמידים למדו בתשפ"ו</span></div>
+      </div>
+
+      <div class="sec-t">הלימוד השבוע</div>
+      <div class="tracks" id="track-cards"></div>
+
+      <div class="card">
+        <h3>איך לומדים?</h3>
+        <p>כל אחד באופן שליבו חפץ — בבית עם אבא או אח גדול, בחברותא עם אברכי הישיבה,
+           או בחבורת לימוד בליווי איש צוות. הקצב אחיד: דף לשבוע.</p>
+      </div>
+
+      <button class="btn g" onclick="show('sfarim')">רכישת גמרות במחיר מוזל →</button>
+      <button class="btn g" onclick="show('insts')">הישיבות שכבר בתוכנית →</button>
+    </div>
+
+    <!-- ========== מסלול ========== -->
+    <div id="v-track" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div class="bm" id="bm"></div>
+    </div>
+
+    <!-- ========== שבוע ========== -->
+    <div id="v-week" class="view">
+      <button class="back" onclick="backToTrack()">→ חזרה למסלול</button>
+      <div id="week-body"></div>
+    </div>
+
+    <!-- ========== חידה ========== -->
+    <div id="v-quiz" class="view">
+      <button class="back" onclick="backToWeek()">→ חזרה לדף</button>
+      <div id="quiz-body"></div>
+    </div>
+
+    <!-- ========== ספרים ========== -->
+    <div id="v-sfarim" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div class="hero" style="padding:18px">
+        <h2 style="font-size:1.25rem">רכישה מרוכזת</h2>
+        <div class="sub">שתי מהדורות, שתי דרכי לימוד. כל ישיבה בוחרת את המתאים לה.</div>
+      </div>
+      <div class="price"><b>15 ₪</b><s>25 ₪</s>
+        <span style="font-size:.8rem;color:var(--ink-3)">לחוברת, בהזמנה מרוכזת</span></div>
+      <div id="sfarim-list" style="display:grid;gap:12px"></div>
+      <div class="card">
+        <h3>הציבו לעצמכם יעד</h3>
+        <p>כמה תלמידים תצליחו להכניס לתוכנית השנה? העריכו מספר — והזמינו לפיו במחיר המוזל.</p>
+      </div>
+      <button class="btn p" onclick="show('gate')">להזמנה — כניסת רכז</button>
+    </div>
+
+    <!-- ========== מוסדות ========== -->
+    <div id="v-insts" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div class="sec-t">ישיבות בתוכנית — תשפ"ז</div>
+      <div class="card" style="padding:6px 14px" id="inst-list"></div>
+      <p style="font-size:.78rem;color:var(--ink-3);text-align:center">
+        סימון זהב — ישיבות שלמדו כבר בתשפ"ו.</p>
+    </div>
+
+    <!-- ========== שער ========== -->
+    <div id="v-gate" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div style="text-align:center;font-weight:800;font-size:1.05rem">כניסת צוות</div>
+      <p style="text-align:center;font-size:.85rem;color:var(--ink-3)">
+        הזינו את הקוד שקיבלתם.<br>הלימוד השבועי פתוח לכולם גם בלי קוד.</p>
+      <div class="pins" id="pins"><i></i><i></i><i></i><i></i></div>
+      <div class="pad" id="pad"></div>
+      <div id="gate-msg" style="text-align:center;font-size:.85rem;color:var(--stop);
+           font-weight:700;min-height:22px"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <b>הדף השבועי של בני עקיבא</b><br>
+    <span id="f-people"></span><br>
+    <span style="opacity:.7">גרסה <span id="f-ver"></span></span>
+  </footer>
+</div>
+
+<!-- ========== הקרנה ========== -->
+<div id="deck">
+  <div class="dtop">
+    <span id="d-where"></span>
+    <button onclick="deckClose()" style="background:none;border:none;color:#fff;
+            font-size:1.3rem;cursor:pointer;opacity:.7">✕</button>
+  </div>
+  <div class="dbody">
+    <div class="dk" id="d-k"></div>
+    <div class="dh" id="d-h"></div>
+    <div class="dt" id="d-t"></div>
+  </div>
+  <div class="dots" id="d-dots"></div>
+  <div class="dnav">
+    <button id="d-prev" onclick="deckGo(-1)">→ הקודם</button>
+    <button id="d-next" onclick="deckGo(1)">הבא ←</button>
+  </div>
+</div>
+
+<div id="upd" onclick="applyUpdate()">גרסה חדשה זמינה — לחצו לעדכון</div>
+
+<script src="data.js"></script>
+<script>
+var APP_VERSION = '1.0.0';
+
+var API     = localStorage.getItem('dfApi') || '';
+var myInst  = localStorage.getItem('dfInst') || '';
+var myName  = localStorage.getItem('dfName') || '';
+var teamCode = '';
+var state = { track:null, week:null, deck:[], di:0, ans:-1 };
+
+document.getElementById('f-ver').textContent = APP_VERSION;
+document.getElementById('f-people').textContent =
+  PROGRAM.contact.head + ' · ' + PROGRAM.contact.coord;
+if (localStorage.getItem('dfDark') === '1') document.body.classList.add('dark');
+
+/* מוסד מתוך הקישור: ?m=raanana */
+(function () {
+  var m = new URLSearchParams(location.search).get('m');
+  if (m && INSTITUTIONS.some(function (i) { return i.code === m; })) {
+    myInst = m; localStorage.setItem('dfInst', m);
+  }
+})();
+
+/* ---------- לוח זמנים ---------- */
+function weekIndex() {
+  var start = new Date(PROGRAM.startDate + 'T00:00:00');
+  var now = new Date(); now.setHours(0, 0, 0, 0);
+  var days = Math.floor((now - start) / 86400000);
+  if (days < 0) return -1;
+  return Math.min(Math.floor(days / 7), CAL_TAANIT.length - 1);
+}
+function trackById(id) {
+  for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].id === id) return TRACKS[i];
+  return null;
+}
+function dafDone(tr) {
+  var wi = weekIndex(), n = 0;
+  if (wi < 0) return 0;
+  for (var i = 0; i <= wi && i < tr.cal.length; i++)
+    if (tr.cal[i][2] && tr.cal[i][2] !== 'סיום') n++;
+  return n;
+}
+
+var HEBV = { 'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,'י':10,'כ':20,'ל':30 };
+function dafToNum(d) {
+  var s = String(d).replace(/["'׳״\s]/g, '');
+  var n = 0;
+  for (var i = 0; i < s.length; i++) n += (HEBV[s[i]] || 0);
+  return n;
+}
+
+/* ---------- ניווט ---------- */
+function show(v) {
+  var all = document.querySelectorAll('.view');
+  for (var i = 0; i < all.length; i++) all[i].className = 'view';
+  var el = document.getElementById('v-' + v);
+  if (el) el.className = 'view on';
+  window.scrollTo(0, 0);
+  if (v === 'home')   renderHome();
+  if (v === 'insts')  renderInsts();
+  if (v === 'sfarim') renderSfarim();
+  if (v === 'gate')   { teamCode = ''; paintPins();
+                        document.getElementById('gate-msg').textContent = ''; }
+}
+function backToTrack() { openTrack(state.track.id); }
+function backToWeek()  { openWeek(state.track.id, state.week); }
+
+/* ---------- בית ---------- */
+function renderHome() {
+  var joined = INSTITUTIONS.filter(function (i) { return i.joined; }).length;
+  document.getElementById('c-inst').textContent = joined;
+  document.getElementById('c-stud').textContent = PROGRAM.lastYear.students;
+
+  var h = '', wi = weekIndex();
+  TRACKS.forEach(function (tr) {
+    var row = wi < 0 ? tr.cal[0] : tr.cal[wi];
+    var tone = tr.id === 'taanit' ? 't-blue' : 't-green';
+    var done = dafDone(tr), pct = Math.round(done / tr.dapim * 100);
+    var line;
+    if (wi < 0)                 line = 'פותחים בפרשת בראשית — <b>דף ב׳</b>';
+    else if (!row[2])           line = '<b>שבוע חופשה</b> · ' + row[1];
+    else if (row[2] === 'סיום') line = '<b>חגיגת סיום המסכת</b>';
+    else                        line = 'השבוע: <b>דף ' + row[2] + '</b> · ' + row[1];
+
+    h += '<div class="track ' + tone + '" onclick="openTrack(\'' + tr.id + '\')">' +
+         '<div class="bar"></div><div class="in">' +
+         '<div class="row"><div><h3>מסכת ' + tr.masechet + '</h3>' +
+         '<div class="now">' + line + '</div></div>' +
+         '<span class="grade">' + tr.gradeFull + '</span></div>' +
+         '<div class="prog"><i style="width:' + pct + '%"></i></div>' +
+         '<div class="pmeta"><span>' + done + ' מתוך ' + tr.dapim + ' דפים</span>' +
+         '<span>' + pct + '%</span></div></div></div>';
+  });
+  document.getElementById('track-cards').innerHTML = h;
+}
+
+/* ---------- סימנייה ---------- */
+function openTrack(id) {
+  var tr = trackById(id); state.track = tr;
+  var tone = id === 'taanit' ? 't-blue' : 't-green';
+  var wi = weekIndex();
+  var chaps = CHAPTERS[id];
+  var shown = {};
+
+  var h = '<div class="head"><b>מסכת ' + tr.masechet + '</b><span>' +
+          tr.gradeFull + ' · ' + tr.dapim + ' דפים · תשפ"ז</span></div>';
+
+  tr.cal.forEach(function (row, i) {
+    var daf = row[2];
+    if (daf && daf !== 'סיום') {
+      var num = dafToNum(daf);
+      chaps.forEach(function (c, ci) {
+        if (!shown[ci] && num >= c.from) {
+          shown[ci] = 1;
+          h += '<div class="chapline">' + c.n + '</div>';
+        }
+      });
+    }
+    var cls = 'wk';
+    if (!daf) cls += ' off';
+    else if (daf === 'סיום') cls += ' siyum';
+    if (i === wi) cls += ' cur';
+    if (wi >= 0 && i < wi) cls += ' done';
+
+    var circle = daf ? (daf === 'סיום' ? 'סיום' : daf) : 'חופשה';
+    var open   = (daf && daf !== 'סיום');
+    var click  = open ? ' onclick="openWeek(\'' + id + '\',' + i + ')"' : '';
+
+    h += '<div class="' + cls + '"' + click + '>' +
+         '<span class="daf">' + circle + '</span>' +
+         '<div class="mid"><div class="p">' + row[1] +
+           (i === wi ? '<span class="cur-badge">השבוע</span>' : '') + '</div>' +
+         '<div class="d">' + row[0] + '</div></div>' +
+         // חץ שמאלה — לא עובר היפוך דו-כיווני, ולכן נשאר נכון ב-RTL
+         (open ? '<span class="go">←</span>' : '<span></span>') + '</div>';
+  });
+
+  var bm = document.getElementById('bm');
+  bm.className = 'bm ' + tone;
+  bm.innerHTML = h;
+  show('track');
+  if (wi > 2) {
+    var cur = bm.querySelector('.wk.cur');
+    if (cur) setTimeout(function () { cur.scrollIntoView({ block:'center' }); }, 60);
+  }
+}
+
+/* ---------- שבוע ---------- */
+function openWeek(id, i) {
+  var tr = trackById(id); state.track = tr; state.week = i;
+  var row = tr.cal[i], key = id + '-' + (i + 1);
+  var c = CONTENT[key], q = QUIZ[key];
+  var tone = id === 'taanit' ? 't-blue' : 't-green';
+  var sef = 'https://www.sefaria.org.il/' + tr.sefaria + '.' + dafToNum(row[2]) + 'a?lang=he';
+
+  var h = '<div class="' + tone + '"><div class="wtop">' +
+          '<div class="l"><div class="k">מסכת ' + tr.masechet + ' · ' + row[1] + '</div>' +
+          '<h2>' + (c ? c.title : 'דף ' + row[2]) + '</h2>' +
+          '<div class="k" style="font-weight:600;margin-top:3px">' + row[0] + '</div></div>' +
+          '<span class="dafbig">' + row[2] + '</span></div></div>';
+
+  if (c) {
+    var live = c.slides.filter(function (s) { return s.h || s.t; });
+    state.deck = live;
+    h += '<button class="btn p" style="margin-top:12px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
+         '<div class="sec-t" style="margin-top:6px">' + live.length + ' שקפים</div>' +
+         '<div class="slides">';
+    live.forEach(function (s) {
+      h += '<div class="slide">' + (s.k ? '<div class="k">' + s.k + '</div>' : '') +
+           (s.h ? '<h4>' + s.h + '</h4>' : '') +
+           (s.t ? '<p>' + s.t + '</p>' : '') + '</div>';
+    });
+    h += '</div>';
+  } else {
+    state.deck = [];
+    h += '<div class="card" style="margin-top:12px;text-align:center">' +
+         '<h3>חומרי הלימוד לדף זה בהכנה</h3>' +
+         '<p>המצגת והחידה יעלו לקראת השבוע הזה.</p></div>';
+  }
+
+  h += '<div class="sec-t" style="margin-top:14px">הדף עצמו</div><div class="links">' +
+       '<a class="lnk" href="' + sef + '" target="_blank" rel="noopener">' +
+       '<span class="ic">ג</span><span>מסכת ' + tr.masechet + ' דף ' + row[2] +
+       '<small>לצפייה בדף הגמרא</small></span></a>' +
+       '<a class="lnk" href="#" onclick="return notYet()">' +
+       '<span class="ic">פ</span><span>ביאור חברותא<small>קישור יתווסף</small></span></a>' +
+       '<a class="lnk" href="#" onclick="return notYet()">' +
+       '<span class="ic">⤓</span><span>הדף להדפסה (PDF)<small>קישור יתווסף</small></span></a>' +
+       '</div>';
+
+  if (q) {
+    h += '<div class="sec-t" style="margin-top:14px">החידה השבועית</div>' +
+         '<button class="btn gr" onclick="openQuiz()">לחידה — ולהגרלה →</button>';
+  }
+
+  document.getElementById('week-body').innerHTML = h;
+  show('week');
+}
+function notYet() { alert('הקישור יתווסף בקרוב.'); return false; }
+
+/* ---------- הקרנה ---------- */
+function deckOpen() {
+  if (!state.deck.length) return;
+  state.di = 0;
+  document.getElementById('d-where').textContent =
+    'מסכת ' + state.track.masechet + ' · דף ' + state.track.cal[state.week][2];
+  document.getElementById('deck').className = 'on';
+  deckPaint();
+}
+function deckClose() { document.getElementById('deck').className = ''; }
+function deckGo(d) {
+  var n = state.di + d;
+  if (n < 0 || n >= state.deck.length) return;
+  state.di = n; deckPaint();
+}
+function deckPaint() {
+  var s = state.deck[state.di];
+  document.getElementById('d-k').textContent = s.k || '';
+  document.getElementById('d-h').textContent = s.h || '';
+  document.getElementById('d-t').textContent = s.t || '';
+  document.getElementById('d-prev').disabled = state.di === 0;
+  document.getElementById('d-next').disabled = state.di === state.deck.length - 1;
+  var d = '';
+  for (var i = 0; i < state.deck.length; i++)
+    d += '<i class="' + (i === state.di ? 'on' : '') + '"></i>';
+  document.getElementById('d-dots').innerHTML = d;
+}
+document.addEventListener('keydown', function (e) {
+  if (document.getElementById('deck').className !== 'on') return;
+  if (e.key === 'ArrowLeft')  deckGo(1);
+  if (e.key === 'ArrowRight') deckGo(-1);
+  if (e.key === ' ')          { deckGo(1); e.preventDefault(); }
+  if (e.key === 'Escape')     deckClose();
+});
+
+/* ---------- חידה ---------- */
+function openQuiz() {
+  var key = state.track.id + '-' + (state.week + 1);
+  var q = QUIZ[key];
+  if (!q) return;
+
+  var opts = '<option value="">— בחרו ישיבה —</option>';
+  INSTITUTIONS.forEach(function (i) {
+    opts += '<option value="' + i.code + '"' +
+            (i.code === myInst ? ' selected' : '') + '>' + i.name + '</option>';
+  });
+
+  var h = '<div class="sec-t">החידה השבועית · מסכת ' + state.track.masechet +
+          ' דף ' + state.track.cal[state.week][2] + '</div>' +
+          '<div class="qwrap"><div class="qq">' + q.q + '</div>';
+  q.a.forEach(function (t, i) {
+    h += '<button class="opt" id="opt' + i + '" onclick="pickAns(' + i + ')">' +
+         '<span class="n">' + (i + 1) + '</span><span>' + t + '</span></button>';
+  });
+  h += '</div><div style="margin-top:14px">' +
+       '<div class="fld"><div class="label">הישיבה שלי</div>' +
+       '<select id="q-inst">' + opts + '</select></div>' +
+       '<div class="fld"><div class="label">השם שלי</div>' +
+       '<input type="text" id="q-name" placeholder="שם מלא" value="' + myName + '"></div>' +
+       '<div class="fld"><div class="label">טלפון — לשליחת הפרס</div>' +
+       '<input type="tel" id="q-phone" placeholder="05X-XXXXXXX"></div></div>' +
+       '<button class="btn p" id="q-send" onclick="sendQuiz()" disabled>שליחה</button>' +
+       '<p style="font-size:.75rem;color:var(--ink-3);text-align:center;margin-top:8px">' +
+       'הפרטים נשמרים במערכת התוכנית בלבד.</p><div id="q-result"></div>';
+
+  document.getElementById('quiz-body').innerHTML = h;
+  state.ans = -1;
+  show('quiz');
+}
+function pickAns(i) {
+  state.ans = i;
+  var q = QUIZ[state.track.id + '-' + (state.week + 1)];
+  for (var k = 0; k < q.a.length; k++) {
+    var el = document.getElementById('opt' + k);
+    if (el) el.className = 'opt' + (k === i ? ' sel' : '');
+  }
+  document.getElementById('q-send').disabled = false;
+}
+function sendQuiz() {
+  var key = state.track.id + '-' + (state.week + 1), q = QUIZ[key];
+  var inst  = document.getElementById('q-inst').value;
+  var name  = document.getElementById('q-name').value.trim();
+  var phone = document.getElementById('q-phone').value.trim();
+  if (!inst || !name) { alert('נא לבחור ישיבה ולמלא שם.'); return; }
+
+  myInst = inst; myName = name;
+  localStorage.setItem('dfInst', inst);
+  localStorage.setItem('dfName', name);
+
+  var right = state.ans === q.correct;
+  for (var k = 0; k < q.a.length; k++) {
+    var el = document.getElementById('opt' + k);
+    if (!el) continue;
+    el.className = 'opt' + (k === q.correct ? ' right'
+                          : (k === state.ans && !right ? ' wrong' : ''));
+    el.onclick = null;
+  }
+  document.getElementById('q-send').disabled = true;
+
+  queue({ action:'quiz', week:key, inst:inst, name:name, phone:phone,
+          answer:state.ans, correct:right, at:new Date().toISOString() });
+
+  document.getElementById('q-result').innerHTML =
+    '<div class="banner-ok" style="margin-top:12px">' +
+    (right ? 'תשובה נכונה! נכנסת להגרלה השבועית.'
+           : 'התשובה הנכונה מסומנת. נכנסת להגרלה השבועית.') + '</div>';
+}
+
+/* ---------- ספרים ---------- */
+function renderSfarim() {
+  var h = '';
+  SFARIM.forEach(function (s) {
+    h += '<div class="sf ' + s.tone + '">' +
+         '<div class="top"><b>' + s.name + '</b><span>' + s.tag + '</span></div>' +
+         '<div class="body"><div class="ph">תמונת הספר — תתווסף</div>' +
+         '<div class="rhythm">קצב הלימוד · ' + s.rhythm + '</div>' +
+         '<p>' + s.desc + '</p><p><b>למי מתאים:</b> ' + s.who + '</p>' +
+         '</div></div>';
+  });
+  document.getElementById('sfarim-list').innerHTML = h;
+}
+
+/* ---------- מוסדות ---------- */
+function renderInsts() {
+  var h = '';
+  INSTITUTIONS.forEach(function (i) {
+    h += '<div class="inst"><span class="v ' + (i.joined ? 'y' : 'n') + '">' +
+         (i.joined ? '✓' : '') + '</span><span class="nm">' + i.name + '</span>' +
+         (i.last ? '<span class="tg">תשפ"ו</span>' : '') + '</div>';
+  });
+  document.getElementById('inst-list').innerHTML = h;
+}
+
+/* ---------- קוד ---------- */
+(function () {
+  var h = '';
+  [1,2,3,4,5,6,7,8,9].forEach(function (n) {
+    h += '<button onclick="pin(' + n + ')">' + n + '</button>';
+  });
+  h += '<button onclick="pinClear()">C</button><button onclick="pin(0)">0</button>' +
+       '<button onclick="pinDel()">⌫</button>';
+  document.getElementById('pad').innerHTML = h;
+})();
+function pin(n) {
+  if (teamCode.length >= 4) return;
+  teamCode += n; paintPins();
+  if (teamCode.length === 4) setTimeout(tryCode, 130);
+}
+function pinDel()   { teamCode = teamCode.slice(0, -1); paintPins(); }
+function pinClear() { teamCode = ''; paintPins(); }
+function paintPins() {
+  var p = document.getElementById('pins').children;
+  for (var i = 0; i < 4; i++) p[i].className = i < teamCode.length ? 'f' : '';
+}
+function tryCode() {
+  document.getElementById('gate-msg').textContent = 'החיבור לשרת עדיין לא הוגדר.';
+  teamCode = ''; setTimeout(paintPins, 400);
+}
+
+/* ---------- תור אופליין ---------- */
+function queue(payload) {
+  var q = JSON.parse(localStorage.getItem('dfQueue') || '[]');
+  q.push(payload);
+  localStorage.setItem('dfQueue', JSON.stringify(q));
+  paintQueue(); flush();
+}
+function flush() {
+  var q = JSON.parse(localStorage.getItem('dfQueue') || '[]');
+  if (!q.length || !API || !navigator.onLine) return;
+  fetch(API, { method:'POST', body:JSON.stringify(q[0]) })
+    .then(function (r) { return r.json(); })
+    .then(function () {
+      var rest = JSON.parse(localStorage.getItem('dfQueue') || '[]');
+      rest.shift();
+      localStorage.setItem('dfQueue', JSON.stringify(rest));
+      paintQueue(); flush();
+    })
+    .catch(function () {});
+}
+function paintQueue() {
+  var n = JSON.parse(localStorage.getItem('dfQueue') || '[]').length;
+  var el = document.getElementById('queued');
+  el.className = n ? 'strip on' : 'strip';
+  el.textContent = !n ? '' :
+    (n === 1 ? 'תשובה אחת ממתינה לשליחה' : n + ' תשובות ממתינות לשליחה');
+}
+function paintNet() {
+  document.getElementById('offline').className = navigator.onLine ? 'strip' : 'strip on';
+}
+window.addEventListener('online',  function () { paintNet(); flush(); });
+window.addEventListener('offline', paintNet);
+
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('dfDark', document.body.classList.contains('dark') ? '1' : '0');
+}
+
+/* ---------- עדכון גרסה ----------
+   PWA במטמון לא בודק לבד אם יצאה גרסה חדשה. לכן version.json נטען
+   תמיד מהרשת (no-store); אם המספר שונה — מנקים מטמון, מסירים את ה-SW
+   הישן וטוענים מחדש. האפליקציה נפתחת מיד, ובכל זאת יודעת להתעדכן.   */
+function checkUpdate() {
+  if (!navigator.onLine) return;
+  fetch('version.json?t=' + Date.now(), { cache:'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (v) {
+      if (v && v.version && v.version !== APP_VERSION)
+        document.getElementById('upd').className = 'on';
+    })
+    .catch(function () {});
+}
+function applyUpdate() {
+  document.getElementById('upd').textContent = 'מעדכן…';
+  var done = function () { location.reload(); };
+  var killSW = function () {
+    if (!navigator.serviceWorker) return done();
+    navigator.serviceWorker.getRegistrations().then(function (rs) {
+      Promise.all(rs.map(function (r) { return r.unregister(); })).then(done, done);
+    }, done);
+  };
+  if (window.caches && caches.keys) {
+    caches.keys().then(function (ks) {
+      return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+    }).then(killSW, killSW);
+  } else killSW();
+}
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('sw.js').then(function (reg) {
+    reg.update();
+    setInterval(function () { reg.update(); }, 60 * 60 * 1000);
+    reg.addEventListener('updatefound', function () {
+      var nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', function () {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller)
+          document.getElementById('upd').className = 'on';
+      });
+    });
+  }).catch(function () {});
+}
+
+/* ---------- הפעלה ---------- */
+(function boot() {
+  renderHome();
+  paintQueue(); paintNet(); flush();
+  registerSW(); checkUpdate();
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) checkUpdate();
+  });
+  show('home');
+  setTimeout(function () { document.getElementById('splash').className = 'off'; }, 300);
+})();
+</script>
+</body>
+</html>
