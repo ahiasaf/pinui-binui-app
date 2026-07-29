@@ -413,8 +413,9 @@
 <div id="upd" onclick="applyUpdate()">גרסה חדשה זמינה — לחצו לעדכון</div>
 
 <script src="data.js"></script>
+<script src="links.js"></script>
 <script>
-var APP_VERSION = '1.0.0';
+var APP_VERSION = '1.1.0';
 
 var API     = localStorage.getItem('dfApi') || '';
 var myInst  = localStorage.getItem('dfInst') || '';
@@ -592,14 +593,22 @@ function openWeek(id, i) {
          '<p>המצגת והחידה יעלו לקראת השבוע הזה.</p></div>';
   }
 
+  // קישורי צורת הדף והחברותא מגיעים ממסד "יגדיל תורה"; מפתח בלי גרשיים
+  var lk = (DAF_LINKS[id] || {})[String(row[2]).replace(/["'׳״\s]/g, '')] || [];
+  var link = function (href, ic, title, sub) {
+    return href
+      ? '<a class="lnk" href="' + href + '" target="_blank" rel="noopener">' +
+        '<span class="ic">' + ic + '</span><span>' + title +
+        '<small>' + sub + '</small></span></a>'
+      : '<a class="lnk" href="#" onclick="return notYet()" style="opacity:.55">' +
+        '<span class="ic">' + ic + '</span><span>' + title +
+        '<small>קישור יתווסף</small></span></a>';
+  };
+
   h += '<div class="sec-t" style="margin-top:14px">הדף עצמו</div><div class="links">' +
-       '<a class="lnk" href="' + sef + '" target="_blank" rel="noopener">' +
-       '<span class="ic">ג</span><span>מסכת ' + tr.masechet + ' דף ' + row[2] +
-       '<small>לצפייה בדף הגמרא</small></span></a>' +
-       '<a class="lnk" href="#" onclick="return notYet()">' +
-       '<span class="ic">פ</span><span>ביאור חברותא<small>קישור יתווסף</small></span></a>' +
-       '<a class="lnk" href="#" onclick="return notYet()">' +
-       '<span class="ic">⤓</span><span>הדף להדפסה (PDF)<small>קישור יתווסף</small></span></a>' +
+       link(lk[0], '⤓', 'צורת הדף', 'הדף להדפסה') +
+       link(lk[1], 'פ', 'פירוש חברותא', 'ביאור על הדף') +
+       link(sef, 'ג', 'מסכת ' + tr.masechet + ' דף ' + row[2], 'לצפייה בספריא') +
        '</div>';
 
   if (q) {
@@ -810,58 +819,49 @@ function toggleDark() {
 }
 
 /* ---------- עדכון גרסה ----------
-   PWA במטמון לא בודק לבד אם יצאה גרסה חדשה. לכן version.json נטען
-   תמיד מהרשת (no-store); אם המספר שונה — מנקים מטמון, מסירים את ה-SW
-   הישן וטוענים מחדש. האפליקציה נפתחת מיד, ובכל זאת יודעת להתעדכן.   */
-function checkUpdate() {
-  if (!navigator.onLine) return;
-  fetch('version.json?t=' + Date.now(), { cache:'no-store' })
-    .then(function (r) { return r.json(); })
-    .then(function (v) {
-      if (v && v.version && v.version !== APP_VERSION)
-        document.getElementById('upd').className = 'on';
-    })
-    .catch(function () {});
-}
+   אותו מנגנון שכבר הוכח ב"יגדיל תורה": ה-SW החדש ממתין ולא נכנס לתוקף
+   מעצמו, מוצג פס עדכון, ורק לחיצה מפעילה אותו. כך תלמיד באמצע חידה
+   לא נקטע באמצע. הקבצים מוגשים מיד מהמטמון והבדיקה רצה ברקע.        */
+var newWorker = null, refreshing = false;
+
 function applyUpdate() {
-  document.getElementById('upd').textContent = 'מעדכן…';
-  var done = function () { location.reload(); };
-  var killSW = function () {
-    if (!navigator.serviceWorker) return done();
-    navigator.serviceWorker.getRegistrations().then(function (rs) {
-      Promise.all(rs.map(function (r) { return r.unregister(); })).then(done, done);
-    }, done);
-  };
-  if (window.caches && caches.keys) {
-    caches.keys().then(function (ks) {
-      return Promise.all(ks.map(function (k) { return caches.delete(k); }));
-    }).then(killSW, killSW);
-  } else killSW();
+  document.getElementById('upd').className = '';
+  if (newWorker) newWorker.postMessage({ type:'SKIP_WAITING' });
+  else location.reload();
+}
+function showUpdateBar(w) {
+  newWorker = w;
+  document.getElementById('upd').className = 'on';
 }
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('sw.js').then(function (reg) {
-    reg.update();
+    reg.update();                                        // בדיקה בכל פתיחה
     setInterval(function () { reg.update(); }, 60 * 60 * 1000);
+
+    if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
+
     reg.addEventListener('updatefound', function () {
       var nw = reg.installing;
       if (!nw) return;
       nw.addEventListener('statechange', function () {
-        if (nw.state === 'installed' && navigator.serviceWorker.controller)
-          document.getElementById('upd').className = 'on';
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdateBar(nw);
       });
     });
   }).catch(function () {});
+
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (refreshing) return;
+    refreshing = true;
+    location.reload();
+  });
 }
 
 /* ---------- הפעלה ---------- */
 (function boot() {
   renderHome();
   paintQueue(); paintNet(); flush();
-  registerSW(); checkUpdate();
-  document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) checkUpdate();
-  });
+  registerSW();
   show('home');
   setTimeout(function () { document.getElementById('splash').className = 'off'; }, 300);
 })();

@@ -1,68 +1,48 @@
 /* הדף השבועי של בני עקיבא — Service Worker
-   כלל: מעלים את VERSION בכל שינוי בקבצים. המספר חייב להיות זהה
-   ל-APP_VERSION שב-index.html ול-version שב-version.json.        */
-var VERSION = '1.0.0';
-var CACHE   = 'hadaf-' + VERSION;
-var ASSETS  = ['./', 'index.html', 'data.js', 'manifest.json'];
+   מבוסס על המנגנון שהוכח ב"יגדיל תורה".
+   בכל העלאת שינוי — להעלות את המספר כאן (v1 ← v2), אחרת מכשירים
+   ימשיכו להגיש את הגרסה השמורה.                                     */
+var CACHE_NAME = 'hadaf-v1';
+var CORE = ['./', './index.html', './data.js', './links.js',
+            './manifest.json', './icon-192.png', './icon-512.png'];
 
+// התקנה — בלי skipWaiting. הגרסה החדשה ממתינה עד שנלחץ פס העדכון,
+// כדי לא לרענן תלמיד באמצע חידה.
 self.addEventListener('install', function (e) {
-  // דילוג על ההמתנה — הגרסה החדשה נכנסת לתוקף מיד.
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }));
+  e.waitUntil(caches.open(CACHE_NAME).then(function (c) { return c.addAll(CORE); }));
 });
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (ks) {
-      return Promise.all(ks.map(function (k) {
-        if (k !== CACHE) return caches.delete(k);
-      }));
+      return Promise.all(ks.filter(function (k) { return k !== CACHE_NAME; })
+                           .map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
 });
 
+self.addEventListener('message', function (e) {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
+/* מוגש מיד מהמטמון, ובמקביל נבדק ברקע אם יש גרסה חדשה — כך הפתיחה
+   מיידית בלי לוותר על עדכונים. בקשות לשרת הנתונים לא עוברות כאן. */
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
-  var url = new URL(req.url);
+  if (new URL(req.url).origin !== self.location.origin) return;
 
-  // version.json — תמיד מהרשת, אחרת בדיקת העדכון חסרת ערך.
-  if (url.pathname.indexOf('version.json') !== -1) {
-    e.respondWith(fetch(req, { cache:'no-store' }).catch(function () {
-      return new Response('{}', { headers:{ 'Content-Type':'application/json' } });
-    }));
-    return;
-  }
-
-  // בקשות חוץ (ספריא וכד') — לא נוגעים.
-  if (url.origin !== location.origin) return;
-
-  // ניווט וקבצי הליבה: רשת קודם, מטמון כגיבוי.
-  // כך משתמש מחובר מקבל תמיד את הגרסה העדכנית, ומנותק עדיין נפתח.
-  if (req.mode === 'navigate' || /\.(html|js)$/.test(url.pathname) ||
-      url.pathname.endsWith('/')) {
-    e.respondWith(
-      fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        return res;
-      }).catch(function () {
-        return caches.match(req).then(function (m) {
-          return m || caches.match('index.html');
-        });
-      })
-    );
-    return;
-  }
-
-  // שאר הקבצים: מטמון קודם.
   e.respondWith(
-    caches.match(req).then(function (m) {
-      return m || fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
+    caches.match(req).then(function (cached) {
+      var net = fetch(req).then(function (res) {
+        if (res && res.status === 200) {
+          var clone = res.clone();
+          caches.open(CACHE_NAME).then(function (c) { c.put(req, clone); });
+        }
         return res;
-      });
+      }).catch(function () { return null; });
+
+      return cached || net;
     })
   );
 });
