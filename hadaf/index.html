@@ -643,16 +643,6 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
     <!-- ===== בית ===== -->
     <div id="v-home" class="view">
 
-      <!-- אזור התלמיד — מה שהם יקבלו -->
-      <div class="zone zone-s">
-        <div class="zlabel">
-          <span class="tag">מה התלמידים יראו</span>
-          <span>זה המסך שנפתח אצל התלמיד ואצל מעביר השיעור, בכל שבוע.</span>
-        </div>
-        <div id="stage"></div>
-        <div class="rv" id="mini" style="margin-top:14px"></div>
-      </div>
-
       <!-- אזור המנהל -->
       <div class="zone zone-a">
         <div class="zlabel">
@@ -663,6 +653,17 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
         <div class="rv" id="rings" style="margin-top:18px"></div>
         <div class="rv" id="inbox" style="margin-top:18px"></div>
       </div>
+
+      <!-- אזור התלמיד — מה שהם יקבלו -->
+      <div class="zone zone-s">
+        <div class="zlabel">
+          <span class="tag">מה התלמידים יראו</span>
+          <span>זה המסך שנפתח אצל התלמיד ואצל מעביר השיעור, בכל שבוע.</span>
+        </div>
+        <div id="stage"></div>
+        <div class="rv" id="mini" style="margin-top:14px"></div>
+      </div>
+
     </div>
 
     <!-- ===== מסלול הרשמה ===== -->
@@ -775,7 +776,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '3.0.0';
+var APP_VERSION = '3.1.0';
 
 var API    = localStorage.getItem('dfApi') || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -1199,7 +1200,7 @@ function openWeek(id, i) {
        lnk(lk[0], '⤓', 'צורת הדף', 'הדף להדפסה') +
        lnk(lk[1], 'פ', 'פירוש חברותא', 'ביאור על הדף') +
        lnk(sgHref, '◆', 'הסוגיה היומית',
-           sgPage ? 'החוברת הצבעונית — עמוד ' + sgPage : 'החוברת הצבעונית', 'sug') +
+           sgPage ? 'דלגו לעמוד ' + sgPage + ' בחוברת' : 'החוברת הדיגיטלית', 'sug') +
        '</div>';
 
   /* 2. החידה */
@@ -1578,6 +1579,100 @@ function applyCfg() {
 }
 applyCfg();
 
+
+/* ============================================================
+   קריאה מגוגל־שיטס, בלי Apps Script.
+   נקודת ה-gviz מגישה כל לשונית כ-CSV, ומאפשרת קריאה מהדפדפן
+   כשהגיליון משותף כ"כל מי שיש לו הקישור — מציג".
+   הקריאה נכשלת בשקט: אם אין רשת או הרשאה, נשארים עם הנתונים
+   המוטמעים ושום דבר לא נשבר.
+   ============================================================ */
+function sheetUrl(id, tab) {
+  return 'https://docs.google.com/spreadsheets/d/' + id +
+         '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(tab) + '&t=' + Date.now();
+}
+/* מפרסר CSV כולל שדות במירכאות ופסיקים בתוכם */
+function parseCsv(text) {
+  var rows = [], row = [], f = '', q = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { f += '"'; i++; }
+      else if (c === '"') q = false;
+      else f += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
+    else if (c !== '\r') f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(function (r) { return r.join('').trim() !== ''; });
+}
+function fetchSheet(id, tab) {
+  if (!id || !navigator.onLine) return Promise.resolve(null);
+  return fetch(sheetUrl(id, tab))
+    .then(function (r) { return r.ok ? r.text() : null; })
+    .then(function (t) { return t ? parseCsv(t) : null; })
+    .catch(function () { return null; });
+}
+var YES = /^(TRUE|כן|V|✓|1)$/i;
+
+/* מוסדות מהגיליון הציבורי: code | name | last | joined */
+function loadInstitutions() {
+  return fetchSheet(CFG.sheetId || SHEET_ID, CFG.sheetTab || SHEET_TAB)
+    .then(function (rows) {
+      if (!rows || rows.length < 2) return false;
+      var out = [];
+      rows.slice(1).forEach(function (r) {
+        var code = (r[0] || '').trim(), name = (r[1] || '').trim();
+        if (!code || !name) return;
+        out.push({ code:code, name:name, last:YES.test((r[2] || '').trim()),
+                   joined:YES.test((r[3] || '').trim()) });
+      });
+      if (!out.length) return false;
+      INSTITUTIONS.length = 0;
+      out.forEach(function (i) { INSTITUTIONS.push(i); });
+      applyCfg();                       // מתגים מהניהול דורסים את הגיליון
+      Store.set('instCache', INSTITUTIONS);
+      return true;
+    });
+}
+/* אנשי קשר מגיליון פרטי. המזהה מוזן בניהול ונשמר על המכשיר —
+   אינו בקוד, כדי שטלפונים של מנהלים לא יישבו בריפו ציבורי. */
+function loadContactsFromSheet() {
+  var id = CFG.contactsSheet;
+  if (!id) { alert('קודם הזינו את מזהה גיליון אנשי הקשר בהגדרות.'); return; }
+  fetchSheet(id, CFG.contactsTab || 'גיליון1').then(function (rows) {
+    if (!rows || rows.length < 2) {
+      alert('לא הצלחתי לקרוא מהגיליון. ודאו שהוא משותף כ"כל מי שיש לו הקישור — מציג".');
+      return;
+    }
+    var out = [];
+    rows.slice(1).forEach(function (r) {
+      var cells = r.map(function (c) { return (c || '').trim(); });
+      var name = '', people = [], phones = [], last = false;
+      cells.forEach(function (c) {
+        if (YES.test(c)) { last = true; return; }
+        if (/^(FALSE|לא)$/i.test(c) || !c || c === 'X' || c === 'x') return;
+        if (/^[0-9\-\+\(\)\s]{9,}$/.test(c)) { phones.push(c); return; }
+        if (!name) name = c; else people.push(c);
+      });
+      if (!name) return;
+      out.push({ name:name, who:people.join(' · '), phone:phones[0] || '',
+                 phone2:phones[1] || '', last:last, stage:'new', note:'' });
+    });
+    // שומרים סטטוסים והערות קיימים לפי שם
+    var old = {};
+    contacts().forEach(function (c) { old[c.name] = c; });
+    out.forEach(function (c) {
+      if (old[c.name]) { c.stage = old[c.name].stage; c.note = old[c.name].note; }
+    });
+    saveContacts(out);
+    renderCalls();
+    alert(out.length + ' מוסדות נטענו מהגיליון.');
+  });
+}
+
 /* ============================================================
    מסך הניהול.
    לא מקושר מאף מקום באפליקציה — נגיש רק דרך /admin או #admin.
@@ -1607,7 +1702,12 @@ function admPane() {
   var el = document.getElementById('adm-pane');
   if (admTab === 'reg')   return admReg(el);
   if (admTab === 'inst')  return admInst(el);
-  if (admTab === 'calls') { el.innerHTML = '<div id="calls-body"></div>'; return renderCalls(); }
+  if (admTab === 'calls') {
+    el.innerHTML = '<button class="btn g" style="margin-bottom:11px" ' +
+      'onclick="loadContactsFromSheet()">טעינת אנשי הקשר מהגיליון</button>' +
+      '<div id="calls-body"></div>';
+    return renderCalls();
+  }
   if (admTab === 'sugya') return admSugya(el);
   if (admTab === 'set')   return admSet(el);
 }
@@ -1714,6 +1814,27 @@ function admSet(el) {
     '<div class="fld"><div class="label">כתובת שרת (Apps Script / Firebase)</div>' +
     '<input type="text" dir="ltr" placeholder="https://script.google.com/…/exec" value="' +
     esc(CFG.api || API) + '" onchange="cfgSet(\'api\',this.value.trim())"></div></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>גוגל־שיטס</h4>' +
+    '<p class="h">הגיליון צריך להיות משותף כ"כל מי שיש לו הקישור — מציג". ' +
+    'גיליון אנשי הקשר נשמר על המכשיר הזה בלבד ואינו בקוד.</p>' +
+    '<div class="fld"><div class="label">מזהה גיליון המוסדות (ציבורי)</div>' +
+    '<input type="text" dir="ltr" value="' + esc(CFG.sheetId || SHEET_ID) +
+    '" onchange="cfgSet(\'sheetId\',this.value.trim())"></div>' +
+    '<div class="fld"><div class="label">שם הלשונית</div>' +
+    '<input type="text" value="' + esc(CFG.sheetTab || SHEET_TAB) +
+    '" onchange="cfgSet(\'sheetTab\',this.value.trim())"></div>' +
+    '<button class="btn g" onclick="loadInstitutions().then(function(ok){' +
+    'alert(ok?\'המוסדות עודכנו מהגיליון.\':\'לא הצלחתי לקרוא מהגיליון.\');renderHome();admPane();})">' +
+    'בדיקה וטעינה</button>' +
+    '<div class="fld" style="margin-top:13px"><div class="label">' +
+    'מזהה גיליון אנשי הקשר (פרטי)</div>' +
+    '<input type="text" dir="ltr" placeholder="נשמר על המכשיר בלבד" value="' +
+    esc(CFG.contactsSheet || '') +
+    '" onchange="cfgSet(\'contactsSheet\',this.value.trim())"></div>' +
+    '<div class="fld"><div class="label">שם הלשונית</div>' +
+    '<input type="text" value="' + esc(CFG.contactsTab || 'גיליון1') +
+    '" onchange="cfgSet(\'contactsTab\',this.value.trim())"></div></div>' +
 
     '<div class="adm-card" style="margin-bottom:11px"><h4>קוד הכניסה לניהול</h4>' +
     '<p class="h">ארבע ספרות. שמור אותו — בלעדיו אין כניסה למסך הזה.</p>' +
@@ -1879,7 +2000,15 @@ function registerSW() {
 }
 
 (function boot() {
+  // נפתחים מיד מהמטמון, ומתרעננים מהגיליון ברקע
+  var cached = Store.get('instCache');
+  if (cached && cached.length) {
+    INSTITUTIONS.length = 0;
+    cached.forEach(function (i) { INSTITUTIONS.push(i); });
+    applyCfg();
+  }
   renderHome(); paintQueue(); paintNet(); flush(); registerSW();
+  loadInstitutions().then(function (ok) { if (ok) renderHome(); }).catch(function () {});
   if (isAdminRoute()) adminEntry(); else show('home');
   setTimeout(function () { document.getElementById('splash').className = 'off'; }, 340);
 })();
