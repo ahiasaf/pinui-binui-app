@@ -2,9 +2,9 @@
    מבוסס על המנגנון שהוכח ב"יגדיל תורה".
    בכל העלאת שינוי — להעלות את המספר כאן (v1 ← v2), אחרת מכשירים
    ימשיכו להגיש את הגרסה השמורה.                                     */
-var CACHE_NAME = 'hadaf-v9';
+var CACHE_NAME = 'hadaf-v10';
 var CORE = ['./', './index.html', './data.js', './links.js',
-            './manifest.json', './icon-192.png', './icon-512.png'];
+            './logo.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 // התקנה — בלי skipWaiting. הגרסה החדשה ממתינה עד שנלחץ פס העדכון,
 // כדי לא לרענן תלמיד באמצע חידה.
