@@ -798,7 +798,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.0.1';
+var APP_VERSION = '5.1.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -988,14 +988,12 @@ function renderHome() {
     '</div><div class="note">הרשימה מתעדכנת בכל הרשת — כל ישיבה שנרשמת מופיעה כאן.</div></div>';
 
   /* ---- קריאה לפעולה, אחרי ההוכחה ולא לפניה ---- */
-  document.getElementById('cta').innerHTML = mine
-    ? '<div class="done-box">' + esc(mine.inst) + ' רשומה לתוכנית · ' +
-      mine.total + ' גמרות</div>' +
-      '<button class="btn g" style="margin-top:9px" onclick="show(\'reg\')">' +
-      'עדכון הפרטים</button>'
-    : '<button class="btn gd" onclick="show(\'reg\')">להרשמה ולהזמנת גמרות</button>' +
-      '<p style="font-size:.8rem;color:var(--ink-3);font-weight:700;text-align:center;' +
-      'margin-top:9px;line-height:1.5">דקה אחת · הגמרות במחיר מוזל, 15 ₪ במקום 25 ₪</p>';
+  document.getElementById('cta').innerHTML =
+    '<button class="btn gd" onclick="show(\'reg\')">להרשמה ולהזמנת גמרות</button>' +
+    '<p style="font-size:.8rem;color:var(--ink-3);font-weight:700;text-align:center;' +
+    'margin-top:9px;line-height:1.5">' +
+    (mine ? 'כבר שלחתם הרשמה — אפשר לעדכן אותה'
+          : 'דקה אחת · הגמרות במחיר מוזל, 15 ₪ במקום 25 ₪') + '</p>';
 
   reveal();
 }
