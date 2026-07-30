@@ -152,14 +152,58 @@ header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
 /* ---------- שני אזורים, שני עולמות ----------
    מנהל חטיבה צריך לדעת מיד מה הוא רואה: מה התלמידים יקבלו,
    ומה הפאנל שלו. לכן לכל אזור רקע משלו, לרוחב המסך המלא. */
-.zone{margin:0 -14px;padding:16px 14px 18px}
-.zone-s{background:linear-gradient(180deg,rgba(23,70,143,.09),rgba(23,70,143,.04));
-  border-block:1px solid rgba(23,70,143,.1)}
-.zlabel{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.zone{margin:0 -14px;padding:18px 14px 20px;position:relative}
+/* אזור התלמידים — לוח קריר ושקוע, שנראה כמו משטח אחר לגמרי */
+.zone-s{background:linear-gradient(180deg,#DDE5F1,#E7ECF5 60%,#E2E9F3);
+  box-shadow:inset 0 9px 14px -10px rgba(11,37,80,.3),
+             inset 0 -9px 14px -10px rgba(11,37,80,.3);
+  border-block:1px solid rgba(11,37,80,.13)}
+/* אזור ראשי החטיבות — הקלף החם, עם קו זהב שמפריד */
+.zone-a{background:linear-gradient(180deg,#F7F1E2,#F1E9D6);
+  box-shadow:inset 0 9px 14px -10px rgba(120,90,30,.14),
+             inset 0 -9px 14px -10px rgba(120,90,30,.14);
+  border-block:1px solid rgba(192,143,43,.22)}
+.zlabel{display:flex;align-items:center;gap:10px;margin-bottom:15px}
 .zlabel .tag{font-size:.66rem;font-weight:800;letter-spacing:.09em;padding:5px 11px;
   border-radius:30px;background:var(--blue);color:#fff;flex:none}
 .zlabel .tag.a{background:var(--gold)}
 .zlabel span{font-size:.83rem;font-weight:700;color:var(--ink-2);line-height:1.4}
+
+/* ---------- לוח שלבי השנה ----------
+   הלוח מתחיל מעכשיו ולא מבראשית, והשלב הנוכחי צבוע. */
+.plan{background:var(--surface);border-radius:var(--r);padding:16px 16px 14px;
+  box-shadow:var(--sh-2);position:relative;overflow:hidden}
+.plan:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;
+  background:linear-gradient(180deg,var(--gold-l),var(--gold))}
+.plan .hd{display:flex;justify-content:space-between;align-items:baseline;
+  gap:10px;margin-bottom:15px}
+.plan .hd b{font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.plan .hd span{font-size:.71rem;font-weight:800;color:var(--gold);letter-spacing:.05em}
+.steps{display:flex;gap:0;align-items:flex-start}
+.st{flex:1;position:relative;text-align:center;padding-top:19px;min-width:0}
+/* הקו שמחבר את השלבים */
+.st:before{content:"";position:absolute;top:6px;right:50%;left:-50%;height:2px;
+  background:var(--rule)}
+.st:first-child:before{display:none}
+.st.done:before,.st.now:before{background:var(--gold)}
+.st i{position:absolute;top:0;right:50%;transform:translateX(50%);
+  width:13px;height:13px;border-radius:50%;background:var(--surface);
+  box-shadow:inset 0 0 0 2px var(--rule)}
+.st.done i{background:var(--gold);box-shadow:none}
+.st.now i{background:var(--gold);box-shadow:0 0 0 5px rgba(192,143,43,.22);
+  width:15px;height:15px;top:-1px}
+.st b{display:block;font-size:.76rem;font-weight:800;line-height:1.25;
+  color:var(--ink-3);padding:0 3px}
+.st small{display:block;font-size:.65rem;color:var(--ink-3);opacity:.75;
+  font-weight:700;margin-top:2px;padding:0 2px}
+.st.now b{color:var(--ink);font-size:.8rem}
+.st.done b{color:var(--ink-2)}
+.here{display:flex;align-items:center;gap:9px;margin-top:15px;padding-top:13px;
+  border-top:1px solid var(--rule-2)}
+.here em{font-style:normal;font-size:.64rem;font-weight:800;letter-spacing:.08em;
+  background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#fff;
+  border-radius:20px;padding:4px 10px;flex:none}
+.here span{font-size:.84rem;font-weight:700;color:var(--ink-2);line-height:1.45}
 
 /* ---------- פס ההרשמה ---------- */
 .regbar{border-radius:var(--r);padding:15px 17px;color:#fff;position:relative;
@@ -643,7 +687,20 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
     <!-- ===== בית ===== -->
     <div id="v-home" class="view">
 
-      <!-- אזור המנהל -->
+      <!-- לוח שלבי השנה — מתחיל מעכשיו -->
+      <div id="plan"></div>
+
+      <!-- אזור התלמיד — מה שהם יקבלו -->
+      <div class="zone zone-s">
+        <div class="zlabel">
+          <span class="tag">מה התלמידים יראו</span>
+          <span>זה המסך שנפתח אצל התלמיד ואצל מעביר השיעור, בכל שבוע.</span>
+        </div>
+        <div id="stage"></div>
+        <div class="rv" id="mini" style="margin-top:14px"></div>
+      </div>
+
+      <!-- אזור ראשי החטיבות -->
       <div class="zone zone-a">
         <div class="zlabel">
           <span class="tag a">לראשי החטיבות</span>
@@ -653,13 +710,6 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
         <div class="rv" id="rings" style="margin-top:18px"></div>
         <div class="rv" id="inbox" style="margin-top:18px"></div>
       </div>
-
-      <!-- אזור התלמיד — מה שהם יקבלו -->
-      <div class="zone zone-s">
-        <div class="zlabel">
-          <span class="tag">מה התלמידים יראו</span>
-          <span>זה המסך שנפתח אצל התלמיד ואצל מעביר השיעור, בכל שבוע.</span>
-        </div>
         <div id="stage"></div>
         <div class="rv" id="mini" style="margin-top:14px"></div>
       </div>
@@ -776,7 +826,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '3.2.0';
+var APP_VERSION = '3.3.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -918,6 +968,24 @@ function renderHome() {
     '<div class="rail">' + rail + '</div>' +
     '<div style="font-size:.79rem;color:var(--ink-3);font-weight:700;margin-top:10px">' +
     'דף בשבוע — וסיום המסכת בא׳ סיוון ←</div></div>';
+
+  /* ---- לוח שלבי השנה ---- */
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var nowIdx = 0;
+  PHASES.forEach(function (ph, i) {
+    if (today >= new Date(ph.from + 'T00:00:00')) nowIdx = i;
+  });
+  document.getElementById('plan').innerHTML =
+    '<div class="plan"><div class="hd"><b>לוח התוכנית · תשפ"ז</b>' +
+    '<span>אנחנו כאן</span></div><div class="steps">' +
+    PHASES.map(function (ph, i) {
+      var cls = i < nowIdx ? 'done' : i === nowIdx ? 'now' : '';
+      return '<div class="st ' + cls + '"><i></i><b>' + esc(ph.t) + '</b>' +
+             '<small>' + esc(ph.sub) + '</small></div>';
+    }).join('') + '</div>' +
+    '<div class="here"><em>עכשיו</em><span>' + esc(PHASES[nowIdx].t) +
+    (nowIdx === 0 ? ' — נרשמים, מעריכים כמה תלמידים, ומזמינים גמרות במחיר מוזל.'
+                  : ' · ' + esc(PHASES[nowIdx].sub)) + '</span></div></div>';
 
   /* ---- פס ההרשמה ---- */
   var joined = INSTITUTIONS.filter(function (i) { return i.joined; }).length;
