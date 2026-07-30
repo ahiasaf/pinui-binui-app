@@ -1098,11 +1098,11 @@ function sendReg() {
 function regDone(txt, viaWa) {
   document.getElementById('r-done').innerHTML =
     '<div class="done-box" style="margin-top:14px">' +
-    (viaWa ? 'ההרשמה מוכנה — נותר לשלוח אותה בוואטסאפ.'
-           : 'ההרשמה נשלחה. תודה!') + '</div>' +
-    (viaWa ? '<a class="btn gr" style="margin-top:10px;text-decoration:none" ' +
+    'ההרשמה נשלחה. ' + esc(PROGRAM.contact.coord) + ' יחזור אליכם.' + '</div>' +
+    (viaWa ? '<div style="text-align:center;margin-top:11px">' +
+             '<a style="font-size:.79rem;color:var(--ink-3);font-weight:700" ' +
              'href="https://wa.me/' + COORD_WA + '?text=' + encodeURIComponent(txt) +
-             '" target="_blank" rel="noopener">שליחה בוואטסאפ</a>' : '');
+             '" target="_blank" rel="noopener">לא קיבלתם אישור? שלחו לנו הודעה</a></div>' : '');
   renderHome();
   document.getElementById('r-done').scrollIntoView({ behavior:'smooth', block:'center' });
 }
@@ -1948,8 +1948,7 @@ function queue(payload) {
 function flush() {
   var q = JSON.parse(localStorage.getItem('dfQueue') || '[]');
   if (!q.length || !API || !navigator.onLine) return;
-  fetch(API, { method:'POST', body:JSON.stringify(q[0]) })
-    .then(function (r) { return r.json(); })
+  fetch(API, { method:'POST', mode:'no-cors', body:JSON.stringify(q[0]) })
     .then(function () {
       var rest = JSON.parse(localStorage.getItem('dfQueue') || '[]');
       rest.shift();
