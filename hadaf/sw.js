@@ -2,7 +2,7 @@
    מבוסס על המנגנון שהוכח ב"יגדיל תורה".
    בכל העלאת שינוי — להעלות את המספר כאן (v1 ← v2), אחרת מכשירים
    ימשיכו להגיש את הגרסה השמורה.                                     */
-var CACHE_NAME = 'hadaf-v10';
+var CACHE_NAME = 'hadaf-v11';
 var CORE = ['./', './index.html', './data.js', './links.js',
             './logo.js', './manifest.json', './icon-192.png', './icon-512.png'];
 

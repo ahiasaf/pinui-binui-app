@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>הדף השבועי של בני עקיבא</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
 <meta name="theme-color" content="#0E2E63">
 <meta property="og:title" content="הדף השבועי של בני עקיבא">
 <meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — כיתות ז׳ מסכת תענית, כיתות ח׳ מסכת מגילה.">
@@ -33,7 +34,10 @@
   font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif}
 html,body{overflow-x:hidden}
 img{max-width:100%}
-body{background:var(--paper);color:var(--ink);min-height:100vh;line-height:1.55;
+body{background:var(--paper);
+     background-image:radial-gradient(120% 60% at 50% 0%,#FBF7EF 0%,transparent 60%);
+     background-attachment:fixed;
+     color:var(--ink);min-height:100vh;line-height:1.55;
      -webkit-font-smoothing:antialiased;display:flex;justify-content:center}
 .app{width:100%;max-width:580px;min-height:100vh;display:flex;flex-direction:column;
      position:relative;z-index:1;background:transparent}
@@ -151,20 +155,28 @@ header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
 /* ---------- מערכת המשטחים ----------
    קרקע אחת חמה; לוח קריר אחד באמצע — עולם התלמידים; וחזרה לקרקע.
    סטייה אחת בלבד, כדי שהעין תבנה היררכיה ולא תתעייף.       */
-.sec-b{margin:0 -14px;padding:20px 14px 22px}
-.band{background:#E7ECF4;border-block:1px solid #CBD6E6}
-.zlabel{display:flex;align-items:center;gap:9px;margin-bottom:14px}
-.zlabel .tag{font-size:.64rem;font-weight:800;letter-spacing:.09em;padding:5px 10px;
-  border-radius:99px;background:var(--blue);color:#fff;flex:none}
-.zlabel .tag.a{background:var(--gold)}
-.zlabel span{font-size:.8rem;font-weight:700;color:var(--ink-2);line-height:1.4}
+.sec-b{margin:0 -14px;padding:28px 14px 22px;position:relative}
+.band{background:linear-gradient(180deg,#E9EEF6 0%,#E3E9F3 55%,#E7ECF4 100%);
+  border-block:1px solid rgba(11,37,80,.09);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65)}
+.zlabel{margin-bottom:15px}
+/* התווית רוכבת על התפר — חצי מעל הגבול וחצי מתחתיו */
+.zlabel .tag{position:absolute;top:0;right:14px;transform:translateY(-50%);
+  font-size:.66rem;font-weight:800;letter-spacing:.08em;padding:7px 14px;
+  border-radius:99px;background:var(--blue);color:#fff;white-space:nowrap;
+  box-shadow:0 3px 10px rgba(11,37,80,.22),0 0 0 4px var(--paper)}
+.band .zlabel .tag{box-shadow:0 3px 10px rgba(11,37,80,.22),0 0 0 4px #EDF1F7}
+.zlabel .tag.a{background:var(--gold);
+  box-shadow:0 3px 10px rgba(160,120,30,.28),0 0 0 4px var(--paper)}
+.zlabel span{display:block;font-size:.81rem;font-weight:700;color:var(--ink-2);
+  line-height:1.45;padding-top:2px}
 
 /* ---------- לוח שלבי השנה ---------- */
 .steps{display:flex;align-items:flex-start;margin-top:4px}
 .st{flex:1;position:relative;text-align:center;padding-top:18px;min-width:0}
 .st:before{content:"";position:absolute;top:5px;right:50%;left:-50%;height:2px;
   background:#DFD5C0}
-.st:first-child:before{display:none}
+.st:last-child:before{display:none}
 .st.done:before{background:var(--gold)}
 .st i{position:absolute;top:0;right:50%;transform:translateX(50%);width:12px;height:12px;
   border-radius:50%;background:var(--paper);box-shadow:inset 0 0 0 2px #DFD5C0}
@@ -194,7 +206,8 @@ header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
 .ring .t{font-size:.7rem;font-weight:800;color:var(--ink-3);margin-top:5px;line-height:1.35}
 
 /* ---------- מי כבר בפנים ---------- */
-.inbox{background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--sh-1)}
+.inbox{background:var(--surface);border-radius:var(--r);padding:16px;
+  box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.9)}
 .inbox .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
 .inbox .hd b{font-size:1.04rem;font-weight:800;letter-spacing:-.02em}
 .inbox .hd span{font-size:.74rem;color:var(--ink-3);font-weight:800}
@@ -235,7 +248,8 @@ header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
 .total .t{font-size:.84rem;opacity:.9;font-weight:700;margin-top:4px}
 
 /* המסלול בזעיר אנפין — כל השנה במבט אחד */
-.mini{background:var(--surface);border-radius:var(--r);padding:13px 15px;box-shadow:var(--sh-1)}
+.mini{background:var(--surface);border-radius:var(--r);padding:13px 15px;
+  box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.9)}
 .mini .cap{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:13px}
 .mini .cap b{font-size:.95rem;font-weight:800;letter-spacing:-.02em}
 .mini .cap span{font-size:.74rem;color:var(--ink-3);font-weight:700}
@@ -359,7 +373,8 @@ header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
 .chap:before{content:"◆";color:var(--gold);font-size:.55rem;opacity:.7}
 
 /* ---------- כללי ---------- */
-.card{background:var(--surface);border-radius:var(--r-m);padding:15px;box-shadow:var(--sh-1)}
+.card{background:var(--surface);border-radius:var(--r-m);padding:15px;
+  box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.9)}
 .card h3{font-size:1.05rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em}
 .card p{font-size:.91rem;color:var(--ink-2);line-height:1.68}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
@@ -615,6 +630,13 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 </head>
 <body>
 
+<script>
+  /* המסמך עשוי להיטען בתוך מעטפת חיצונית שאין בה dir="rtl".
+     נקבע אותו מיד, לפני הציור, כדי שלא יהיה הבזק של פריסה הפוכה. */
+  document.documentElement.lang = 'he';
+  document.documentElement.dir  = 'rtl';
+</script>
+
 <div id="splash">
   <span class="slogo"><img id="splash-logo" alt="מרכז ישיבות ואולפנות בני עקיבא"></span>
   <b>הדף השבועי</b><i></i>
@@ -781,7 +803,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '4.0.0';
+var APP_VERSION = '4.1.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -1150,6 +1172,12 @@ function reveal() {
     });
   }, { rootMargin:'0px 0px -8% 0px' });
   for (var j = 0; j < els.length; j++) { els[j].classList.remove('in'); io.observe(els[j]); }
+
+  // רשת ביטחון: אם המשקיף לא ירה מסיבה כלשהי, לא נשאיר תוכן נסתר.
+  clearTimeout(reveal.t);
+  reveal.t = setTimeout(function () {
+    for (var k = 0; k < els.length; k++) els[k].classList.add('in');
+  }, 1200);
 }
 
 /* ---------- מסלול כמסע ---------- */
