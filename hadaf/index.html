@@ -162,19 +162,89 @@ body.dark .count b{color:var(--blue-l)} body.dark .count.g b{color:var(--green)}
   border:1px solid rgba(255,255,255,.18)!important;padding-inline:18px}
 .stage .acts button:active{transform:scale(.98)}
 
-/* סרט שקפים — גלילה אופקית, שוברת את הערימה האנכית */
-.strip-wrap{margin:0 -16px;padding:0 16px}
-.filmstrip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
-  padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.filmstrip::-webkit-scrollbar{display:none}
-.filmstrip img{flex:none;width:196px;aspect-ratio:16/9;object-fit:cover;border-radius:11px;
-  scroll-snap-align:start;cursor:pointer;box-shadow:var(--sh-1);background:var(--sunk)}
-.filmstrip img:active{transform:scale(.98)}
-.filmstrip .end{flex:none;width:150px;border-radius:11px;background:var(--surface);
-  box-shadow:var(--sh-1);display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:5px;cursor:pointer;font-weight:800;font-size:.85rem;
-  color:var(--blue);scroll-snap-align:start}
-body.dark .filmstrip .end{color:var(--blue-l)}
+/* ---------- שני אזורים, שני עולמות ----------
+   מנהל חטיבה צריך לדעת מיד מה הוא רואה: מה התלמידים יקבלו,
+   ומה הפאנל שלו. לכן לכל אזור רקע משלו, לרוחב המסך המלא. */
+.zone{margin:0 -16px;padding:20px 16px 24px}
+.zone-s{background:linear-gradient(180deg,rgba(23,70,143,.09),rgba(23,70,143,.04));
+  border-block:1px solid rgba(23,70,143,.1)}
+body.dark .zone-s{background:linear-gradient(180deg,rgba(53,116,206,.13),rgba(53,116,206,.05));
+  border-block-color:rgba(53,116,206,.16)}
+.zlabel{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.zlabel .tag{font-size:.66rem;font-weight:800;letter-spacing:.09em;padding:5px 11px;
+  border-radius:30px;background:var(--blue);color:#fff;flex:none}
+.zlabel .tag.a{background:var(--gold)}
+.zlabel span{font-size:.83rem;font-weight:700;color:var(--ink-2);line-height:1.4}
+
+/* ---------- פס ההרשמה ---------- */
+.regbar{border-radius:var(--r);padding:18px 20px;color:#fff;position:relative;
+  overflow:hidden;box-shadow:var(--sh-2);
+  background:linear-gradient(140deg,#4F8A1E,#2F5A12)}
+.regbar:after{content:"";position:absolute;right:-30px;top:-40px;width:130px;height:130px;
+  border-radius:50%;background:rgba(255,255,255,.1)}
+.regbar .k{font-size:.68rem;font-weight:800;letter-spacing:.11em;opacity:.8}
+.regbar b{display:block;font-size:1.24rem;font-weight:800;letter-spacing:-.03em;margin:5px 0 4px}
+.regbar p{font-size:.87rem;opacity:.9;line-height:1.55;max-width:34ch}
+.regbar button{margin-top:14px;background:#fff;color:#2F5A12;border:none;border-radius:12px;
+  padding:14px 20px;font-weight:800;font-size:.96rem;cursor:pointer;width:100%}
+.regbar button:active{transform:scale(.985)}
+
+/* ---------- עיגולי סטטיסטיקה ---------- */
+.rings{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.ring{position:relative;width:142px;height:142px;border-radius:50%;flex:none;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-2);
+  background:conic-gradient(from 210deg,var(--gold-l),var(--gold) 55%,var(--gold-l))}
+.ring.b{background:conic-gradient(from 210deg,var(--blue-l),var(--blue) 55%,var(--blue-l))}
+.ring:before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface)}
+.ring .in{position:relative;text-align:center;padding:0 12px}
+.ring .n{font-size:2.2rem;font-weight:800;line-height:1;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;color:var(--gold)}
+.ring.b .n{color:var(--blue)} body.dark .ring.b .n{color:var(--blue-l)}
+.ring .t{font-size:.7rem;font-weight:800;color:var(--ink-3);margin-top:5px;line-height:1.35}
+
+/* ---------- מי כבר בפנים ---------- */
+.inbox{background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--sh-2)}
+.inbox .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.inbox .hd b{font-size:1.04rem;font-weight:800;letter-spacing:-.02em}
+.inbox .hd span{font-size:.74rem;color:var(--ink-3);font-weight:800}
+.joined{display:flex;flex-wrap:wrap;gap:7px}
+.jp{display:inline-flex;align-items:center;gap:6px;background:rgba(111,168,59,.12);
+  color:var(--green-d);border-radius:30px;padding:7px 13px;font-size:.83rem;font-weight:800}
+body.dark .jp{background:rgba(111,168,59,.18);color:#9AD165}
+.jp:before{content:"✓";font-size:.7rem}
+.jp.open{background:var(--sunk);color:var(--ink-3)}
+.jp.open:before{content:"";display:none}
+.inbox .note{font-size:.82rem;color:var(--ink-2);font-weight:700;margin-top:14px;
+  padding-top:14px;border-top:1px solid var(--rule-2);line-height:1.55}
+
+/* ---------- מסלול הרשמה ---------- */
+.step-n{display:flex;align-items:center;gap:10px;margin:20px 0 10px}
+.step-n i{width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex:none}
+.step-n b{font-size:1.02rem;font-weight:800;letter-spacing:-.02em}
+.opt2{display:grid;gap:9px}
+.o2{background:var(--surface);border:2px solid transparent;border-radius:var(--r-s);
+  padding:15px;cursor:pointer;text-align:start;width:100%;color:inherit;box-shadow:var(--sh-1)}
+.o2 b{display:block;font-size:.98rem;font-weight:800;letter-spacing:-.02em}
+.o2 span{display:block;font-size:.81rem;color:var(--ink-2);font-weight:600;
+  margin-top:4px;line-height:1.55}
+.o2.sel{border-color:var(--blue);background:var(--accent-soft)}
+body.dark .o2.sel{background:rgba(53,116,206,.14)}
+.num{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
+  background:var(--surface);border-radius:var(--r-s);padding:12px 14px;box-shadow:var(--sh-1)}
+.num .lbl{font-size:.92rem;font-weight:800}
+.num .lbl small{display:block;font-size:.72rem;color:var(--ink-3);font-weight:700}
+.num .ctl{display:flex;align-items:center;gap:6px;justify-self:end}
+.num .ctl button{width:38px;height:38px;border-radius:11px;border:none;background:var(--sunk);
+  color:var(--blue);font-size:1.2rem;font-weight:800;cursor:pointer}
+body.dark .num .ctl button{color:var(--blue-l)}
+.num .ctl button:active{transform:scale(.92)}
+.num .ctl input{width:58px;text-align:center;font-size:1.1rem;font-weight:800;
+  padding:8px 2px;border-radius:10px}
+.total{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff;
+  border-radius:var(--r-m);padding:17px;text-align:center;box-shadow:var(--sh-2)}
+.total .n{font-size:1.9rem;font-weight:800;letter-spacing:-.04em;line-height:1.1}
+.total .t{font-size:.84rem;opacity:.9;font-weight:700;margin-top:4px}
 
 /* המסלול בזעיר אנפין — כל השנה במבט אחד */
 .mini{background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--sh-1)}
@@ -339,6 +409,8 @@ body.dark .track.t-g .grade{background:rgba(111,168,59,.2);color:#9AD165}
   background:rgba(23,70,143,.09);color:var(--blue)}
 body.dark .lnk .ic{background:rgba(53,116,206,.18);color:#8CB4F0}
 .lnk.dim{opacity:.5}
+.lnk.sug .ic{background:linear-gradient(140deg,#8FBF4A,#4F8A1E);color:#fff}
+.lnk.sug{border-inline-start:3px solid var(--green)}
 .msg{text-align:center;color:var(--ink-3);font-size:.9rem;padding:34px 12px;font-weight:600}
 
 /* ---------- מסך שבוע ---------- */
@@ -538,12 +610,35 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 
     <!-- ===== בית ===== -->
     <div id="v-home" class="view">
-      <div id="stage"></div>
-      <div class="strip-wrap rv"><div class="filmstrip" id="filmstrip"></div></div>
-      <div class="rv" id="mini"></div>
-      <div class="rv" id="bento"></div>
-      <div class="sec rv"><b>איך לומדים</b><i></i></div>
-      <div class="ways rv" id="ways"></div>
+
+      <!-- אזור התלמיד — מה שהם יקבלו -->
+      <div class="zone zone-s">
+        <div class="zlabel">
+          <span class="tag">מה התלמידים יראו</span>
+          <span>זה המסך שנפתח אצל התלמיד ואצל מעביר השיעור, בכל שבוע.</span>
+        </div>
+        <div id="stage"></div>
+        <div class="rv" id="mini" style="margin-top:14px"></div>
+      </div>
+
+      <!-- אזור המנהל -->
+      <div class="zone zone-a">
+        <div class="zlabel">
+          <span class="tag a">לראשי החטיבות</span>
+          <span>הצטרפות לתוכנית והזמנת הגמרות.</span>
+        </div>
+        <div class="rv" id="regbar"></div>
+        <div class="rv" id="rings" style="margin-top:18px"></div>
+        <div class="rv" id="inbox" style="margin-top:18px"></div>
+        <div class="sec rv" style="margin-top:20px"><b>איך לומדים</b><i></i></div>
+        <div class="ways rv" id="ways"></div>
+      </div>
+    </div>
+
+    <!-- ===== מסלול הרשמה ===== -->
+    <div id="v-reg" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div id="reg-body"></div>
     </div>
 
     <!-- ===== מסלול ===== -->
@@ -645,7 +740,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '2.1.0';
+var APP_VERSION = '2.2.0';
 
 var API    = localStorage.getItem('dfApi') || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -708,6 +803,7 @@ function show(v) {
   if (v === 'insts')  renderInsts();
   if (v === 'sfarim') renderSfarim();
   if (v === 'calls')  renderCalls();
+  if (v === 'reg')    renderReg();
   if (v === 'gate')   { teamCode = ''; paintPins();
                         document.getElementById('gate-msg').textContent = ''; }
 }
@@ -774,18 +870,6 @@ function renderHome() {
   }
   document.getElementById('stage').innerHTML = s + '</div>';
 
-  /* ---- סרט השקפים ---- */
-  var f = '';
-  if (c && c.deck) {
-    for (var n = 1; n <= Math.min(c.deck.n, 6); n++)
-      f += '<img loading="lazy" src="' + slideSrc(c, n) + '" alt="שקף ' + n +
-           '" onclick="openFromHome(' + (n - 1) + ')">';
-    f += '<div class="end" onclick="openFromHome(0)"><span>כל ' + c.deck.n +
-         ' השקפים</span><span style="font-size:1.2rem">←</span></div>';
-  }
-  document.getElementById('filmstrip').innerHTML = f;
-  document.querySelector('.strip-wrap').style.display = f ? '' : 'none';
-
   /* ---- המסלול בזעיר אנפין ---- */
   var done = dafDone(tr), pct = Math.round(done / tr.dapim * 100);
   var rail = '';
@@ -804,36 +888,39 @@ function renderHome() {
     '<div style="font-size:.79rem;color:var(--ink-3);font-weight:700;margin-top:10px">' +
     'דף בשבוע — וסיום המסכת בא׳ סיוון ←</div></div>';
 
-  /* ---- בנטו ---- */
+  /* ---- פס ההרשמה ---- */
   var joined = INSTITUTIONS.filter(function (i) { return i.joined; }).length;
-  // כל עוד אף ישיבה לא אישרה, המספר החזק הוא זה של שנה שעברה — לא אפס.
-  var lead = joined
-    ? { n:joined, lb:'ישיבות בתוכנית השנה', tap:' tap" onclick="show(\'insts\')' }
-    : { n:PROGRAM.lastYear.students, lb:'תלמידים למדו בתשפ"ו את מסכת ' +
-        PROGRAM.lastYear.masechet, tap:'' };
-  var side = joined
-    ? { n:PROGRAM.lastYear.students, lb:'תלמידים למדו בתשפ"ו' }
-    : { n:INSTITUTIONS.length, lb:'ישיבות ברשת' };
+  var mine   = regSaved();
+  document.getElementById('regbar').innerHTML = mine
+    ? '<div class="regbar" style="background:linear-gradient(140deg,#3574CE,#0B2550)">' +
+      '<div class="k">ההרשמה נשלחה</div><b>' + esc(mine.inst) + ' בתוכנית</b>' +
+      '<p>הזמנתם ' + mine.total + ' גמרות. נחזור אליכם עם פרטי האספקה.</p>' +
+      '<button onclick="show(\'reg\')" style="color:#0B2550">לעדכון הפרטים</button></div>'
+    : '<div class="regbar"><div class="k">שנת תשפ"ז · ההרשמה פתוחה</div>' +
+      '<b>מצטרפים לדף השבועי?</b>' +
+      '<p>ההרשמה לוקחת דקה: מי אתם, כמה תלמידים בערך, ואיזו גמרא. ' +
+      'הגמרות במחיר מוזל — 15 ₪ במקום 25 ₪.</p>' +
+      '<button onclick="show(\'reg\')">להרשמה ולהזמנת גמרות</button></div>';
 
-  document.getElementById('bento').innerHTML =
-    '<div class="bento">' +
-      '<div class="bx blue' + lead.tap + '">' +
-        '<div><div class="n">' + lead.n + '</div>' +
-        '<div class="lb">' + lead.lb + '</div></div>' +
-        (joined ? '<span class="arrow">←</span>' : '') + '</div>' +
-      '<div class="bx tap" onclick="show(\'insts\')">' +
-        '<div><div class="n g">' + side.n + '</div>' +
-        '<div class="lb">' + side.lb + '</div></div>' +
-        '<span class="arrow">←</span></div>' +
-      '<div class="bx gold w tap" onclick="openWeek(\'' + homeTrack + '\',' + w.i + ')">' +
-        '<div class="ti">החידה השבועית</div>' +
-        '<div class="ds">שאלה אחת על הדף, פתוחה כל השבוע — ובסופו הגרלת פרסים.</div>' +
-        '<span class="arrow">←</span></div>' +
-      '<div class="bx w tap" onclick="show(\'sfarim\')">' +
-        '<div class="ti">גמרות במחיר מוזל — 15 ₪ במקום 25 ₪</div>' +
-        '<div class="ds">רכישה מרוכזת לכל הרשת. שתי מהדורות, לפי דרך הלימוד שמתאימה לכם.</div>' +
-        '<span class="arrow">←</span></div>' +
+  /* ---- עיגולי הסטטיסטיקה ---- */
+  document.getElementById('rings').innerHTML =
+    '<div class="rings">' +
+      '<div class="ring"><div class="in"><div class="n">' + PROGRAM.lastYear.students +
+        '</div><div class="t">תלמידים למדו<br>מסכת ' + PROGRAM.lastYear.masechet +
+        ' בתשפ"ו</div></div></div>' +
+      '<div class="ring b"><div class="in"><div class="n">' + joined + '</div>' +
+        '<div class="t">ישיבות כבר<br>בתוכנית תשפ"ז</div></div></div>' +
     '</div>';
+
+  /* ---- מי כבר בפנים — גלוי, כדי לעודד למלא את השורות ---- */
+  var inList = INSTITUTIONS.filter(function (i) { return i.joined; });
+  var openN  = INSTITUTIONS.length - inList.length;
+  document.getElementById('inbox').innerHTML =
+    '<div class="inbox"><div class="hd"><b>מי כבר בפנים</b>' +
+    '<span>' + joined + ' מתוך ' + INSTITUTIONS.length + '</span></div><div class="joined">' +
+    inList.map(function (i) { return '<span class="jp">' + esc(i.name) + '</span>'; }).join('') +
+    (openN ? '<span class="jp open">ועוד ' + openN + ' מקומות פתוחים</span>' : '') +
+    '</div><div class="note">הרשימה מתעדכנת בכל הרשת — כל ישיבה שנרשמת מופיעה כאן.</div></div>';
 
   /* ---- דרכי הלימוד ---- */
   var WAYS = [
@@ -853,6 +940,147 @@ function openFromHome(i) {
   var w = contentFor(homeTrack);
   openWeek(homeTrack, w.i);
   deckOpen(i);
+}
+
+/* ============================================================
+   מסלול הרשמה.
+   בשפה מדוברת, במסך אחד, בלי אשף רב־שלבי — פחות נשירה.
+   ============================================================ */
+var reg = { inst:'', instOther:'', who:'', phone:'', z:0, ch:0, sefer:'', note:'' };
+
+function regSaved() {
+  try { return JSON.parse(localStorage.getItem('dfReg') || 'null'); } catch (e) { return null; }
+}
+
+function renderReg() {
+  var saved = regSaved();
+  if (saved && !reg.inst) {
+    reg.inst = saved.code || ''; reg.who = saved.who || ''; reg.phone = saved.phone || '';
+    reg.z = saved.z || 0; reg.ch = saved.ch || 0; reg.sefer = saved.sefer || '';
+    reg.note = saved.note || ''; reg.instOther = saved.instOther || '';
+  }
+  var opts = '<option value="">— בחרו מהרשימה —</option>';
+  INSTITUTIONS.forEach(function (i) {
+    opts += '<option value="' + i.code + '"' + (i.code === reg.inst ? ' selected' : '') +
+            '>' + esc(i.name) + '</option>';
+  });
+  opts += '<option value="other"' + (reg.inst === 'other' ? ' selected' : '') +
+          '>ישיבה אחרת…</option>';
+
+  var total = (reg.z || 0) + (reg.ch || 0);
+  var SEF = [
+    ['veshinantam', 'ושננתם', 'מול כל עמוד גמרא — עמוד ביאור מאיר עיניים. מתאים לשתי ישיבות לימוד בשבוע.'],
+    ['sugya', 'הסוגיה היומית', 'החוברת הצבעונית, פורסת את הדף לסוגיות קצרות. מתאים למי שלומד מעט בכל יום.'],
+    ['later', 'עוד נחליט', 'נרשמים עכשיו, ובוחרים מהדורה בהמשך.']
+  ];
+
+  var h =
+    '<div class="hero" style="padding:22px 20px"><span class="glow g1"></span>' +
+    '<span class="glow g3"></span><h2 style="font-size:1.42rem">מצטרפים לדף השבועי</h2>' +
+    '<div class="rule"></div><div class="sub">דקה אחת. אין התחייבות למספר מדויק — ' +
+    'העריכו, ותמיד אפשר לעדכן.</div></div>' +
+
+    '<div class="step-n"><i>1</i><b>מי אתם?</b></div>' +
+    '<div class="fld"><select id="r-inst" onchange="regSet(\'inst\',this.value)">' + opts + '</select></div>' +
+    '<div class="fld" id="r-other" style="display:' + (reg.inst === 'other' ? 'block' : 'none') + '">' +
+    '<input type="text" id="r-otherName" placeholder="שם הישיבה" value="' + esc(reg.instOther) +
+    '" onchange="regSet(\'instOther\',this.value)"></div>' +
+    '<div class="fld"><div class="label">מי מרכז את התוכנית בישיבה</div>' +
+    '<input type="text" id="r-who" placeholder="שם" value="' + esc(reg.who) +
+    '" onchange="regSet(\'who\',this.value)"></div>' +
+    '<div class="fld"><div class="label">טלפון לחזרה</div>' +
+    '<input type="tel" id="r-phone" placeholder="05X-XXXXXXX" value="' + esc(reg.phone) +
+    '" onchange="regSet(\'phone\',this.value)"></div>' +
+
+    '<div class="step-n"><i>2</i><b>כמה תלמידים, בערך?</b></div>' +
+    '<p style="font-size:.85rem;color:var(--ink-2);font-weight:600;margin-bottom:11px;' +
+    'line-height:1.6">זו הערכה, לא התחייבות. היא רק כדי לדעת כמה גמרות להזמין.</p>' +
+    '<div style="display:grid;gap:9px">' +
+      numRow('z',  'כיתות ז׳', 'מסכת תענית') +
+      numRow('ch', 'כיתות ח׳', 'מסכת מגילה') +
+    '</div>' +
+    (total ? '<div class="total" style="margin-top:12px"><div class="n">' +
+             (total * SFARIM_PRICE.group).toLocaleString('he-IL') + ' ₪</div>' +
+             '<div class="t">' + total + ' גמרות × 15 ₪ · חסכון של ' +
+             (total * (SFARIM_PRICE.normal - SFARIM_PRICE.group)).toLocaleString('he-IL') +
+             ' ₪ מול המחיר הרגיל</div></div>' : '') +
+
+    '<div class="step-n"><i>3</i><b>איזו גמרא מתאימה לכם?</b></div><div class="opt2">' +
+    SEF.map(function (s) {
+      return '<button class="o2' + (reg.sefer === s[0] ? ' sel' : '') +
+             '" onclick="regSet(\'sefer\',\'' + s[0] + '\')">' +
+             '<b>' + s[1] + '</b><span>' + s[2] + '</span></button>';
+    }).join('') + '</div>' +
+
+    '<div class="step-n"><i>4</i><b>עוד משהו שכדאי שנדע?</b></div>' +
+    '<textarea id="r-note" rows="2" placeholder="לא חובה" onchange="regSet(\'note\',this.value)">' +
+    esc(reg.note) + '</textarea>' +
+
+    '<button class="btn gr" style="margin-top:20px" onclick="sendReg()">' +
+    (saved ? 'עדכון ההרשמה' : 'שליחת ההרשמה') + '</button>' +
+    '<p style="font-size:.78rem;color:var(--ink-3);text-align:center;margin-top:10px;' +
+    'font-weight:600">ההרשמה מגיעה ל' + esc(PROGRAM.contact.coord) + '.</p>' +
+    '<div id="r-done"></div>';
+
+  document.getElementById('reg-body').innerHTML = h;
+}
+function numRow(k, label, sub) {
+  return '<div class="num"><div class="lbl">' + label + '<small>' + sub + '</small></div><span></span>' +
+    '<div class="ctl"><button onclick="regStep(\'' + k + '\',-5)">−</button>' +
+    '<input type="tel" id="r-' + k + '" value="' + (reg[k] || 0) +
+    '" onchange="regSet(\'' + k + '\',this.value)">' +
+    '<button onclick="regStep(\'' + k + '\',5)">+</button></div></div>';
+}
+function regSet(k, v) {
+  if (k === 'z' || k === 'ch') v = Math.max(0, parseInt(v, 10) || 0);
+  reg[k] = v;
+  if (k === 'inst' || k === 'z' || k === 'ch' || k === 'sefer') renderReg();
+}
+function regStep(k, d) { regSet(k, (reg[k] || 0) + d); }
+
+function sendReg() {
+  var name = reg.inst === 'other' ? reg.instOther
+           : (INSTITUTIONS.filter(function (i) { return i.code === reg.inst; })[0] || {}).name;
+  if (!name)      { alert('נא לבחור ישיבה.'); return; }
+  if (!reg.who)   { alert('נא למלא שם איש קשר.'); return; }
+  if (!reg.phone) { alert('נא למלא טלפון.'); return; }
+
+  var total = (reg.z || 0) + (reg.ch || 0);
+  var seferName = { veshinantam:'ושננתם', sugya:'הסוגיה היומית', later:'עוד נחליט' }[reg.sefer]
+                  || 'לא נבחר';
+  var payload = { action:'register', inst:name, code:reg.inst, who:reg.who, phone:reg.phone,
+                  z:reg.z, ch:reg.ch, total:total, sefer:reg.sefer, seferName:seferName,
+                  note:reg.note, at:new Date().toISOString() };
+
+  localStorage.setItem('dfReg', JSON.stringify(payload));
+
+  var txt = 'הרשמה לדף השבועי תשפ"ז\n\n' +
+    'ישיבה: ' + name + '\n' +
+    'איש קשר: ' + reg.who + '\n' +
+    'טלפון: ' + reg.phone + '\n' +
+    'כיתות ז׳ (תענית): ' + (reg.z || 0) + '\n' +
+    'כיתות ח׳ (מגילה): ' + (reg.ch || 0) + '\n' +
+    'סה"כ גמרות: ' + total + '\n' +
+    'מהדורה: ' + seferName +
+    (reg.note ? '\nהערה: ' + reg.note : '');
+
+  if (API) {
+    queue(payload);                       // יש שרת — נשלח, וגם נשמר בתור אם אין רשת
+    regDone(txt, false);
+  } else {
+    regDone(txt, true);                   // אין שרת — הודעת וואטסאפ מוכנה לשליחה
+  }
+}
+function regDone(txt, viaWa) {
+  document.getElementById('r-done').innerHTML =
+    '<div class="done-box" style="margin-top:14px">' +
+    (viaWa ? 'ההרשמה מוכנה — נותר לשלוח אותה בוואטסאפ.'
+           : 'ההרשמה נשלחה. תודה!') + '</div>' +
+    (viaWa ? '<a class="btn gr" style="margin-top:10px;text-decoration:none" ' +
+             'href="https://wa.me/' + COORD_WA + '?text=' + encodeURIComponent(txt) +
+             '" target="_blank" rel="noopener">שליחה בוואטסאפ</a>' : '');
+  renderHome();
+  document.getElementById('r-done').scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
 /* חשיפה עדינה בגלילה — נותנת קצב לעמוד בלי להסיח */
@@ -924,7 +1152,6 @@ function openWeek(id, i) {
   var row = tr.cal[i], key = id + '-' + (i + 1);
   var c = CONTENT[key], q = QUIZ[key];
   var tone = id === 'taanit' ? 't-b' : 't-g';
-  var sef = 'https://www.sefaria.org.il/' + tr.sefaria + '.' + dafToNum(row[2]) + 'a?lang=he';
   var lk = (DAF_LINKS[id] || {})[dafKey(row[2])] || [];
 
   var h = '<div class="' + tone + '"><div class="wtop">' +
@@ -933,12 +1160,38 @@ function openWeek(id, i) {
           '<div class="k" style="font-weight:600">' + esc(row[0]) + '</div></div>' +
           '<span class="dafbig">' + esc(row[2]) + '</span></div></div>';
 
+  /* 1. הדף עצמו — זה העיקר, ולכן הוא ראשון */
+  var lnk = function (href, ic, t, sub, cls) {
+    return href
+      ? '<a class="lnk ' + (cls || '') + '" href="' + href + '" target="_blank" rel="noopener">' +
+        '<span class="ic">' + ic + '</span><span>' + t + '<small>' + sub + '</small></span></a>'
+      : '<a class="lnk dim" href="#" onclick="return notYet()">' +
+        '<span class="ic">' + ic + '</span><span>' + t + '<small>' + sub + '</small></span></a>';
+  };
+  var sg = SUGYA[id] || {}, sgPage = (sg.pages || {})[dafKey(row[2])];
+  var sgHref = (sg.base && sg.fmt && sgPage) ? sg.fmt.replace('{p}', sgPage)
+             : (sg.base || '');
+
+  h += '<div class="sec" style="margin-top:16px"><b>הדף עצמו</b><i></i></div><div class="links">' +
+       lnk(lk[0], '⤓', 'צורת הדף', 'הדף להדפסה') +
+       lnk(lk[1], 'פ', 'פירוש חברותא', 'ביאור על הדף') +
+       lnk(sgHref, '◆', 'הסוגיה היומית',
+           sgPage ? 'החוברת הצבעונית — עמוד ' + sgPage : 'החוברת הצבעונית', 'sug') +
+       '</div>';
+
+  /* 2. החידה */
+  if (q) h += '<div class="sec" style="margin-top:18px"><b>החידה השבועית</b><i></i></div>' +
+              '<button class="btn gr" onclick="openQuiz()">לחידה — ולהגרלה</button>';
+
+  /* 3. המצגת — כלי עזר, ולכן אחרונה */
   if (c && c.deck) {
     state.deck = [];
     for (var n = 1; n <= c.deck.n; n++)
       state.deck.push({ img: c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg' });
-    h += '<button class="btn p" style="margin-top:14px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
-         '<div class="sec" style="margin-top:14px"><b>' + c.deck.n + ' שקפים</b><i></i></div>' +
+    h += '<div class="sec" style="margin-top:20px"><b>מצגת עזר · ' + c.deck.n +
+         ' שקפים</b><i></i></div>' +
+         '<button class="btn p" onclick="deckOpen()">▶ הצגה על המסך</button>' +
+         '<div class="thumbs" style="margin-top:10px">'.replace('<div class="thumbs" style="margin-top:10px">','') +
          '<div class="thumbs">';
     state.deck.forEach(function (s, k) {
       h += '<img class="thumb" loading="lazy" src="' + s.img +
@@ -964,22 +1217,6 @@ function openWeek(id, i) {
          '<h3>חומרי הלימוד לדף זה בהכנה</h3>' +
          '<p>המצגת והחידה יעלו לקראת השבוע הזה.</p></div>';
   }
-
-  var lnk = function (href, ic, t, sub) {
-    return href
-      ? '<a class="lnk" href="' + href + '" target="_blank" rel="noopener">' +
-        '<span class="ic">' + ic + '</span><span>' + t + '<small>' + sub + '</small></span></a>'
-      : '<a class="lnk dim" href="#" onclick="return notYet()">' +
-        '<span class="ic">' + ic + '</span><span>' + t + '<small>קישור יתווסף</small></span></a>';
-  };
-  h += '<div class="sec" style="margin-top:18px"><b>הדף עצמו</b><i></i></div><div class="links">' +
-       lnk(lk[0], '⤓', 'צורת הדף', 'הדף להדפסה') +
-       lnk(lk[1], 'פ', 'פירוש חברותא', 'ביאור על הדף') +
-       lnk(sef, 'ג', 'מסכת ' + esc(tr.masechet) + ' דף ' + esc(row[2]), 'לצפייה בספריא') +
-       '</div>';
-
-  if (q) h += '<div class="sec" style="margin-top:18px"><b>החידה השבועית</b><i></i></div>' +
-              '<button class="btn gr" onclick="openQuiz()">לחידה — ולהגרלה</button>';
 
   document.getElementById('week-body').innerHTML = h;
   show('week');

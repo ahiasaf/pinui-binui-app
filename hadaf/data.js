@@ -8,6 +8,20 @@
    שום מידע רגיש: אנשי הקשר נשמרים על המכשיר של הרכז בלבד.       */
 var ADMIN_PIN = '2727';
 
+/* הטלפון שאליו נשלחת הרשמה כשאין עדיין חיבור לשרת —
+   האפליקציה מרכיבה הודעת וואטסאפ מוכנה. פורמט בינלאומי בלי +. */
+var COORD_WA = '972500000000';
+
+/* "הסוגיה היומית" — החוברת הדיגיטלית.
+   base   = כתובת הפליפבוק.
+   fmt    = תבנית הקישור לעמוד מסוים; {p} מוחלף במספר העמוד.
+   pages  = לכל דף, העמוד בחוברת שבו הוא מתחיל.
+   כל אלה ממתינים לכתובת הפליפבוק ולחוברת עצמה.               */
+var SUGYA = {
+  megila: { base:'', fmt:'', pages:{} },
+  taanit: { base:'', fmt:'', pages:{} }
+};
+
 var PROGRAM = {
   name:      'הדף השבועי של בני עקיבא',
   short:     'הדף השבועי',
@@ -124,20 +138,20 @@ var TRACKS = [
    אין כאן טלפונים — הרשימה גלויה לכל מי שנכנס.
    ------------------------------------------------------------ */
 var INSTITUTIONS = [
-  { code:'avir',    name:'יב"ע אביר יעקב',            last:true,  joined:false },
+  { code:'avir',    name:'יב"ע אביר יעקב',            last:true,  joined:true  },
   { code:'ohel',    name:'יב"ע אהל שלמה',             last:false, joined:false },
   { code:'oretzion',name:'יב"ע אור עציון',            last:false, joined:false },
   { code:'baryohai',name:'יב"ע בר יוחאי',             last:false, joined:false },
-  { code:'givat',   name:'יב"ע גבעת שמואל',           last:true,  joined:false },
-  { code:'hadarom', name:'יב"ע הדרום',                last:true,  joined:false },
+  { code:'givat',   name:'יב"ע גבעת שמואל',           last:true,  joined:true  },
+  { code:'hadarom', name:'יב"ע הדרום',                last:true,  joined:true  },
   { code:'halihot', name:'יב"ע הליכות עולם — שומרון', last:false, joined:false },
-  { code:'harel',   name:'יב"ע הראל חולון',           last:true,  joined:false },
-  { code:'hadera',  name:'יב"ע חדרה',                 last:true,  joined:false },
+  { code:'harel',   name:'יב"ע הראל חולון',           last:true,  joined:true  },
+  { code:'hadera',  name:'יב"ע חדרה',                 last:true,  joined:true  },
   { code:'harish',  name:'יב"ע חריש',                 last:false, joined:false },
-  { code:'yavne',   name:'יב"ע יבנה',                 last:true,  joined:false },
+  { code:'yavne',   name:'יב"ע יבנה',                 last:true,  joined:true  },
   { code:'lapid',   name:'יב"ע לפיד תורת נחום',       last:false, joined:false },
   { code:'binyamin',name:'יב"ע מטה בנימין',           last:false, joined:false },
-  { code:'neve',    name:'יב"ע נווה הרצוג',           last:true,  joined:false },
+  { code:'neve',    name:'יב"ע נווה הרצוג',           last:true,  joined:true  },
   { code:'nahal',   name:'יב"ע נחל יצחק — נחלים',     last:false, joined:false },
   { code:'nertamid',name:'יב"ע נר תמיד',              last:false, joined:false },
   { code:'netivmeir',name:'יב"ע נתיב מאיר',           last:false, joined:false },
@@ -145,7 +159,7 @@ var INSTITUTIONS = [
   { code:'eli',     name:'יב"ע עלי',                  last:false, joined:false },
   { code:'kiryat',  name:'יב"ע קרית הרצוג',           last:false, joined:false },
   { code:'rishon',  name:'יב"ע ראשל"צ',               last:false, joined:false },
-  { code:'raanana', name:'יב"ע רעננה',                last:true,  joined:false },
+  { code:'raanana', name:'יב"ע רעננה',                last:true,  joined:true  },
   { code:'tapuah',  name:'יב"ע תפוח / מערב השומרון',  last:false, joined:false },
   { code:'tikvot',  name:'יב"ע תקוות יעקב',           last:false, joined:false }
 ];
