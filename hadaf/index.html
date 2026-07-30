@@ -776,9 +776,9 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '3.1.0';
+var APP_VERSION = '3.2.0';
 
-var API    = localStorage.getItem('dfApi') || '';
+var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
 var myName = localStorage.getItem('dfName') || '';
 var teamCode = '';
@@ -1570,7 +1570,7 @@ var Store = {
 var CFG = Store.get('cfg', {}) || {};
 function cfgSet(k, v) { CFG[k] = v; Store.set('cfg', CFG); applyCfg(); }
 function applyCfg() {
-  if (CFG.api    != null) { API = CFG.api; localStorage.setItem('dfApi', CFG.api); }
+  if (CFG.api) { API = CFG.api; localStorage.setItem('dfApi', CFG.api); }
   if (CFG.coordWa)  COORD_WA = CFG.coordWa;
   if (CFG.pin)      ADMIN_PIN = CFG.pin;
   if (CFG.sugya)    { for (var t in CFG.sugya) SUGYA[t] = CFG.sugya[t]; }
