@@ -23,21 +23,11 @@
   --rule:#E5DAC3; --rule-2:#EFE7D7;
 
   --ok:#3B7D57; --warn:#A87A1C; --stop:#A5382D;
-  --r:20px; --r-m:15px; --r-s:11px;
+  --r:16px; --r-m:13px; --r-s:10px;
   --sh-1:0 1px 2px rgba(37,29,12,.05), 0 2px 8px rgba(37,29,12,.05);
   --sh-2:0 2px 4px rgba(37,29,12,.06), 0 10px 26px rgba(37,29,12,.08);
   --sh-3:0 10px 40px rgba(11,37,80,.20);
   --pat:rgba(23,70,143,.05);
-}
-body.dark{
-  --paper:#0C121D; --surface:#161F2E; --surface-2:#1C2637; --sunk:#111926;
-  --ink:#ECF0F7; --ink-2:#9DAABF; --ink-3:#6F7C91;
-  --rule:#293449; --rule-2:#212B3C;
-  --gold:#DDB44F; --gold-l:#EAC876;
-  --sh-1:0 1px 2px rgba(0,0,0,.4);
-  --sh-2:0 2px 6px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.35);
-  --sh-3:0 10px 40px rgba(0,0,0,.5);
-  --pat:rgba(160,190,255,.045);
 }
 *{box-sizing:border-box;margin:0;padding:0;
   font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif}
@@ -49,13 +39,11 @@ body{background:var(--paper);color:var(--ink);min-height:100vh;line-height:1.55;
 body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   background-size:58px 58px;opacity:.13;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='54' height='54'><g fill='%2317468F'><path d='M27 6l3.2 6.4L27 18.8 23.8 12.4z'/><circle cx='6' cy='33' r='1.7'/><circle cx='48' cy='33' r='1.7'/><path d='M27 35.2l2.2 4.4L27 44l-2.2-4.4z'/></g></svg>")}
-body.dark:before{opacity:.17;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='54' height='54'><g fill='%236E8CC4'><path d='M27 6l3.2 6.4L27 18.8 23.8 12.4z'/><circle cx='6' cy='33' r='1.7'/><circle cx='48' cy='33' r='1.7'/><path d='M27 35.2l2.2 4.4L27 44l-2.2-4.4z'/></g></svg>")}
 .app{width:100%;max-width:580px;min-height:100vh;display:flex;flex-direction:column;
      position:relative;z-index:1;background:transparent}
 
 /* ---------- כותרת ---------- */
-header{position:sticky;top:0;z-index:40;padding:12px 16px;display:flex;
+header{position:sticky;top:0;z-index:40;padding:10px 14px;display:flex;
   justify-content:space-between;align-items:center;gap:10px;color:#fff;
   background:linear-gradient(165deg,var(--blue) 0%,var(--blue-d) 100%);
   box-shadow:0 2px 18px rgba(11,37,80,.28)}
@@ -66,17 +54,17 @@ header .mark{width:34px;height:34px;border-radius:50%;background:#fff;flex:none;
 header .mark svg{width:23px;height:23px}
 header h1{font-size:1rem;font-weight:800;letter-spacing:-.015em;white-space:nowrap}
 header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
-.hbtns{display:flex;gap:7px;flex:none}
+
 .icon{background:rgba(255,255,255,.14);border:none;color:#fff;width:35px;height:35px;
   border-radius:11px;font-size:.98rem;cursor:pointer;display:flex;
   align-items:center;justify-content:center;transition:background .15s,transform .12s}
 .icon:hover{background:rgba(255,255,255,.24)}
 .icon:active{transform:scale(.92)}
 
-.content{padding:18px 16px 30px;flex:1}
-.view{display:none;flex-direction:column;gap:16px}
-.view.on{display:flex;animation:rise .3s cubic-bezier(.22,1,.36,1)}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.content{padding:14px 14px 26px;flex:1}
+.view{display:none;flex-direction:column;gap:12px}
+.view.on{display:flex;animation:rise .26s cubic-bezier(.34,1.4,.5,1)}
+@keyframes rise{from{opacity:0;transform:translateY(9px) scale(.995)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 #splash{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;gap:10px;
@@ -113,14 +101,13 @@ header .sub{font-size:.66rem;opacity:.62;font-weight:600;letter-spacing:.06em}
 .count b{display:block;font-size:2.1rem;font-weight:800;line-height:1;
   font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--blue)}
 .count.g b{color:var(--green-d)}
-body.dark .count b{color:var(--blue-l)} body.dark .count.g b{color:var(--green)}
 .count span{font-size:.73rem;color:var(--ink-3);font-weight:700;margin-top:5px;display:block}
 
 /* ============================================================
    מסך הבית — במה, לא רשימה.
    הדבר הראשון שרואים הוא החומר עצמו, לא תיאור שלו.
    ============================================================ */
-.stage{position:relative;overflow:hidden;border-radius:24px;padding:22px 20px 24px;
+.stage{position:relative;overflow:hidden;border-radius:18px;padding:16px 16px 18px;
   color:#fff;box-shadow:var(--sh-3);
   background:radial-gradient(130% 105% at 78% -10%,#2C63B6 0%,var(--blue) 34%,var(--blue-d) 78%)}
 .stage .g{position:absolute;border-radius:50%}
@@ -130,13 +117,13 @@ body.dark .count b{color:var(--blue-l)} body.dark .count.g b{color:var(--green)}
 .stage .eyebrow{display:flex;align-items:center;gap:9px;font-size:.7rem;font-weight:800;
   letter-spacing:.13em;color:var(--gold-l);margin-bottom:12px}
 .stage .eyebrow s{flex:1;height:1px;background:rgba(255,255,255,.16);text-decoration:none}
-.stage h2{font-size:1.62rem;font-weight:800;line-height:1.15;letter-spacing:-.04em;
+.stage h2{font-size:1.42rem;font-weight:800;line-height:1.15;letter-spacing:-.04em;
   text-wrap:balance}
 .stage .meta{font-size:.85rem;opacity:.72;font-weight:700;margin-top:7px}
 
 /* בחירת שכבה — שני מתגים, לא שני כרטיסים זהים */
-.picker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;
-  background:rgba(0,0,0,.2);padding:5px;border-radius:15px}
+.picker{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:13px;
+  background:rgba(0,0,0,.2);padding:4px;border-radius:13px}
 .pick{border:none;background:none;color:rgba(255,255,255,.62);cursor:pointer;
   padding:10px 6px;border-radius:11px;font-weight:800;font-size:.86rem;
   transition:background .2s,color .2s;line-height:1.3}
@@ -144,7 +131,7 @@ body.dark .count b{color:var(--blue-l)} body.dark .count.g b{color:var(--green)}
 .pick.on{background:rgba(255,255,255,.16);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
 
 /* הכרטיס המרחף — השקף הראשון של השבוע, בפרספקטיבה */
-.showcase{margin:18px -4px 0;perspective:1100px}
+.showcase{margin:13px -2px 0;perspective:1100px}
 .showcase .frame{border-radius:14px;overflow:hidden;box-shadow:0 22px 50px rgba(0,0,0,.42);
   transform:rotateX(7deg) scale(.97);transform-origin:50% 0;cursor:pointer;
   border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);
@@ -165,11 +152,9 @@ body.dark .count b{color:var(--blue-l)} body.dark .count.g b{color:var(--green)}
 /* ---------- שני אזורים, שני עולמות ----------
    מנהל חטיבה צריך לדעת מיד מה הוא רואה: מה התלמידים יקבלו,
    ומה הפאנל שלו. לכן לכל אזור רקע משלו, לרוחב המסך המלא. */
-.zone{margin:0 -16px;padding:20px 16px 24px}
+.zone{margin:0 -14px;padding:16px 14px 18px}
 .zone-s{background:linear-gradient(180deg,rgba(23,70,143,.09),rgba(23,70,143,.04));
   border-block:1px solid rgba(23,70,143,.1)}
-body.dark .zone-s{background:linear-gradient(180deg,rgba(53,116,206,.13),rgba(53,116,206,.05));
-  border-block-color:rgba(53,116,206,.16)}
 .zlabel{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .zlabel .tag{font-size:.66rem;font-weight:800;letter-spacing:.09em;padding:5px 11px;
   border-radius:30px;background:var(--blue);color:#fff;flex:none}
@@ -177,7 +162,7 @@ body.dark .zone-s{background:linear-gradient(180deg,rgba(53,116,206,.13),rgba(53
 .zlabel span{font-size:.83rem;font-weight:700;color:var(--ink-2);line-height:1.4}
 
 /* ---------- פס ההרשמה ---------- */
-.regbar{border-radius:var(--r);padding:18px 20px;color:#fff;position:relative;
+.regbar{border-radius:var(--r);padding:15px 17px;color:#fff;position:relative;
   overflow:hidden;box-shadow:var(--sh-2);
   background:linear-gradient(140deg,#4F8A1E,#2F5A12)}
 .regbar:after{content:"";position:absolute;right:-30px;top:-40px;width:130px;height:130px;
@@ -191,26 +176,25 @@ body.dark .zone-s{background:linear-gradient(180deg,rgba(53,116,206,.13),rgba(53
 
 /* ---------- עיגולי סטטיסטיקה ---------- */
 .rings{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-.ring{position:relative;width:142px;height:142px;border-radius:50%;flex:none;
+.ring{position:relative;width:124px;height:124px;border-radius:50%;flex:none;
   display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-2);
   background:conic-gradient(from 210deg,var(--gold-l),var(--gold) 55%,var(--gold-l))}
 .ring.b{background:conic-gradient(from 210deg,var(--blue-l),var(--blue) 55%,var(--blue-l))}
-.ring:before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface)}
+.ring:before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--surface)}
 .ring .in{position:relative;text-align:center;padding:0 12px}
-.ring .n{font-size:2.2rem;font-weight:800;line-height:1;letter-spacing:-.04em;
+.ring .n{font-size:1.86rem;font-weight:800;line-height:1;letter-spacing:-.04em;
   font-variant-numeric:tabular-nums;color:var(--gold)}
-.ring.b .n{color:var(--blue)} body.dark .ring.b .n{color:var(--blue-l)}
+.ring.b .n{color:var(--blue)}
 .ring .t{font-size:.7rem;font-weight:800;color:var(--ink-3);margin-top:5px;line-height:1.35}
 
 /* ---------- מי כבר בפנים ---------- */
-.inbox{background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--sh-2)}
+.inbox{background:var(--surface);border-radius:var(--r);padding:15px;box-shadow:var(--sh-2)}
 .inbox .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
 .inbox .hd b{font-size:1.04rem;font-weight:800;letter-spacing:-.02em}
 .inbox .hd span{font-size:.74rem;color:var(--ink-3);font-weight:800}
 .joined{display:flex;flex-wrap:wrap;gap:7px}
 .jp{display:inline-flex;align-items:center;gap:6px;background:rgba(111,168,59,.12);
   color:var(--green-d);border-radius:30px;padding:7px 13px;font-size:.83rem;font-weight:800}
-body.dark .jp{background:rgba(111,168,59,.18);color:#9AD165}
 .jp:before{content:"✓";font-size:.7rem}
 .jp.open{background:var(--sunk);color:var(--ink-3)}
 .jp.open:before{content:"";display:none}
@@ -218,7 +202,7 @@ body.dark .jp{background:rgba(111,168,59,.18);color:#9AD165}
   padding-top:14px;border-top:1px solid var(--rule-2);line-height:1.55}
 
 /* ---------- מסלול הרשמה ---------- */
-.step-n{display:flex;align-items:center;gap:10px;margin:20px 0 10px}
+.step-n{display:flex;align-items:center;gap:9px;margin:16px 0 8px}
 .step-n i{width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex:none}
 .step-n b{font-size:1.02rem;font-weight:800;letter-spacing:-.02em}
@@ -229,7 +213,6 @@ body.dark .jp{background:rgba(111,168,59,.18);color:#9AD165}
 .o2 span{display:block;font-size:.81rem;color:var(--ink-2);font-weight:600;
   margin-top:4px;line-height:1.55}
 .o2.sel{border-color:var(--blue);background:var(--accent-soft)}
-body.dark .o2.sel{background:rgba(53,116,206,.14)}
 .num{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
   background:var(--surface);border-radius:var(--r-s);padding:12px 14px;box-shadow:var(--sh-1)}
 .num .lbl{font-size:.92rem;font-weight:800}
@@ -237,7 +220,6 @@ body.dark .o2.sel{background:rgba(53,116,206,.14)}
 .num .ctl{display:flex;align-items:center;gap:6px;justify-self:end}
 .num .ctl button{width:38px;height:38px;border-radius:11px;border:none;background:var(--sunk);
   color:var(--blue);font-size:1.2rem;font-weight:800;cursor:pointer}
-body.dark .num .ctl button{color:var(--blue-l)}
 .num .ctl button:active{transform:scale(.92)}
 .num .ctl input{width:58px;text-align:center;font-size:1.1rem;font-weight:800;
   padding:8px 2px;border-radius:10px}
@@ -247,7 +229,7 @@ body.dark .num .ctl button{color:var(--blue-l)}
 .total .t{font-size:.84rem;opacity:.9;font-weight:700;margin-top:4px}
 
 /* המסלול בזעיר אנפין — כל השנה במבט אחד */
-.mini{background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--sh-1)}
+.mini{background:var(--surface);border-radius:var(--r);padding:13px 15px;box-shadow:var(--sh-1)}
 .mini .cap{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:13px}
 .mini .cap b{font-size:.95rem;font-weight:800;letter-spacing:-.02em}
 .mini .cap span{font-size:.74rem;color:var(--ink-3);font-weight:700}
@@ -279,21 +261,12 @@ body.dark .num .ctl button{color:var(--blue-l)}
 .bx.blue .lb,.bx.blue .ds{color:rgba(255,255,255,.75)}
 .bx.gold{background:linear-gradient(150deg,var(--gold-l),var(--gold));color:#fff}
 .bx.gold .lb,.bx.gold .ds{color:rgba(255,255,255,.85)}
-.bx .n.g{color:var(--green-d)} body.dark .bx .n.g{color:var(--green)}
+.bx .n.g{color:var(--green-d)}
 .bx .arrow{position:absolute;left:14px;bottom:13px;font-size:1rem;opacity:.35}
 
-/* ארבע דרכי הלימוד — שורה נגללת, לא פסקה */
-.ways{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;
-  margin:0 -16px;padding:2px 16px 6px}
-.ways::-webkit-scrollbar{display:none}
-.way{flex:none;width:168px;background:var(--surface);border-radius:var(--r-m);
-  padding:15px;box-shadow:var(--sh-1);border-top:3px solid var(--gold)}
-.way b{display:block;font-size:.92rem;font-weight:800;letter-spacing:-.02em;margin-bottom:5px}
-.way span{font-size:.79rem;color:var(--ink-2);font-weight:600;line-height:1.55}
-
 /* חשיפה בגלילה */
-.rv{opacity:0;transform:translateY(16px)}
-.rv.in{opacity:1;transform:none;transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1)}
+.rv{opacity:0;transform:translateY(13px)}
+.rv.in{opacity:1;transform:none;transition:opacity .34s ease,transform .42s cubic-bezier(.34,1.36,.52,1)}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
 
 /* ---------- כותרות מקטע ---------- */
@@ -317,8 +290,6 @@ body.dark .num .ctl button{color:var(--blue-l)}
   letter-spacing:.03em}
 .track.t-b .grade{background:rgba(23,70,143,.1);color:var(--blue)}
 .track.t-g .grade{background:rgba(111,168,59,.16);color:var(--green-d)}
-body.dark .track.t-b .grade{background:rgba(53,116,206,.2);color:#8CB4F0}
-body.dark .track.t-g .grade{background:rgba(111,168,59,.2);color:#9AD165}
 .track .now{font-size:.9rem;color:var(--ink-2);margin-top:7px}
 .track .now b{color:var(--ink);font-weight:800}
 .track .foot{display:flex;align-items:center;gap:12px;margin-top:16px}
@@ -382,11 +353,11 @@ body.dark .track.t-g .grade{background:rgba(111,168,59,.2);color:#9AD165}
 .chap:before{content:"◆";color:var(--gold);font-size:.55rem;opacity:.7}
 
 /* ---------- כללי ---------- */
-.card{background:var(--surface);border-radius:var(--r-m);padding:18px;box-shadow:var(--sh-1)}
+.card{background:var(--surface);border-radius:var(--r-m);padding:15px;box-shadow:var(--sh-1)}
 .card h3{font-size:1.05rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em}
 .card p{font-size:.91rem;color:var(--ink-2);line-height:1.68}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
-  border:none;border-radius:var(--r-s);padding:16px;font-size:1rem;font-weight:800;
+  border:none;border-radius:var(--r-s);padding:14px;font-size:1rem;font-weight:800;
   cursor:pointer;letter-spacing:-.01em;transition:transform .14s,filter .15s;color:#fff}
 .btn:active{transform:scale(.982)}
 .btn.p{background:linear-gradient(140deg,var(--blue-l),var(--blue));box-shadow:var(--sh-2)}
@@ -399,26 +370,25 @@ body.dark .track.t-g .grade{background:rgba(111,168,59,.2);color:#9AD165}
 .back{background:none;border:none;color:var(--ink-3);font-size:.87rem;font-weight:800;
   cursor:pointer;padding:3px 0;text-align:start;align-self:flex-start}
 .links{display:grid;gap:9px}
-.lnk{display:flex;align-items:center;gap:12px;background:var(--surface);
-  border-radius:var(--r-s);padding:14px;text-decoration:none;color:var(--ink);
+.lnk{display:flex;align-items:center;gap:11px;background:var(--surface);
+  border-radius:var(--r-s);padding:12px;text-decoration:none;color:var(--ink);
   font-weight:800;font-size:.94rem;box-shadow:var(--sh-1);transition:transform .15s}
 .lnk:active{transform:scale(.99)}
 .lnk small{color:var(--ink-3);font-weight:600;font-size:.75rem;display:block;margin-top:1px}
 .lnk .ic{width:38px;height:38px;border-radius:11px;flex:none;font-weight:800;font-size:1rem;
   display:flex;align-items:center;justify-content:center;
   background:rgba(23,70,143,.09);color:var(--blue)}
-body.dark .lnk .ic{background:rgba(53,116,206,.18);color:#8CB4F0}
 .lnk.dim{opacity:.5}
 .lnk.sug .ic{background:linear-gradient(140deg,#8FBF4A,#4F8A1E);color:#fff}
 .lnk.sug{border-inline-start:3px solid var(--green)}
 .msg{text-align:center;color:var(--ink-3);font-size:.9rem;padding:34px 12px;font-weight:600}
 
 /* ---------- מסך שבוע ---------- */
-.wtop{display:flex;justify-content:space-between;align-items:center;gap:14px;
-  background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--sh-2)}
+.wtop{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  background:var(--surface);border-radius:var(--r);padding:15px;box-shadow:var(--sh-2)}
 .wtop .k{font-size:.73rem;font-weight:800;color:var(--ink-3);letter-spacing:.06em}
 .wtop h2{font-size:1.3rem;font-weight:800;letter-spacing:-.032em;line-height:1.2;margin:3px 0}
-.dafbig{width:66px;height:66px;border-radius:50%;color:#fff;flex:none;display:flex;
+.dafbig{width:58px;height:58px;border-radius:50%;color:#fff;flex:none;display:flex;
   align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;
   box-shadow:var(--sh-2)}
 .t-b .dafbig{background:linear-gradient(150deg,var(--blue-l),var(--blue))}
@@ -480,6 +450,40 @@ body.dark .lnk .ic{background:rgba(53,116,206,.18);color:#8CB4F0}
 .opt.right{border-color:var(--ok);background:rgba(59,125,87,.08)}
 .opt.right .n{background:var(--ok);color:#fff}
 .opt.wrong{border-color:var(--stop);background:rgba(165,56,45,.07)}
+/* ---------- בוחר מותאם ----------
+   ה-select המקורי נראה כמו רכיב של המערכת ולא כמו האתר.
+   כאן: שדה בעיצוב שלנו, ותפריט שנפתח כגלולה מלמטה.        */
+.pk{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r-s);
+  padding:13px 14px;font-size:.95rem;font-weight:700;color:inherit;cursor:pointer;
+  text-align:start;transition:border-color .15s}
+.pk.empty{color:var(--ink-3);font-weight:600}
+.pk:active{transform:scale(.995)}
+.pk .cv{width:9px;height:9px;border-inline-end:2px solid var(--ink-3);
+  border-block-end:2px solid var(--ink-3);transform:rotate(45deg);
+  margin-block-end:3px;flex:none}
+#sheet{position:fixed;inset:0;z-index:90;display:none}
+#sheet.on{display:block}
+#sheet .veil{position:absolute;inset:0;background:rgba(11,37,80,.42);
+  animation:vin .2s ease}
+@keyframes vin{from{opacity:0}to{opacity:1}}
+#sheet .panel{position:absolute;inset:auto 0 0 0;background:var(--surface);
+  border-radius:20px 20px 0 0;max-height:78vh;display:flex;flex-direction:column;
+  box-shadow:0 -12px 40px rgba(11,37,80,.28);animation:sup .3s cubic-bezier(.24,1.3,.5,1)}
+@keyframes sup{from{transform:translateY(100%)}to{transform:none}}
+#sheet .hd{padding:16px 18px 12px;flex:none;text-align:center;position:relative}
+#sheet .hd i{display:block;width:38px;height:4px;border-radius:3px;background:var(--rule);
+  margin:0 auto 12px}
+#sheet .hd b{font-size:1.02rem;font-weight:800;letter-spacing:-.02em}
+#sheet .list{overflow-y:auto;padding:0 12px 14px;-webkit-overflow-scrolling:touch}
+#sheet .it{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;
+  padding:14px;border-radius:var(--r-s);font-size:.96rem;font-weight:700;color:inherit;
+  cursor:pointer;text-align:start}
+#sheet .it:active{background:var(--sunk)}
+#sheet .it.on{background:var(--accent-soft);color:var(--blue)}
+#sheet .it .tick{width:18px;flex:none;font-size:.85rem;color:var(--blue);opacity:0}
+#sheet .it.on .tick{opacity:1}
+
 select,input[type=text],input[type=tel],textarea{width:100%;background:var(--surface);
   border:1.5px solid var(--rule);border-radius:var(--r-s);padding:14px;font-size:.96rem;
   color:inherit;outline:none;font-weight:600;transition:border-color .15s}
@@ -505,7 +509,6 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
 .price{display:flex;align-items:baseline;gap:10px;justify-content:center;flex-wrap:wrap;
   background:var(--surface);border-radius:var(--r-m);padding:16px;box-shadow:var(--sh-1)}
 .price b{font-size:2rem;font-weight:800;color:var(--green-d);letter-spacing:-.03em}
-body.dark .price b{color:var(--green)}
 .price s{color:var(--ink-3);font-size:1rem;font-weight:700}
 .price span{font-size:.79rem;color:var(--ink-3);font-weight:700}
 
@@ -557,13 +560,36 @@ body.dark .price b{color:var(--green)}
 .pins i{width:15px;height:15px;border-radius:50%;border:2px solid var(--blue);
   transition:background .15s,transform .15s}
 .pins i.f{background:var(--blue);transform:scale(1.12)}
-body.dark .pins i{border-color:var(--blue-l)} body.dark .pins i.f{background:var(--blue-l)}
 .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;max-width:290px;
   margin:0 auto;direction:ltr}
 .pad button{background:var(--surface);border:none;border-radius:var(--r-s);padding:17px 0;
   font-size:1.3rem;font-weight:800;color:var(--blue);cursor:pointer;box-shadow:var(--sh-1)}
-body.dark .pad button{color:var(--blue-l)}
 .pad button:active{transform:scale(.94)}
+
+/* ---------- ניהול ---------- */
+.tabs{display:flex;gap:5px;background:var(--sunk);padding:4px;border-radius:12px;
+  overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1;min-width:78px;border:none;background:none;color:var(--ink-3);
+  padding:10px 8px;border-radius:9px;font-size:.83rem;font-weight:800;cursor:pointer;
+  white-space:nowrap;transition:background .15s,color .15s}
+.tabs button.on{background:var(--surface);color:var(--blue);box-shadow:var(--sh-1)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 0;border-bottom:1px solid var(--rule-2);font-size:.92rem;font-weight:700}
+.row:last-child{border-bottom:0}
+.row .sub{font-size:.76rem;color:var(--ink-3);font-weight:700;margin-top:2px}
+.sw{width:46px;height:27px;border-radius:20px;background:var(--rule);border:none;
+  position:relative;cursor:pointer;flex:none;transition:background .2s}
+.sw:after{content:"";position:absolute;top:3px;inset-inline-end:3px;width:21px;height:21px;
+  border-radius:50%;background:#fff;transition:transform .22s cubic-bezier(.34,1.4,.5,1);
+  box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--green)}
+.sw.on:after{transform:translateX(-19px)}
+.adm-card{background:var(--surface);border-radius:var(--r-m);padding:15px;box-shadow:var(--sh-1)}
+.adm-card h4{font-size:.98rem;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
+.adm-card p.h{font-size:.79rem;color:var(--ink-3);font-weight:600;line-height:1.55;margin-bottom:11px}
+.pill-n{background:var(--blue);color:#fff;border-radius:20px;padding:2px 9px;
+  font-size:.7rem;font-weight:800;margin-inline-start:6px}
 
 /* ---------- פסים ---------- */
 .strip{text-align:center;font-size:.79rem;font-weight:800;padding:9px;display:none}
@@ -589,17 +615,23 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
   <header>
     <div class="brand" onclick="show('home')">
       <span class="mark">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 2.5 4 7v6.2c0 4.3 3.3 7.4 8 8.3 4.7-.9 8-4 8-8.3V7z" fill="#17468F"/>
-          <path d="M12 2.5 4 7v6.2c0 1 .2 2 .5 2.8L12 12z" fill="#29ABE2"/>
-          <path d="M12 12l7.5 4c.3-.8.5-1.8.5-2.8V7z" fill="#6FA83B"/>
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <g fill="none" stroke-linecap="round">
+            <path d="M21.7 21.7 A40 40 0 1 1 21.7 78.3" stroke="#3E7CC4" stroke-width="11"/>
+            <path d="M29.5 29.5 A29 29 0 1 1 29.5 70.5" stroke="#8CC63F" stroke-width="9.5"/>
+            <path d="M36.6 36.6 A19 19 0 1 1 36.6 63.4" stroke="#9B4B9B" stroke-width="7.5"/>
+            <path d="M42.2 42.2 A11 11 0 1 1 42.2 57.8" stroke="#35B6E8" stroke-width="5.5"/>
+          </g>
+          <g transform="translate(13 62) rotate(-8)">
+            <rect width="27" height="21" rx="3.4" fill="#2E6BC4"/>
+            <g fill="#fff"><rect x="5" y="5.5" width="2.6" height="10.5" rx="1.3"/>
+            <rect x="10.2" y="4" width="2.6" height="12" rx="1.3"/>
+            <rect x="15.4" y="6.5" width="2.6" height="9.5" rx="1.3"/>
+            <rect x="20.6" y="5" width="2.6" height="11" rx="1.3"/></g>
+          </g>
         </svg>
       </span>
       <div><h1>הדף השבועי</h1><div class="sub">בני עקיבא · תשפ"ז</div></div>
-    </div>
-    <div class="hbtns">
-      <button class="icon" onclick="toggleDark()" title="מצב לילה">◐</button>
-      <button class="icon" onclick="show('gate')" title="כניסת צוות">☰</button>
     </div>
   </header>
 
@@ -630,8 +662,6 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
         <div class="rv" id="regbar"></div>
         <div class="rv" id="rings" style="margin-top:18px"></div>
         <div class="rv" id="inbox" style="margin-top:18px"></div>
-        <div class="sec rv" style="margin-top:20px"><b>איך לומדים</b><i></i></div>
-        <div class="ways rv" id="ways"></div>
       </div>
     </div>
 
@@ -698,6 +728,11 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
            font-weight:800;min-height:24px"></div>
     </div>
 
+    <!-- ===== ניהול (נסתר; נגיש רק דרך /admin) ===== -->
+    <div id="v-admin" class="view">
+      <div id="admin-body"></div>
+    </div>
+
     <!-- ===== מוקד שיחות ===== -->
     <div id="v-calls" class="view">
       <button class="back" onclick="show('home')">→ יציאה</button>
@@ -706,12 +741,6 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 
   </div>
 
-  <footer>
-    <i></i>
-    <b>הדף השבועי של בני עקיבא</b><br>
-    <span id="f-people"></span><br>
-    <span style="opacity:.65">גרסה <span id="f-ver"></span></span>
-  </footer>
 </div>
 
 <div id="deck">
@@ -735,23 +764,24 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
   </div>
 </div>
 
+<div id="sheet" onclick="if(event.target.id==='sheet'||event.target.className==='veil')sheetClose()">
+  <div class="veil"></div>
+  <div class="panel"><div class="hd"><i></i><b id="sheet-t"></b></div>
+  <div class="list" id="sheet-l"></div></div>
+</div>
+
 <div id="upd" onclick="applyUpdate()">גרסה חדשה זמינה — לחצו לעדכון</div>
 
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '2.2.0';
+var APP_VERSION = '3.0.0';
 
 var API    = localStorage.getItem('dfApi') || '';
 var myInst = localStorage.getItem('dfInst') || '';
 var myName = localStorage.getItem('dfName') || '';
 var teamCode = '';
 var state = { track:null, week:null, deck:[], di:0, ans:-1, filter:'all' };
-
-document.getElementById('f-ver').textContent = APP_VERSION;
-document.getElementById('f-people').textContent =
-  PROGRAM.contact.head + ' · ' + PROGRAM.contact.coord;
-if (localStorage.getItem('dfDark') === '1') document.body.classList.add('dark');
 
 (function () {
   var m = new URLSearchParams(location.search).get('m');
@@ -922,17 +952,6 @@ function renderHome() {
     (openN ? '<span class="jp open">ועוד ' + openN + ' מקומות פתוחים</span>' : '') +
     '</div><div class="note">הרשימה מתעדכנת בכל הרשת — כל ישיבה שנרשמת מופיעה כאן.</div></div>';
 
-  /* ---- דרכי הלימוד ---- */
-  var WAYS = [
-    ['בבית', 'עם אבא או עם אח גדול, בזמן שנוח לכם.'],
-    ['בחברותא', 'עם אברכי הישיבה — חיבור טבעי בין בוגרים לצעירים.'],
-    ['בחבורה', 'קבוצת לימוד בליווי איש צוות מהישיבה.'],
-    ['לבד', 'עם המצגת והביאור שבאפליקציה, בקצב שלכם.']
-  ];
-  document.getElementById('ways').innerHTML = WAYS.map(function (x) {
-    return '<div class="way"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>';
-  }).join('');
-
   reveal();
 }
 
@@ -959,13 +978,8 @@ function renderReg() {
     reg.z = saved.z || 0; reg.ch = saved.ch || 0; reg.sefer = saved.sefer || '';
     reg.note = saved.note || ''; reg.instOther = saved.instOther || '';
   }
-  var opts = '<option value="">— בחרו מהרשימה —</option>';
-  INSTITUTIONS.forEach(function (i) {
-    opts += '<option value="' + i.code + '"' + (i.code === reg.inst ? ' selected' : '') +
-            '>' + esc(i.name) + '</option>';
-  });
-  opts += '<option value="other"' + (reg.inst === 'other' ? ' selected' : '') +
-          '>ישיבה אחרת…</option>';
+  var instName = reg.inst === 'other' ? 'ישיבה אחרת'
+    : (INSTITUTIONS.filter(function (i) { return i.code === reg.inst; })[0] || {}).name || '';
 
   var total = (reg.z || 0) + (reg.ch || 0);
   var SEF = [
@@ -981,7 +995,7 @@ function renderReg() {
     'העריכו, ותמיד אפשר לעדכן.</div></div>' +
 
     '<div class="step-n"><i>1</i><b>מי אתם?</b></div>' +
-    '<div class="fld"><select id="r-inst" onchange="regSet(\'inst\',this.value)">' + opts + '</select></div>' +
+    pkField('', instName, 'בחרו את הישיבה', 'pickInst()') +
     '<div class="fld" id="r-other" style="display:' + (reg.inst === 'other' ? 'block' : 'none') + '">' +
     '<input type="text" id="r-otherName" placeholder="שם הישיבה" value="' + esc(reg.instOther) +
     '" onchange="regSet(\'instOther\',this.value)"></div>' +
@@ -1037,6 +1051,11 @@ function regSet(k, v) {
   if (k === 'inst' || k === 'z' || k === 'ch' || k === 'sefer') renderReg();
 }
 function regStep(k, d) { regSet(k, (reg[k] || 0) + d); }
+function pickInst() {
+  var items = INSTITUTIONS.map(function (i) { return { v:i.code, t:i.name }; });
+  items.push({ v:'other', t:'ישיבה אחרת…' });
+  pick('הישיבה שלנו', items, reg.inst, function (v) { regSet('inst', v); });
+}
 
 function sendReg() {
   var name = reg.inst === 'other' ? reg.instOther
@@ -1053,6 +1072,10 @@ function sendReg() {
                   note:reg.note, at:new Date().toISOString() };
 
   localStorage.setItem('dfReg', JSON.stringify(payload));
+  var all = Store.get('registrations', []) || [];
+  all = all.filter(function (r) { return r.code !== payload.code; });
+  all.unshift(payload);
+  Store.set('registrations', all);
 
   var txt = 'הרשמה לדף השבועי תשפ"ז\n\n' +
     'ישיבה: ' + name + '\n' +
@@ -1094,7 +1117,7 @@ function reveal() {
     es.forEach(function (e, k) {
       if (!e.isIntersecting) return;
       var el = e.target;
-      setTimeout(function () { el.classList.add('in'); }, k * 70);
+      setTimeout(function () { el.classList.add('in'); }, k * 55);
       io.unobserve(el);
     });
   }, { rootMargin:'0px 0px -8% 0px' });
@@ -1270,11 +1293,7 @@ document.addEventListener('keydown', function (e) {
 function openQuiz() {
   var key = state.track.id + '-' + (state.week + 1), q = QUIZ[key];
   if (!q) return;
-  var opts = '<option value="">— בחרו ישיבה —</option>';
-  INSTITUTIONS.forEach(function (i) {
-    opts += '<option value="' + i.code + '"' + (i.code === myInst ? ' selected' : '') +
-            '>' + esc(i.name) + '</option>';
-  });
+  var qInstName = (INSTITUTIONS.filter(function (i) { return i.code === myInst; })[0] || {}).name || '';
 
   var h = '<div class="sec"><b>החידה השבועית · דף ' +
           esc(state.track.cal[state.week][2]) + '</b><i></i></div>' +
@@ -1284,7 +1303,7 @@ function openQuiz() {
          '<span class="n">' + (i + 1) + '</span><span>' + esc(t) + '</span></button>';
   });
   h += '</div><div style="margin-top:18px">' +
-       '<div class="fld"><div class="label">הישיבה שלי</div><select id="q-inst">' + opts + '</select></div>' +
+       pkField('הישיבה שלי', qInstName, 'בחרו ישיבה', 'pickQuizInst()') +
        '<div class="fld"><div class="label">השם שלי</div>' +
        '<input type="text" id="q-name" placeholder="שם מלא" value="' + esc(myName) + '"></div>' +
        '<div class="fld"><div class="label">טלפון — לשליחת הפרס</div>' +
@@ -1295,6 +1314,12 @@ function openQuiz() {
   document.getElementById('quiz-body').innerHTML = h;
   state.ans = -1;
   show('quiz');
+}
+function pickQuizInst() {
+  pick('הישיבה שלי', INSTITUTIONS.map(function (i) { return { v:i.code, t:i.name }; }),
+       myInst, function (v) {
+    myInst = v; localStorage.setItem('dfInst', v); openQuiz();
+  });
 }
 function pickAns(i) {
   state.ans = i;
@@ -1307,7 +1332,7 @@ function pickAns(i) {
 }
 function sendQuiz() {
   var key = state.track.id + '-' + (state.week + 1), q = QUIZ[key];
-  var inst = document.getElementById('q-inst').value;
+  var inst = myInst;
   var name = document.getElementById('q-name').value.trim();
   var phone = document.getElementById('q-phone').value.trim();
   if (!inst || !name) { alert('נא לבחור ישיבה ולמלא שם.'); return; }
@@ -1519,6 +1544,223 @@ function wipeContacts() {
   renderCalls();
 }
 
+
+/* ============================================================
+   שכבת אחסון.
+   כל הכתיבות עוברות דרך Store, ולכן החלפת המנוע ל-Firebase היא
+   שינוי בקובץ אחד: ממלאים firebaseAdapter ומצביעים את Store אליו.
+   כרגע: אחסון מקומי במכשיר.
+   ============================================================ */
+var Store = {
+  engine: 'local',
+  get: function (k, d) {
+    try { var v = localStorage.getItem('df:' + k);
+          return v === null ? (d === undefined ? null : d) : JSON.parse(v); }
+    catch (e) { return d === undefined ? null : d; }
+  },
+  set: function (k, v) {
+    try { localStorage.setItem('df:' + k, JSON.stringify(v)); } catch (e) {}
+    if (this.push) this.push(k, v);          // מנוע מרוחק, כשיחובר
+  },
+  del: function (k) { try { localStorage.removeItem('df:' + k); } catch (e) {} }
+};
+
+/* הגדרות שנקבעות מתוך מסך הניהול ודורסות את ברירות המחדל שב-data.js */
+var CFG = Store.get('cfg', {}) || {};
+function cfgSet(k, v) { CFG[k] = v; Store.set('cfg', CFG); applyCfg(); }
+function applyCfg() {
+  if (CFG.api    != null) { API = CFG.api; localStorage.setItem('dfApi', CFG.api); }
+  if (CFG.coordWa)  COORD_WA = CFG.coordWa;
+  if (CFG.pin)      ADMIN_PIN = CFG.pin;
+  if (CFG.sugya)    { for (var t in CFG.sugya) SUGYA[t] = CFG.sugya[t]; }
+  if (CFG.joined)   INSTITUTIONS.forEach(function (i) {
+                      if (CFG.joined[i.code] != null) i.joined = !!CFG.joined[i.code]; });
+}
+applyCfg();
+
+/* ============================================================
+   מסך הניהול.
+   לא מקושר מאף מקום באפליקציה — נגיש רק דרך /admin או #admin.
+   ============================================================ */
+var admTab = 'reg';
+
+function renderAdmin() {
+  var TABS = [['reg','הרשמות'],['inst','מוסדות'],['calls','שיחות'],
+              ['sugya','הסוגיה'],['set','הגדרות']];
+  var h = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+          '<div><div style="font-size:1.15rem;font-weight:800;letter-spacing:-.03em">ניהול התוכנית</div>' +
+          '<div style="font-size:.76rem;color:var(--ink-3);font-weight:700">' +
+          esc(PROGRAM.contact.coord) + ' · גרסה ' + APP_VERSION + '</div></div>' +
+          '<button class="back" onclick="admExit()">יציאה →</button></div>' +
+          '<div class="tabs" style="margin-top:12px">' +
+          TABS.map(function (t) {
+            return '<button class="' + (admTab === t[0] ? 'on' : '') +
+                   '" onclick="admGo(\'' + t[0] + '\')">' + t[1] + '</button>';
+          }).join('') + '</div><div id="adm-pane" style="margin-top:14px"></div>';
+  document.getElementById('admin-body').innerHTML = h;
+  admPane();
+}
+function admGo(t) { admTab = t; renderAdmin(); }
+function admExit() { location.hash = ''; show('home'); }
+
+function admPane() {
+  var el = document.getElementById('adm-pane');
+  if (admTab === 'reg')   return admReg(el);
+  if (admTab === 'inst')  return admInst(el);
+  if (admTab === 'calls') { el.innerHTML = '<div id="calls-body"></div>'; return renderCalls(); }
+  if (admTab === 'sugya') return admSugya(el);
+  if (admTab === 'set')   return admSet(el);
+}
+
+/* ---- הרשמות שהתקבלו ---- */
+function admReg(el) {
+  var list = Store.get('registrations', []) || [];
+  var own = regSaved();
+  if (own && !list.some(function (r) { return r.code === own.code; })) list = [own].concat(list);
+  if (!list.length) {
+    el.innerHTML = '<div class="adm-card"><h4>אין עדיין הרשמות</h4>' +
+      '<p class="h">הרשמה שנשלחת מהאפליקציה תופיע כאן. כל עוד אין חיבור לשרת, ' +
+      'רואים כאן רק הרשמות שנשלחו מהמכשיר הזה.</p></div>';
+    return;
+  }
+  var tot = list.reduce(function (a, r) { return a + (r.total || 0); }, 0);
+  el.innerHTML =
+    '<div class="adm-card" style="margin-bottom:11px"><h4>' + list.length +
+    ' הרשמות · ' + tot + ' גמרות</h4><p class="h" style="margin:0">' +
+    'סה"כ להזמנה: ' + (tot * SFARIM_PRICE.group).toLocaleString('he-IL') + ' ₪</p></div>' +
+    list.map(function (r) {
+      return '<div class="adm-card" style="margin-bottom:9px"><h4>' + esc(r.inst) + '</h4>' +
+        '<p class="h" style="margin-bottom:8px">' + esc(r.who || '') +
+        (r.phone ? ' · ' + esc(r.phone) : '') + '</p>' +
+        '<div class="row" style="padding:7px 0"><span>ז׳ / ח׳</span>' +
+        '<b>' + (r.z || 0) + ' / ' + (r.ch || 0) + '</b></div>' +
+        '<div class="row" style="padding:7px 0"><span>מהדורה</span>' +
+        '<b>' + esc(r.seferName || '—') + '</b></div>' +
+        (r.note ? '<div class="row" style="padding:7px 0"><span>הערה</span>' +
+                  '<b style="font-weight:600">' + esc(r.note) + '</b></div>' : '') +
+        (r.phone ? '<a class="btn gr" style="margin-top:10px;text-decoration:none" href="tel:' +
+                   digits(r.phone) + '">חייג</a>' : '') + '</div>';
+    }).join('');
+}
+
+/* ---- מוסדות: מי בפנים ---- */
+function admInst(el) {
+  el.innerHTML = '<div class="adm-card"><h4>מי מופיע כ"בפנים"</h4>' +
+    '<p class="h">המתג קובע מה נראה בעמוד הראשי ובעיגול המונה.</p>' +
+    INSTITUTIONS.map(function (i) {
+      return '<div class="row"><div>' + esc(i.name) +
+        (i.last ? '<div class="sub">למדו בתשפ"ו</div>' : '') + '</div>' +
+        '<button class="sw' + (i.joined ? ' on' : '') +
+        '" onclick="admToggle(\'' + i.code + '\')" aria-label="שיוך"></button></div>';
+    }).join('') + '</div>';
+}
+function admToggle(code) {
+  var j = CFG.joined || {};
+  var cur = INSTITUTIONS.filter(function (i) { return i.code === code; })[0];
+  j[code] = !(cur && cur.joined);
+  cfgSet('joined', j);
+  admPane();
+}
+
+/* ---- הסוגיה היומית ---- */
+function admSugya(el) {
+  var t = homeTrack, sg = SUGYA[t] || { base:'', fmt:'', pages:{} };
+  el.innerHTML =
+    '<div class="adm-card"><h4>הסוגיה היומית — ' +
+    esc(trackById(t).masechet) + '</h4>' +
+    '<p class="h">כתובת הפליפבוק, ותבנית הקישור לעמוד מסוים. ' +
+    'ב-{p} ייכנס מספר העמוד. לדוגמה: ' +
+    '<span dir="ltr">https://…/book.html#p={p}</span></p>' +
+    '<div class="tabs" style="margin-bottom:12px">' +
+    TRACKS.map(function (x) {
+      return '<button class="' + (x.id === t ? 'on' : '') +
+             '" onclick="pickTrack(\'' + x.id + '\');admPane()">' + esc(x.masechet) + '</button>';
+    }).join('') + '</div>' +
+    '<div class="fld"><div class="label">כתובת הפליפבוק</div>' +
+    '<input type="text" dir="ltr" value="' + esc(sg.base) +
+    '" onchange="admSugyaSet(\'base\',this.value)"></div>' +
+    '<div class="fld"><div class="label">תבנית קישור לעמוד</div>' +
+    '<input type="text" dir="ltr" value="' + esc(sg.fmt) +
+    '" onchange="admSugyaSet(\'fmt\',this.value)"></div>' +
+    '<div class="label">עמוד בחוברת לכל דף</div>' +
+    trackById(t).cal.filter(function (r) { return r[2] && r[2] !== 'סיום'; })
+      .map(function (r) {
+        var k = dafKey(r[2]);
+        return '<div class="row"><span>דף ' + esc(r[2]) + '</span>' +
+          '<input type="tel" style="width:74px;text-align:center;padding:8px" value="' +
+          ((sg.pages || {})[k] || '') + '" onchange="admSugyaPage(\'' + k + '\',this.value)"></div>';
+      }).join('') + '</div>';
+}
+function admSugyaSet(k, v) {
+  var c = CFG.sugya || {}; c[homeTrack] = c[homeTrack] || { base:'', fmt:'', pages:{} };
+  c[homeTrack][k] = v.trim(); cfgSet('sugya', c);
+}
+function admSugyaPage(daf, v) {
+  var c = CFG.sugya || {}; c[homeTrack] = c[homeTrack] || { base:'', fmt:'', pages:{} };
+  c[homeTrack].pages = c[homeTrack].pages || {};
+  if (v.trim()) c[homeTrack].pages[daf] = parseInt(v, 10) || '';
+  else delete c[homeTrack].pages[daf];
+  cfgSet('sugya', c);
+}
+
+/* ---- הגדרות ---- */
+function admSet(el) {
+  el.innerHTML =
+    '<div class="adm-card" style="margin-bottom:11px"><h4>יעדי שליחה</h4>' +
+    '<p class="h">כל עוד אין כתובת שרת, הרשמות נשלחות כהודעת וואטסאפ לרכז.</p>' +
+    '<div class="fld"><div class="label">וואטסאפ של הרכז (972…)</div>' +
+    '<input type="tel" dir="ltr" value="' + esc(CFG.coordWa || COORD_WA) +
+    '" onchange="cfgSet(\'coordWa\',this.value.replace(/[^0-9]/g,\'\'))"></div>' +
+    '<div class="fld"><div class="label">כתובת שרת (Apps Script / Firebase)</div>' +
+    '<input type="text" dir="ltr" placeholder="https://script.google.com/…/exec" value="' +
+    esc(CFG.api || API) + '" onchange="cfgSet(\'api\',this.value.trim())"></div></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>קוד הכניסה לניהול</h4>' +
+    '<p class="h">ארבע ספרות. שמור אותו — בלעדיו אין כניסה למסך הזה.</p>' +
+    '<div class="fld"><input type="tel" dir="ltr" maxlength="4" value="' +
+    esc(CFG.pin || ADMIN_PIN) + '" onchange="admPin(this.value)"></div></div>' +
+
+    '<div class="adm-card"><h4>גיבוי</h4>' +
+    '<p class="h">כל ההגדרות וההרשמות שמורות על המכשיר הזה. שמור גיבוי לפני מחיקת היסטוריה.</p>' +
+    '<button class="btn g" onclick="admExport()">העתקת גיבוי</button>' +
+    '<button class="btn g" style="margin-top:8px" onclick="admImport()">שחזור מגיבוי</button></div>';
+}
+function admPin(v) {
+  v = String(v).replace(/[^0-9]/g, '').slice(0, 4);
+  if (v.length !== 4) { alert('הקוד חייב להיות בן ארבע ספרות.'); admPane(); return; }
+  cfgSet('pin', v);
+  alert('הקוד עודכן.');
+}
+function admExport() {
+  var dump = { cfg:CFG, contacts:contacts(), reg:regSaved(),
+               registrations:Store.get('registrations', []) };
+  var t = JSON.stringify(dump);
+  if (navigator.clipboard) navigator.clipboard.writeText(t);
+  alert('הגיבוי הועתק. שמור אותו במקום בטוח.');
+}
+function admImport() {
+  var t = prompt('הדביקו את הגיבוי:');
+  if (!t) return;
+  try {
+    var d = JSON.parse(t);
+    if (d.cfg) { CFG = d.cfg; Store.set('cfg', CFG); applyCfg(); }
+    if (d.contacts) saveContacts(d.contacts);
+    if (d.reg) localStorage.setItem('dfReg', JSON.stringify(d.reg));
+    if (d.registrations) Store.set('registrations', d.registrations);
+    alert('שוחזר.'); renderAdmin();
+  } catch (e) { alert('הגיבוי אינו תקין.'); }
+}
+
+/* ---- ניתוב נסתר ל-/admin ---- */
+function isAdminRoute() {
+  return /\/admin\/?$/.test(location.pathname) || location.hash === '#admin';
+}
+function adminEntry() {
+  if (Store.get('admOk')) { renderAdmin(); show('admin'); }
+  else show('gate');
+}
+window.addEventListener('hashchange', function () { if (isAdminRoute()) adminEntry(); });
+
 /* ---------- קוד כניסה ---------- */
 (function () {
   var h = '';
@@ -1541,9 +1783,38 @@ function paintPins() {
   for (var i = 0; i < 4; i++) p[i].className = i < teamCode.length ? 'f' : '';
 }
 function tryCode() {
-  if (teamCode === ADMIN_PIN) { teamCode = ''; paintPins(); show('calls'); return; }
+  if (teamCode === ADMIN_PIN) {
+    teamCode = ''; paintPins();
+    Store.set('admOk', 1);
+    renderAdmin(); show('admin');
+    return;
+  }
   document.getElementById('gate-msg').textContent = 'קוד שגוי';
   teamCode = ''; setTimeout(paintPins, 350);
+}
+
+/* ---------- בוחר מותאם ---------- */
+var sheetCb = null;
+function pick(title, items, current, cb) {
+  sheetCb = cb;
+  document.getElementById('sheet-t').textContent = title;
+  document.getElementById('sheet-l').innerHTML = items.map(function (it) {
+    return '<button class="it' + (it.v === current ? ' on' : '') +
+           '" onclick="sheetPick(\'' + it.v + '\')">' +
+           '<span class="tick">✓</span><span>' + esc(it.t) + '</span></button>';
+  }).join('');
+  document.getElementById('sheet').className = 'on';
+}
+function sheetPick(v) { sheetClose(); if (sheetCb) sheetCb(v); }
+function sheetClose() { document.getElementById('sheet').className = ''; }
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.getElementById('sheet').className === 'on') sheetClose();
+});
+/* שדה בוחר: נראה כמו האתר, נפתח כגלולה */
+function pkField(label, value, placeholder, onOpen) {
+  return '<div class="fld">' + (label ? '<div class="label">' + label + '</div>' : '') +
+    '<button class="pk' + (value ? '' : ' empty') + '" onclick="' + onOpen + '">' +
+    '<span>' + esc(value || placeholder) + '</span><span class="cv"></span></button></div>';
 }
 
 /* ---------- תור אופליין ---------- */
@@ -1578,11 +1849,6 @@ function paintNet() {
 window.addEventListener('online',  function () { paintNet(); flush(); });
 window.addEventListener('offline', paintNet);
 
-function toggleDark() {
-  document.body.classList.toggle('dark');
-  localStorage.setItem('dfDark', document.body.classList.contains('dark') ? '1' : '0');
-}
-
 /* ---------- עדכון גרסה (המנגנון של "יגדיל תורה") ---------- */
 var newWorker = null, refreshing = false;
 function applyUpdate() {
@@ -1614,7 +1880,7 @@ function registerSW() {
 
 (function boot() {
   renderHome(); paintQueue(); paintNet(); flush(); registerSW();
-  show('home');
+  if (isAdminRoute()) adminEntry(); else show('home');
   setTimeout(function () { document.getElementById('splash').className = 'off'; }, 340);
 })();
 </script>
