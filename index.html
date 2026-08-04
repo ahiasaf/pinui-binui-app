@@ -312,35 +312,78 @@ if (localStorage.getItem('pbDark') === '1') document.body.classList.add('dark');
 // תור כתיבה — המערכת חייבת לעבוד בחדר מדרגות בלי קליטה.
 // כל כתיבה נכנסת לתור מקומי ונשלחת כשיש רשת. המסך אף פעם לא ממתין.
 // ============================================================
+var QUEUE_MAX_TRIES = 3;
+var flushing = false;
+
+function loadQueue() {
+  try { return JSON.parse(localStorage.getItem('pbQueue') || '[]'); } catch (e) { return []; }
+}
+function saveQueue(q) { localStorage.setItem('pbQueue', JSON.stringify(q)); }
+
 function queue(payload) {
-  var q = JSON.parse(localStorage.getItem('pbQueue') || '[]');
+  var q = loadQueue();
   q.push(payload);
-  localStorage.setItem('pbQueue', JSON.stringify(q));
+  saveQueue(q);
   showQueue();
   flush();
 }
 
+// אין רשת ותשובת שרת פסולה נראים אותו דבר ל-fetch, אבל הם הפוכים:
+// על הראשון צריך לחכות, ועל השני אסור לחכות — פריט שהשרת דוחה שוב ושוב
+// יישאר בראש התור ויחסום כל עדכון שנרשם אחריו, בשקט.
 function flush() {
-  var q = JSON.parse(localStorage.getItem('pbQueue') || '[]');
-  if (!q.length || !API) return;
-  var item = q[0];
-  fetch(API, { method:'POST', body: JSON.stringify(item) })
-    .then(function (r) { return r.json(); })
+  var q = loadQueue();
+  if (!q.length || !API || flushing) return;
+  flushing = true;
+
+  fetch(API, { method:'POST', body: JSON.stringify(q[0]) })
+    .then(function (r) {
+      return r.text().then(function (body) {
+        var parsed = null;
+        try { parsed = JSON.parse(body); } catch (e) {}
+        if (!r.ok || !parsed) {
+          var rejected = new Error('server rejected the queued update');
+          rejected.rejected = true;
+          throw rejected;
+        }
+      });
+    })
     .then(function () {
-      var rest = JSON.parse(localStorage.getItem('pbQueue') || '[]');
+      var rest = loadQueue();
       rest.shift();
-      localStorage.setItem('pbQueue', JSON.stringify(rest));
+      saveQueue(rest);
+      flushing = false;
       showQueue();
       if (rest.length) flush();
     })
-    .catch(function () { /* אין רשת — יישלח בפעם הבאה */ });
+    .catch(function (error) {
+      flushing = false;
+      if (!error || !error.rejected) { showQueue(); return; }   // אין רשת — נשמר לפעם הבאה
+
+      var rest = loadQueue();
+      if (!rest.length) { showQueue(); return; }
+      rest[0].tries = (rest[0].tries || 0) + 1;
+      if (rest[0].tries < QUEUE_MAX_TRIES) { saveQueue(rest); showQueue(); return; }
+
+      var stuck = rest.shift();
+      var failed = [];
+      try { failed = JSON.parse(localStorage.getItem('pbFailed') || '[]'); } catch (e) {}
+      failed.push(stuck);
+      localStorage.setItem('pbFailed', JSON.stringify(failed.slice(-50)));
+      saveQueue(rest);
+      showQueue();
+      if (rest.length) flush();
+    });
 }
 
 function showQueue() {
-  var n = JSON.parse(localStorage.getItem('pbQueue') || '[]').length;
+  var n = loadQueue().length;
+  var stuck = 0;
+  try { stuck = JSON.parse(localStorage.getItem('pbFailed') || '[]').length; } catch (e) {}
   var el = document.getElementById('queued');
-  el.className = n ? 'queued on' : 'queued';
-  el.textContent = n ? n + ' עדכונים ממתינים לרשת' : '';
+  el.className = n || stuck ? 'queued on' : 'queued';
+  if (stuck) el.textContent = stuck + ' עדכונים לא התקבלו בשרת' + (n ? ' · ' + n + ' ממתינים לרשת' : '');
+  else el.textContent = n ? n + ' עדכונים ממתינים לרשת' : '';
 }
 window.addEventListener('online', flush);
 
@@ -905,12 +948,17 @@ function openDetail() {
 
   var info = document.getElementById('d-info');
   info.innerHTML = '<h3>פרטים</h3>';
-  [['מצב', a.status], ['חוסרים', a.missing.join(', ') || '—'],
+  [['מצב', STATUS_HE[a.status] || a.status], ['חוסרים', a.missing.join(', ') || '—'],
    ['מקום חתימה', a.signingPlace || '—'], ['מגע הבא', a.nextAt || '—'],
    ['מס׳ מגעים', a.contactCount]].forEach(function (pair) {
     var row = document.createElement('div');
     row.className = 'kv';
-    row.innerHTML = '<span>' + pair[0] + '</span><b>' + pair[1] + '</b>';
+    var label = document.createElement('span');
+    label.textContent = pair[0];
+    var value = document.createElement('b');
+    value.textContent = pair[1];
+    row.appendChild(label);
+    row.appendChild(value);
     info.appendChild(row);
   });
 
@@ -920,7 +968,10 @@ function openDetail() {
     if (!c.notes) return;
     var row = document.createElement('div');
     row.className = 'hist';
-    row.innerHTML = '<b>' + c.name + ':</b> ' + c.notes;
+    var who = document.createElement('b');
+    who.textContent = c.name + ':';
+    row.appendChild(who);
+    row.appendChild(document.createTextNode(' ' + c.notes));
     hist.appendChild(row);
   });
 
@@ -1043,8 +1094,12 @@ function markObjector() {
   queue({ pin: pinCode, action: 'set_state', apartment: current.apt.id, status: 'objector' });
   localStorage.setItem('pbData', JSON.stringify(db));
   render();
-  show(backTo);
-  nextCard();
+
+  // המשך התנועה תלוי במסלול שממנו נפתח הכרטיס. nextCard מציג את מסך
+  // הסבב, ולכן קריאה לו אחרי חיפוש זרקה אותך לסבב שלא התחלת.
+  if (roundMode === 'update') { nextUpdate(); return; }
+  if (roundMode === 'call') { nextCard(); return; }
+  show('v-home');
 }
 
 // ============================================================
