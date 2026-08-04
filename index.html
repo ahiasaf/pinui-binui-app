@@ -122,6 +122,19 @@
   .hist { font-size:.85rem; color:var(--ink-2); padding:8px 0; border-bottom:1px solid var(--rule); }
   .hist b { color:var(--ink); }
 
+  /* ---------- מעקב שליחות ---------- */
+  .send { background:var(--surface-2); border:1px solid var(--rule); border-radius:var(--radius);
+          padding:12px; margin-bottom:9px; display:flex; flex-direction:column; gap:6px; }
+  .send .who { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .send .who b { font-size:.95rem; }
+  .send .txt { font-size:.82rem; color:var(--ink-3); line-height:1.5; }
+  .st { font-size:.7rem; font-weight:800; padding:3px 9px; border-radius:20px; white-space:nowrap;
+        background:var(--accent-soft); color:var(--accent); }
+  .st.ok { background:rgba(46,122,82,.14); color:var(--ok); }
+  .st.bad { background:rgba(165,56,45,.14); color:var(--stop); }
+  .st.wait { background:rgba(156,112,22,.14); color:var(--warn); }
+  .send .row2 button { padding:9px; font-size:.82rem; }
+
   /* ---------- התחברות ---------- */
   .pins { display:flex; justify-content:center; gap:14px; margin:18px 0; }
   .pins i { width:16px; height:16px; border-radius:50%; border:2px solid var(--accent); }
@@ -190,8 +203,22 @@
         <div class="cell" onclick="startDeck('trace')"><b id="c-trace">0</b><span>לאיתור</span></div>
       </div>
 
+      <button class="btn g" id="s-open" onclick="openSends()" style="display:none"></button>
+
       <input type="text" id="q" placeholder="חיפוש דייר לפי שם, טלפון או בניין" oninput="search()">
       <div id="q-out"></div>
+    </div>
+
+    <!-- מעקב שליחות -->
+    <div id="v-sends" class="view">
+      <div class="top"><button onclick="show('v-home')">›</button><span id="s-cap"></span></div>
+      <div class="strip">
+        <div class="cell"><b id="s-done">0</b><span>נמסרו</span></div>
+        <div class="cell"><b id="s-way">0</b><span>בדרך</span></div>
+        <div class="cell"><b id="s-bad">0</b><span>לא נמסרו</span></div>
+      </div>
+      <button class="btn g" onclick="refreshSends()">בדוק מצב עכשיו</button>
+      <div id="s-list"></div>
     </div>
 
     <!-- סבב -->
@@ -250,8 +277,11 @@
       <div class="name" id="u-name"></div>
       <div class="where" id="u-where"></div>
       <textarea id="u-text" rows="10"></textarea>
-      <button class="btn ok" onclick="sendUpdate()">פתח בוואטסאפ</button>
-      <button class="btn g" onclick="nextUpdate()">דלג</button>
+      <button class="btn ok" onclick="sendUpdate()">שלח מהאפליקציה</button>
+      <div class="row2">
+        <button class="btn g" onclick="openWhatsapp()">פתח בוואטסאפ</button>
+        <button class="btn g" onclick="nextUpdate()">דלג</button>
+      </div>
     </div>
 
     <!-- פרטים -->
@@ -301,7 +331,7 @@ var API = localStorage.getItem('pbApi') || '';   // כתובת ה-Apps Script
 var pinCode = localStorage.getItem('pbPin') || '';
 var DEFAULT_CALL_MINUTES = 8;   // עד שיצטבר מספיק מידע אמיתי
 
-var db = { project:{}, apartments:[] };
+var db = { project:{}, apartments:[], sends:[], sending:{ ready:false, cap:0, usedToday:0 } };
 var round = [], idx = 0, current = null, backTo = 'v-home';
 var outcome = '', whenDays = 7, roundMode = 'call';
 var typed = '';
@@ -405,6 +435,7 @@ window.onload = function () {
   if (cached) {
     try { db = JSON.parse(cached); } catch (e) {}
   }
+  normalizeDb();
   hideSplash();
   showQueue();
   if (pinCode) { show('v-home'); render(); refresh(); }
@@ -414,6 +445,16 @@ window.onload = function () {
 
 function hideSplash() { document.getElementById('splash').classList.add('off'); }
 
+// מטמון שנשמר בגרסה קודמת לא מכיר שדות שנוספו מאז. בלי ההשלמה הזו
+// המסך היה נופל על שדה חסר דווקא אצל מי שכבר מתקין את האפליקציה.
+function normalizeDb() {
+  if (!db || typeof db !== 'object') db = {};
+  db.project = db.project || {};
+  db.apartments = db.apartments || [];
+  db.sends = db.sends || [];
+  db.sending = db.sending || { ready: false, cap: 0, usedToday: 0 };
+}
+
 function refresh() {
   if (!API || !pinCode) return Promise.resolve();
   return fetch(API + '?pin=' + encodeURIComponent(pinCode))
@@ -421,6 +462,7 @@ function refresh() {
     .then(function (data) {
       if (data.status !== 'ok') return;
       db = data;
+      normalizeDb();
       localStorage.setItem('pbData', JSON.stringify(db));
       render();
     })
@@ -456,6 +498,7 @@ function tryAuth() {
       pinCode = candidate;
       localStorage.setItem('pbPin', pinCode);
       db = data;
+      normalizeDb();
       localStorage.setItem('pbData', JSON.stringify(db));
       document.getElementById('auth-msg').textContent = '';
       show('v-home');
@@ -502,6 +545,17 @@ function render() {
   document.getElementById('c-comp').textContent = deck('completion').length;
   document.getElementById('c-trace').textContent = deck('trace').length;
   document.getElementById('c-upd').textContent = updateCandidates().length;
+
+  var tally = sendTally();
+  var open = document.getElementById('s-open');
+  if (!db.sends.length) {
+    open.style.display = 'none';
+  } else {
+    open.style.display = 'block';
+    open.textContent = tally.bad
+      ? 'מעקב שליחות · ' + tally.bad + ' לא נמסרו'
+      : (tally.way ? 'מעקב שליחות · ' + tally.way + ' בדרך' : 'מעקב שליחות');
+  }
 }
 
 // ============================================================
@@ -867,10 +921,23 @@ if (Recognition) {
 // לא נשלח למי שחתם, למתנגד, ולמי שנגעת בו בשבוע האחרון —
 // הודעה גנרית באמצע חוט אישי חי מזיקה יותר משהיא מועילה.
 // ============================================================
+var SEND_OPEN = { 'ממתין':1, 'בדרך':1 };
+
+// דירה שיש לה הודעה שעדיין לא נמסרה כבר טופלה, גם אם היומן לא יודע
+// על כך עדיין: המגע נרשם רק כשההודעה באמת יוצאת. בלי הסינון הזה כל
+// רענון היה מציע את אותו דייר שוב ומכניס אותו לתור פעם נוספת.
+function hasOpenSend(id) {
+  for (var i = 0; i < db.sends.length; i++) {
+    if (db.sends[i].apartment === id && SEND_OPEN[db.sends[i].state]) return true;
+  }
+  return false;
+}
+
 function updateCandidates() {
   return db.apartments.filter(function (a) {
     if (a.status !== 'open') return false;
     if (daysSince(a.lastAt) < 7) return false;
+    if (hasOpenSend(a.id)) return false;
     var c = dominant(a);
     return !!c.phone;
   });
@@ -911,7 +978,39 @@ function showUpdate() {
 
 function nextUpdate() { idx++; showUpdate(); }
 
+// שליחה מהאפליקציה. הכפתור לא מדבר עם וואטסאפ — הוא רושם בקשה בשרת,
+// והשרת (שהוא היחיד שמחזיק את הטוקן) משגר אותה. לכן אין כאן אישור
+// מיידי: ההודעה נחשבת שנשלחה רק כשהשרת מדווח שהיא יצאה.
 function sendUpdate() {
+  var a = current.apt, c = dominant(a);
+  var text = document.getElementById('u-text').value.trim();
+  if (!text) { alert('אין טקסט לשליחה.'); return; }
+  if (!c.phone) { alert('לאיש הקשר אין מספר טלפון. אפשר להוסיף אותו בכרטיס.'); return; }
+  if (!db.sending.ready) {
+    alert('שליחה אוטומטית עוד לא הוגדרה בשרת.\nבינתיים אפשר "פתח בוואטסאפ".');
+    return;
+  }
+
+  var id = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  queue({
+    pin: pinCode, action: 'send_whatsapp', sendId: id,
+    apartment: a.id, contact: c.name, phone: c.phone, text: text
+  });
+
+  // רישום מקומי מיידי כדי שהמסך יראה את השליחה גם בלי רשת.
+  // השרת הוא המקור הקובע, והרענון הבא ידרוס את השורה הזו.
+  db.sends.unshift({
+    id: id, at: today(), apartment: a.id, contact: c.name, phone: c.phone,
+    preview: text.slice(0, 90), state: 'ממתין', sentAt: '', run: '', note: ''
+  });
+  localStorage.setItem('pbData', JSON.stringify(db));
+  render();
+  nextUpdate();
+}
+
+// המסלול הידני נשאר במקומו ולא ייעלם: הוא עובד גם כשהשרת לא מוגדר,
+// גם כשהחיבור לוואטסאפ נפל, וגם כשפשוט רוצים לראות את ההודעה לפני ששולחים.
+function openWhatsapp() {
   var a = current.apt, c = dominant(a);
   var text = document.getElementById('u-text').value;
   var phone = c.phone.replace(/\D/g, '').replace(/^0/, '972');
@@ -924,6 +1023,104 @@ function sendUpdate() {
   a.lastAt = today();
   localStorage.setItem('pbData', JSON.stringify(db));
   nextUpdate();
+}
+
+// ============================================================
+// מעקב שליחות — "מי לא קיבל" חייב להיות מסך, לא חקירה בגיליון
+// ============================================================
+function sendTally() {
+  var t = { done: 0, way: 0, bad: 0 };
+  db.sends.forEach(function (s) {
+    if (s.state === 'נמסר') t.done++;
+    else if (SEND_OPEN[s.state]) t.way++;
+    else if (s.state === 'נכשל') t.bad++;
+  });
+  return t;
+}
+
+function openSends() { drawSends(); show('v-sends'); refresh().then(drawSends); }
+
+function refreshSends() {
+  // הבקשה הזו רק דוחפת את השרת לבדוק את התור עכשיו במקום להמתין
+  // לבדיקה המתוזמנת הבאה. התשובה מגיעה ברענון שאחריה.
+  queue({ pin: pinCode, action: 'pump_sends' });
+  setTimeout(function () { refresh().then(drawSends); }, 2500);
+}
+
+function drawSends() {
+  var t = sendTally();
+  document.getElementById('s-done').textContent = t.done;
+  document.getElementById('s-way').textContent = t.way;
+  document.getElementById('s-bad').textContent = t.bad;
+  document.getElementById('s-cap').textContent = db.sending.cap
+    ? 'נשלחו היום ' + db.sending.usedToday + ' מתוך ' + db.sending.cap
+    : '';
+
+  var list = document.getElementById('s-list');
+  list.innerHTML = '';
+  if (!db.sends.length) {
+    var empty = document.createElement('div');
+    empty.className = 'msg';
+    empty.textContent = 'עוד לא נשלחה אף הודעה מהאפליקציה.';
+    list.appendChild(empty);
+    return;
+  }
+  db.sends.slice(0, 60).forEach(function (s) { list.appendChild(sendCard(s)); });
+}
+
+var SEND_LOOK = {
+  'נמסר': 'ok', 'נכשל': 'bad', 'בדרך': 'wait', 'ממתין': 'wait', 'בוטל': ''
+};
+
+function sendCard(s) {
+  var box = document.createElement('div');
+  box.className = 'send';
+
+  var head = document.createElement('div');
+  head.className = 'who';
+  var who = document.createElement('b');
+  who.textContent = s.contact || s.phone || s.apartment;
+  var badge = document.createElement('span');
+  badge.className = 'st ' + (SEND_LOOK[s.state] || '');
+  badge.textContent = s.state;
+  head.appendChild(who);
+  head.appendChild(badge);
+  box.appendChild(head);
+
+  var txt = document.createElement('div');
+  txt.className = 'txt';
+  txt.textContent = (s.sentAt || s.at || '') + (s.note ? ' · ' + s.note : '');
+  box.appendChild(txt);
+
+  if (s.state === 'נכשל' || s.state === 'בוטל') {
+    var row = document.createElement('div');
+    row.className = 'row2';
+    var again = document.createElement('button');
+    again.className = 'btn g';
+    again.textContent = 'שלח שוב';
+    again.onclick = function () { retrySend(s); };
+    // בכוונה בלי הטקסט: מה שנשמר כאן הוא תחילת ההודעה בלבד, והדבקה
+    // של חצי הודעה גרועה מלהתחיל אותה מחדש.
+    var manual = document.createElement('button');
+    manual.className = 'btn g';
+    manual.textContent = 'פתח שיחה';
+    manual.onclick = function () {
+      window.open('https://wa.me/' + s.phone.replace(/\D/g, ''), '_blank');
+    };
+    row.appendChild(again);
+    row.appendChild(manual);
+    box.appendChild(row);
+  }
+  return box;
+}
+
+function retrySend(s) {
+  queue({ pin: pinCode, action: 'retry_send', sendId: s.id });
+  s.state = 'ממתין';
+  s.note = '';
+  localStorage.setItem('pbData', JSON.stringify(db));
+  drawSends();
+  render();
 }
 
 // ============================================================
