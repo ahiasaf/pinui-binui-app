@@ -341,11 +341,17 @@ function flush() {
       return r.text().then(function (body) {
         var parsed = null;
         try { parsed = JSON.parse(body); } catch (e) {}
-        if (!r.ok || !parsed) {
-          var rejected = new Error('server rejected the queued update');
-          rejected.rejected = true;
-          throw rejected;
-        }
+        // Apps Script מחזיר 200 גם על שגיאה, והמצב נמצא בגוף התשובה בלבד.
+        // בלי הבדיקה הזו עדכון שנדחה היה נמחק מהתור כאילו נקלט.
+        if (parsed && parsed.status === 'ok') return;
+
+        // קוד גישה שגוי הוא מצב זמני שנפתר בהתחברות מחדש. אסור לספור
+        // אותו כדחייה, אחרת תיעוד שדה שלם היה נמחק בגלל קוד שהוחלף.
+        if (parsed && parsed.status === 'wrong_pin') throw new Error('wrong pin');
+
+        var rejected = new Error(parsed && parsed.status ? parsed.status : 'unreadable response');
+        rejected.rejected = true;
+        throw rejected;
       });
     })
     .then(function () {
