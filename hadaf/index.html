@@ -219,17 +219,6 @@ body{background:var(--paper);
 .step-n i{width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex:none}
 .step-n b{font-size:1.02rem;font-weight:800;letter-spacing:-.02em}
-.opt2{display:grid;gap:9px}
-.o2{background:var(--surface);border:2px solid transparent;border-radius:var(--r-s);
-  padding:15px;cursor:pointer;text-align:start;width:100%;color:inherit;box-shadow:var(--sh-1)}
-.o2 b{display:flex;align-items:baseline;justify-content:space-between;gap:9px;
-  font-size:.98rem;font-weight:800;letter-spacing:-.02em}
-.o2 b em{font-style:normal;font-size:.86rem;font-weight:800;color:var(--green-d);
-  white-space:nowrap;letter-spacing:-.01em}
-.o2 b em s{color:var(--ink-3);font-weight:700;font-size:.78rem;margin-inline-start:3px}
-.o2 span{display:block;font-size:.81rem;color:var(--ink-2);font-weight:600;
-  margin-top:4px;line-height:1.55}
-.o2.sel{border-color:var(--blue);background:var(--accent-soft)}
 .num{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
   background:var(--surface);border-radius:var(--r-s);padding:12px 14px;box-shadow:var(--sh-1)}
 .num .lbl{font-size:.92rem;font-weight:800}
@@ -515,30 +504,27 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
 
 /* ---------- ספרים ---------- */
 .sf{border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh-2)}
-.sf .top{padding:16px 18px;color:#fff}
+.sf .top{padding:14px 18px;color:#fff;text-align:center}
 .sf.blue .top{background:linear-gradient(150deg,var(--blue-d),var(--blue))}
 .sf.green .top{background:linear-gradient(150deg,var(--green-d),var(--green))}
 .sf .top b{font-size:1.2rem;font-weight:800;display:block;letter-spacing:-.02em}
-.sf .top span{font-size:.77rem;opacity:.85;font-weight:600}
 .sf .body{padding:16px 18px;display:grid;gap:10px}
 .sf .body p{font-size:.9rem;color:var(--ink-2);line-height:1.68}
-.sf .rhythm{font-size:.72rem;font-weight:800;color:var(--gold);letter-spacing:.06em}
-.sf .tag-p{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sf .tag-p{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;justify-content:center}
 .sf .tag-p b{font-size:1.5rem;font-weight:800;color:var(--green-d);letter-spacing:-.03em}
 .sf .tag-p s{color:var(--ink-3);font-size:.9rem;font-weight:700}
 .sf .tag-p i{font-style:normal;font-size:.75rem;color:var(--ink-3);font-weight:700}
 .sf .ph{background:var(--sunk);border:1.5px dashed var(--rule);border-radius:var(--r-s);
   padding:26px;text-align:center;color:var(--ink-3);font-size:.79rem;font-weight:700}
-/* גלריית הספר — גלילה אופקית, שתי תמונות צרות מדי זו לצד זו בנייד */
-.pics{display:flex;gap:9px;overflow-x:auto;margin:0 -18px;padding:0 18px 2px;
-  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-.pics::-webkit-scrollbar{display:none}
-.pics figure{flex:0 0 auto;width:64%;max-width:224px;scroll-snap-align:center;margin:0}
-/* גובה אחיד לכריכה הזקופה ולפריסה הרחבה, כדי שהשורה לא תיראה שבורה */
-.pics img{width:100%;height:150px;object-fit:contain;display:block;padding:5px;
+/* הספר סגור ופתוח, זה לצד זה — שתיהן בשדה הראייה בבת אחת,
+   כי ההשוואה ביניהן היא כל מה שראש החטיבה צריך כדי להחליט. */
+.pics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pics img{width:100%;height:132px;object-fit:contain;display:block;padding:6px;
   border-radius:var(--r-s);background:var(--sunk);box-shadow:0 2px 10px rgba(11,37,80,.13)}
-.pics figcaption{font-size:.7rem;color:var(--ink-3);font-weight:700;
-  text-align:center;margin-top:5px}
+/* המשפט היחיד שנלווה לתמונות */
+.sf .fit{text-align:center;font-size:.95rem;font-weight:800;letter-spacing:-.01em}
+.sf.blue .fit{color:var(--blue-d)}
+.sf.green .fit{color:var(--green-d)}
 /* תנאי ההנחה — נוכח אך שקט, ואף פעם לא רחוק מהמחיר */
 .cond{background:var(--sunk);border-radius:var(--r-s);padding:11px 13px;
   font-size:.78rem;color:var(--ink-2);font-weight:600;line-height:1.62}
@@ -814,7 +800,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.3.1';
+var APP_VERSION = '5.4.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -1037,28 +1023,34 @@ function openFromHome(i) {
    מסלול הרשמה.
    בשפה מדוברת, במסך אחד, בלי אשף רב־שלבי — פחות נשירה.
    ============================================================ */
-var reg = { inst:'', instOther:'', who:'', phone:'', z:0, ch:0, sefer:'', note:'' };
+/* qty — כמות לכל מהדורה. זו גם התשובה ל"כמה תלמידים", ולכן אין
+   שאלה נפרדת, ואפשר להזמין משתי המהדורות באותה הרשמה. */
+var reg = { inst:'', instOther:'', who:'', phone:'', qty:{}, note:'' };
 
 function regSaved() {
   try { return JSON.parse(localStorage.getItem('dfReg') || 'null'); } catch (e) { return null; }
+}
+function regTotalQty() {
+  return SFARIM.reduce(function (a, s) { return a + (reg.qty[s.id] || 0); }, 0);
+}
+/* הרשמה ישנה נשמרה כ-z/ch ומהדורה אחת. מעבירים אותה למודל החדש
+   כדי שמי שכבר נרשם לא יראה טופס ריק. */
+function regMigrate(saved) {
+  if (saved.qty) return saved.qty;
+  var q = {}, n = (saved.z || 0) + (saved.ch || 0);
+  if (n && saved.sefer && saved.sefer !== 'later') q[saved.sefer] = n;
+  return q;
 }
 
 function renderReg() {
   var saved = regSaved();
   if (saved && !reg.inst) {
     reg.inst = saved.code || ''; reg.who = saved.who || ''; reg.phone = saved.phone || '';
-    reg.z = saved.z || 0; reg.ch = saved.ch || 0; reg.sefer = saved.sefer || '';
+    reg.qty = regMigrate(saved);
     reg.note = saved.note || ''; reg.instOther = saved.instOther || '';
   }
   var instName = reg.inst === 'other' ? 'ישיבה אחרת'
     : (INSTITUTIONS.filter(function (i) { return i.code === reg.inst; })[0] || {}).name || '';
-
-  var total = (reg.z || 0) + (reg.ch || 0);
-  var SEF = [
-    ['veshinantam', 'ושננתם', 'מתאים לתלמידים שמעדיפים לימוד מרוכז יותר, עם עמוד שלם בכל מפגש.'],
-    ['sugya', 'הסוגיה היומית', 'החוברת הצבעונית, פורסת את הדף לסוגיות קצרות. מתאים למי שלומד מעט בכל יום.'],
-    ['later', 'עוד נחליט', 'נרשמים עכשיו, ובוחרים מהדורה בהמשך.']
-  ];
 
   var h =
     '<div class="hero" style="padding:22px 20px"><span class="glow g1"></span>' +
@@ -1078,27 +1070,22 @@ function renderReg() {
     '<input type="tel" id="r-phone" placeholder="05X-XXXXXXX" value="' + esc(reg.phone) +
     '" onchange="regSet(\'phone\',this.value)"></div>' +
 
-    '<div class="step-n"><i>2</i><b>כמה תלמידים, בערך?</b></div>' +
+    /* שאלה אחת ולא שתיים: "כמה תלמידים" ו"איזו מהדורה" הן אותה
+       שאלה, וכמות לכל מהדורה בנפרד מאפשרת גם הזמנה מעורבת. */
+    '<div class="step-n"><i>2</i><b>כמה גמרות להזמין?</b></div>' +
     '<p style="font-size:.85rem;color:var(--ink-2);font-weight:600;margin-bottom:11px;' +
-    'line-height:1.6">זו הערכה, לא התחייבות. היא רק כדי לדעת כמה גמרות להזמין.</p>' +
+    'line-height:1.6">מספר התלמידים שיצטרפו, בהערכה. אפשר לשלב בין ' +
+    'שתי המהדורות — ותמיד אפשר לעדכן.</p>' +
     '<div style="display:grid;gap:9px">' +
-      numRow('z',  'כיתות ז׳', 'מסכת תענית') +
-      numRow('ch', 'כיתות ח׳', 'מסכת מגילה') +
+      SFARIM.map(function (s) {
+        var p = priceOf(s.id);
+        return numRow(s.id, s.name, s.fit + ' · ' + shek(p.price) + ' לחוברת');
+      }).join('') +
     '</div>' +
-    '<div class="step-n"><i>3</i><b>איזו גמרא מתאימה לכם?</b></div><div class="opt2">' +
-    SEF.map(function (s) {
-      var p = s[0] === 'later' ? null : priceOf(s[0]);
-      return '<button class="o2' + (reg.sefer === s[0] ? ' sel' : '') +
-             '" onclick="regSet(\'sefer\',\'' + s[0] + '\')">' +
-             '<b>' + s[1] + (p ? '<em>' + shek(p.price) +
-                                 (p.off ? ' <s>' + shek(p.list) + '</s>' : '') + '</em>' : '') +
-             '</b><span>' + s[2] + '</span></button>';
-    }).join('') + '</div>' +
 
-    /* הסיכום יושב אחרי בחירת המהדורה ולא לפניה — המחיר תלוי בה */
-    regTotal(total) +
+    regTotal() +
 
-    '<div class="step-n"><i>4</i><b>עוד משהו שכדאי שנדע?</b></div>' +
+    '<div class="step-n"><i>3</i><b>עוד משהו שכדאי שנדע?</b></div>' +
     '<textarea id="r-note" rows="2" placeholder="לא חובה" onchange="regSet(\'note\',this.value)">' +
     esc(reg.note) + '</textarea>' +
 
@@ -1110,43 +1097,45 @@ function renderReg() {
 
   document.getElementById('reg-body').innerHTML = h;
 }
-/* קופסת הסיכום. כל עוד לא נבחרה מהדורה אי אפשר לנקוב בסכום,
-   ולכן מוצג טווח — ולא מספר שיתברר כלא נכון. */
-function regTotal(total) {
-  if (!total) return '';
-  var p = (reg.sefer && reg.sefer !== 'later') ? priceOf(reg.sefer) : null;
-  var n, t;
-  if (p) {
-    n = shek(total * p.price);
-    t = total + ' גמרות × ' + shek(p.price) +
-        (p.off ? ' · חסכון של ' + shek(total * (p.list - p.price)) + ' מול המחיר הרגיל' : '');
-  } else {
-    var r = priceRange();
-    n = r.min === r.max ? shek(total * r.min)
-                        : 'בין ' + shek(total * r.min) + ' ל־' + shek(total * r.max);
-    t = total + ' גמרות · הסכום המדויק ייקבע לפי המהדורה שתבחרו';
-  }
-  return '<div class="total" style="margin-top:14px"><div class="n">' + n +
-         '</div><div class="t">' + t + '</div></div>' +
-         (p ? (p.off ? condNote(sefName(reg.sefer), p.min) : '') : condAll());
+/* קופסת הסיכום. הכמות ידועה לכל מהדורה בנפרד, ולכן הסכום מדויק
+   גם בהזמנה מעורבת, ומוצגות רק ההערות של המהדורות שנבחרו בפועל. */
+function regTotal() {
+  var picked = SFARIM.filter(function (s) { return reg.qty[s.id] > 0; });
+  if (!picked.length) return '';
+  var total = 0, sum = 0, save = 0;
+  picked.forEach(function (s) {
+    var n = reg.qty[s.id], p = priceOf(s.id);
+    total += n; sum += n * p.price; save += n * (p.list - p.price);
+  });
+  var t = picked.map(function (s) {
+    return reg.qty[s.id] + ' × ' + shek(priceOf(s.id).price) + ' ' + s.name;
+  }).join(' · ');
+  return '<div class="total" style="margin-top:14px"><div class="n">' + shek(sum) +
+         '</div><div class="t">' + esc(t) +
+         (save ? ' · חסכון של ' + shek(save) + ' מול המחיר הרגיל' : '') +
+         '</div></div>' +
+         picked.map(function (s) {
+           var p = priceOf(s.id);
+           return p.off ? condNote(s.name, p.min) : '';
+         }).join('');
 }
-function sefName(id) {
-  for (var i = 0; i < SFARIM.length; i++) if (SFARIM[i].id === id) return SFARIM[i].name;
-  return '';
+function numRow(id, label, sub) {
+  return '<div class="num"><div class="lbl">' + esc(label) +
+    '<small>' + esc(sub) + '</small></div><span></span>' +
+    '<div class="ctl"><button onclick="qtyStep(\'' + id + '\',-5)">−</button>' +
+    '<input type="tel" id="r-' + id + '" value="' + (reg.qty[id] || 0) +
+    '" onchange="qtySet(\'' + id + '\',this.value)">' +
+    '<button onclick="qtyStep(\'' + id + '\',5)">+</button></div></div>';
 }
-function numRow(k, label, sub) {
-  return '<div class="num"><div class="lbl">' + label + '<small>' + sub + '</small></div><span></span>' +
-    '<div class="ctl"><button onclick="regStep(\'' + k + '\',-5)">−</button>' +
-    '<input type="tel" id="r-' + k + '" value="' + (reg[k] || 0) +
-    '" onchange="regSet(\'' + k + '\',this.value)">' +
-    '<button onclick="regStep(\'' + k + '\',5)">+</button></div></div>';
+function qtySet(id, v) {
+  reg.qty[id] = Math.max(0, parseInt(v, 10) || 0);
+  renderReg();
 }
+function qtyStep(id, d) { qtySet(id, (reg.qty[id] || 0) + d); }
 function regSet(k, v) {
-  if (k === 'z' || k === 'ch') v = Math.max(0, parseInt(v, 10) || 0);
   reg[k] = v;
-  if (k === 'inst' || k === 'z' || k === 'ch' || k === 'sefer') renderReg();
+  if (k === 'inst') renderReg();
 }
-function regStep(k, d) { regSet(k, (reg[k] || 0) + d); }
 function pickInst() {
   var items = INSTITUTIONS.map(function (i) { return { v:i.code, t:i.name }; });
   items.push({ v:'other', t:'ישיבה אחרת…' });
@@ -1160,12 +1149,16 @@ function sendReg() {
   if (!reg.who)   { alert('נא למלא שם איש קשר.'); return; }
   if (!reg.phone) { alert('נא למלא טלפון.'); return; }
 
-  var total = (reg.z || 0) + (reg.ch || 0);
-  var seferName = { veshinantam:'ושננתם', sugya:'הסוגיה היומית', later:'עוד נחליט' }[reg.sefer]
-                  || 'לא נבחר';
+  var total = regTotalQty();
+  if (!total) { alert('נא למלא כמה גמרות להזמין.'); return; }
+
+  /* עמודה לכל מהדורה בגיליון, ולצידה שורת סיכום קריאה לאדם. */
   var payload = { action:'register', inst:name, code:reg.inst, who:reg.who, phone:reg.phone,
-                  z:reg.z, ch:reg.ch, total:total, sefer:reg.sefer, seferName:seferName,
-                  note:reg.note, at:new Date().toISOString() };
+                  total:total, note:reg.note, at:new Date().toISOString() };
+  SFARIM.forEach(function (s) { payload[s.id] = reg.qty[s.id] || 0; });
+  payload.qty = reg.qty;
+  payload.seferName = SFARIM.filter(function (s) { return reg.qty[s.id] > 0; })
+    .map(function (s) { return s.name + ' ' + reg.qty[s.id]; }).join(' · ') || 'לא נבחר';
 
   localStorage.setItem('dfReg', JSON.stringify(payload));
   var all = Store.get('registrations', []) || [];
@@ -1177,10 +1170,8 @@ function sendReg() {
     'ישיבה: ' + name + '\n' +
     'איש קשר: ' + reg.who + '\n' +
     'טלפון: ' + reg.phone + '\n' +
-    'כיתות ז׳ (תענית): ' + (reg.z || 0) + '\n' +
-    'כיתות ח׳ (מגילה): ' + (reg.ch || 0) + '\n' +
-    'סה"כ גמרות: ' + total + '\n' +
-    'מהדורה: ' + seferName +
+    SFARIM.map(function (s) { return s.name + ': ' + (reg.qty[s.id] || 0); }).join('\n') + '\n' +
+    'סה"כ גמרות: ' + total +
     (reg.note ? '\nהערה: ' + reg.note : '');
 
   if (API) {
@@ -1459,32 +1450,29 @@ function sendQuiz() {
 
 /* ---------- ספרים / מוסדות ---------- */
 function renderSfarim() {
-  /* כותרת המחיר: הנחה אחידה מוצגת פעם אחת למעלה; כשהמחירים
-     נבדלים אין מה להכריז, והמחיר יושב על הכרטיס של כל מהדורה. */
-  var u = uniformPrice();
-  document.getElementById('sfarim-price').innerHTML = u
-    ? '<b>' + shek(u.price) + '</b><s>' + shek(u.list) + '</s>' +
-      '<span>לחוברת, בהזמנה מרוכזת</span>'
-    : '<span>המחיר לחוברת נקבע לפי המהדורה — בהזמנה מרוכזת</span>';
+  /* הכרזת מחיר אחת למעלה רק אם המחיר זהה לשתי המהדורות. אחרת
+     היא לא אומרת דבר שהכרטיסים לא אומרים טוב יותר, ולכן נעלמת. */
+  var u = uniformPrice(), pb = document.getElementById('sfarim-price');
+  pb.style.display = u ? '' : 'none';
+  if (u) pb.innerHTML = '<b>' + shek(u.price) + '</b><s>' + shek(u.list) + '</s>' +
+                        '<span>לחוברת, בהזמנה מרוכזת</span>';
 
   var h = '';
   SFARIM.forEach(function (s) {
     var p = priceOf(s.id);
     h += '<div class="sf ' + s.tone + '"><div class="top"><b>' + esc(s.name) +
-         '</b><span>' + esc(s.tag) + '</span></div><div class="body">' +
+         '</b></div><div class="body">' +
          (s.pics && s.pics.length
            ? '<div class="pics">' + s.pics.map(function (pic) {
-               return '<figure><img loading="lazy" src="' + esc(pic.src) + '" alt="' +
-                      esc(s.name + ' — ' + pic.cap) + '"><figcaption>' +
-                      esc(pic.cap) + '</figcaption></figure>';
+               return '<img loading="lazy" src="' + esc(pic.src) + '" alt="' + esc(s.name) + '">';
              }).join('') + '</div>'
            : '<div class="ph">תמונת הספר — תתווסף</div>') +
+         '<div class="fit">' + esc(s.fit) + '</div>' +
          '<div class="tag-p"><b>' + shek(p.price) + '</b>' +
          (p.off ? '<s>' + shek(p.list) + '</s><i>בהזמנה מרוכזת</i>'
                 : '<i>לחוברת</i>') + '</div>' +
          (p.off ? condNote(s.name, p.min) : '') +
-         '<div class="rhythm">קצב הלימוד · ' + esc(s.rhythm) + '</div>' +
-         '<p>' + esc(s.desc) + '</p><p><b>למי מתאים:</b> ' + esc(s.who) + '</p></div></div>';
+         '</div></div>';
   });
   document.getElementById('sfarim-list').innerHTML = h;
 }
@@ -1724,14 +1712,6 @@ function condNote(name, min) {
   return '<div class="cond">המחיר המסובסד מותנה בכך שנגיע ל־<b>' + min +
          ' הזמנות</b> של ' + esc(name) + '. <em>אל דאגה, בעזרת ה׳ נגיע לכך!</em></div>';
 }
-/* הערה אחת שמכסה את כל המהדורות המוזלות, כשמוצגים כמה מחירים יחד */
-function condAll() {
-  var t = SFARIM.filter(function (s) { var p = priceOf(s.id); return p.off && p.min; });
-  if (!t.length) return '';
-  return '<div class="cond">המחירים המוזלים מותנים בהזמנה מרוכזת — ' +
-    t.map(function (s) { return '<b>' + priceOf(s.id).min + ' עותקים</b> ב' + esc(s.name); })
-     .join(', ') + '. <em>אל דאגה, בעזרת ה׳ נגיע לכך!</em></div>';
-}
 /* אם כל המהדורות באותו מחיר מוזל — אפשר להציג הנחה אחת לכולם */
 function uniformPrice() {
   var a = SFARIM.map(function (s) { return priceOf(s.id); });
@@ -1889,26 +1869,39 @@ function admReg(el) {
     return;
   }
   var tot = list.reduce(function (a, r) { return a + (r.total || 0); }, 0);
-  /* כל הרשמה לפי המהדורה שנבחרה בה; מי שטרם בחר מוערך במחיר המוזל */
-  var some = false;
-  var sum = list.reduce(function (a, r) {
-    var known = r.sefer && r.sefer !== 'later' && PRICES[r.sefer];
-    if (!known) some = true;
-    return a + (r.total || 0) * (known ? priceOf(r.sefer).price : priceRange().min);
-  }, 0);
+  /* כמות מצטברת לכל מהדורה — זה המספר שקובע אם מגיעים לסף ההנחה */
+  var per = {}, sum = 0;
+  list.forEach(function (r) {
+    var q = regMigrate(r);
+    SFARIM.forEach(function (s) {
+      var n = q[s.id] || 0;
+      per[s.id] = (per[s.id] || 0) + n;
+      sum += n * priceOf(s.id).price;
+    });
+  });
   el.innerHTML =
     '<div class="adm-card" style="margin-bottom:11px"><h4>' + list.length +
-    ' הרשמות · ' + tot + ' גמרות</h4><p class="h" style="margin:0">' +
-    'סה"כ להזמנה: ' + shek(sum) + ' · לפי המהדורה שנבחרה בכל הרשמה' +
-    (some ? '. הרשמות בלי מהדורה חושבו במחיר המוזל' : '') + '</p></div>' +
+    ' הרשמות · ' + tot + ' גמרות</h4>' +
+    SFARIM.map(function (s) {
+      var n = per[s.id] || 0, gap = priceOf(s.id).min - n;
+      return '<div class="row" style="padding:7px 0"><span>' + esc(s.name) +
+        (priceOf(s.id).min ? ' <span style="color:var(--ink-3)">· יעד ' +
+                             priceOf(s.id).min + '</span>' : '') + '</span>' +
+        '<b' + (gap <= 0 ? ' style="color:var(--ok)"' : '') + '>' + n +
+        (priceOf(s.id).min && gap > 0
+          ? ' <span style="font-weight:600;color:var(--ink-3)">(חסרים ' + gap + ')</span>'
+          : priceOf(s.id).min ? ' ✓' : '') + '</b></div>';
+    }).join('') +
+    '<p class="h" style="margin:9px 0 0">סה"כ להזמנה: ' + shek(sum) + '</p></div>' +
     list.map(function (r) {
+      var q = regMigrate(r);
       return '<div class="adm-card" style="margin-bottom:9px"><h4>' + esc(r.inst) + '</h4>' +
         '<p class="h" style="margin-bottom:8px">' + esc(r.who || '') +
         (r.phone ? ' · ' + esc(r.phone) : '') + '</p>' +
-        '<div class="row" style="padding:7px 0"><span>ז׳ / ח׳</span>' +
-        '<b>' + (r.z || 0) + ' / ' + (r.ch || 0) + '</b></div>' +
-        '<div class="row" style="padding:7px 0"><span>מהדורה</span>' +
-        '<b>' + esc(r.seferName || '—') + '</b></div>' +
+        SFARIM.map(function (s) {
+          return '<div class="row" style="padding:7px 0"><span>' + esc(s.name) + '</span>' +
+                 '<b>' + (q[s.id] || 0) + '</b></div>';
+        }).join('') +
         (r.note ? '<div class="row" style="padding:7px 0"><span>הערה</span>' +
                   '<b style="font-weight:600">' + esc(r.note) + '</b></div>' : '') +
         (r.phone ? '<a class="btn gr" style="margin-top:10px;text-decoration:none" href="tel:' +
