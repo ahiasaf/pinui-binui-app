@@ -8,7 +8,7 @@
 <link rel="icon" href="icon-192.png">
 <meta name="theme-color" content="#0E2E63">
 <meta property="og:title" content="הדף השבועי של בני עקיבא">
-<meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — כיתות ז׳ מסכת תענית, כיתות ח׳ מסכת מגילה.">
+<meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — מסכת תענית ומסכת מגילה.">
 <meta property="og:type" content="website">
 <style>
 /* ============================================================
@@ -293,10 +293,6 @@ body{background:var(--paper);
 .track .in{padding:18px 18px 16px}
 .track .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .track h3{font-size:1.32rem;font-weight:800;letter-spacing:-.03em;line-height:1.15}
-.track .grade{font-size:.7rem;font-weight:800;padding:5px 11px;border-radius:30px;flex:none;
-  letter-spacing:.03em}
-.track.t-b .grade{background:rgba(23,70,143,.1);color:var(--blue)}
-.track.t-g .grade{background:rgba(111,168,59,.16);color:var(--green-d)}
 .track .now{font-size:.9rem;color:var(--ink-2);margin-top:7px}
 .track .now b{color:var(--ink);font-weight:800}
 .track .foot{display:flex;align-items:center;gap:12px;margin-top:16px}
@@ -502,39 +498,32 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
   border:1.5px solid var(--ok);color:var(--ok);border-radius:var(--r-m);padding:16px;
   font-weight:800;font-size:.96rem;text-align:center}
 
-/* ---------- ספרים ---------- */
-.sf{border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh-2)}
-.sf .top{padding:14px 18px;color:#fff;text-align:center}
-.sf.blue .top{background:linear-gradient(150deg,var(--blue-d),var(--blue))}
-.sf.green .top{background:linear-gradient(150deg,var(--green-d),var(--green))}
-.sf .top b{font-size:1.2rem;font-weight:800;display:block;letter-spacing:-.02em}
-.sf .body{padding:16px 18px;display:grid;gap:10px}
-.sf .body p{font-size:.9rem;color:var(--ink-2);line-height:1.68}
-.sf .tag-p{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;justify-content:center}
-.sf .tag-p b{font-size:1.5rem;font-weight:800;color:var(--green-d);letter-spacing:-.03em}
-.sf .tag-p s{color:var(--ink-3);font-size:.9rem;font-weight:700}
-.sf .tag-p i{font-style:normal;font-size:.75rem;color:var(--ink-3);font-weight:700}
-.sf .ph{background:var(--sunk);border:1.5px dashed var(--rule);border-radius:var(--r-s);
-  padding:26px;text-align:center;color:var(--ink-3);font-size:.79rem;font-weight:700}
-/* הספר סגור ופתוח, זה לצד זה — שתיהן בשדה הראייה בבת אחת,
-   כי ההשוואה ביניהן היא כל מה שראש החטיבה צריך כדי להחליט. */
+/* ---------- ההמלצה ---------- */
+/* משפט בגוף שני, ומתחתיו הספר סגור ופתוח זה לצד זה — ההשוואה
+   בין שתי התמונות היא כל מה שראש חטיבה צריך כדי להחליט. */
+.rec{background:var(--surface);border-radius:var(--r);padding:16px;
+  box-shadow:var(--sh-2);border-inline-start:4px solid transparent}
+.rec.blue{border-inline-start-color:var(--blue)}
+.rec.green{border-inline-start-color:var(--green)}
+.rec p{font-size:.95rem;color:var(--ink-2);line-height:1.7;margin-bottom:13px}
+.rec p b{color:var(--ink);font-weight:800}
+.rec .pr{margin-top:11px;text-align:center;font-size:.8rem;
+  color:var(--ink-3);font-weight:700}
+.rec .pr b{font-size:1.35rem;letter-spacing:-.03em;margin-inline-end:3px}
+.rec.blue .pr b{color:var(--blue-d)}
+.rec.green .pr b{color:var(--green-d)}
+.rec .pr s{color:var(--ink-3);font-weight:700}
 .pics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .pics img{width:100%;height:132px;object-fit:contain;display:block;padding:6px;
   border-radius:var(--r-s);background:var(--sunk);box-shadow:0 2px 10px rgba(11,37,80,.13)}
-/* המשפט היחיד שנלווה לתמונות */
-.sf .fit{text-align:center;font-size:.95rem;font-weight:800;letter-spacing:-.01em}
-.sf.blue .fit{color:var(--blue-d)}
-.sf.green .fit{color:var(--green-d)}
+/* כותרת המסכת בטופס ההזמנה */
+.mtitle{font-size:1rem;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;
+  padding-inline-start:11px;border-inline-start:3px solid var(--gold)}
 /* תנאי ההנחה — נוכח אך שקט, ואף פעם לא רחוק מהמחיר */
 .cond{background:var(--sunk);border-radius:var(--r-s);padding:11px 13px;
-  font-size:.78rem;color:var(--ink-2);font-weight:600;line-height:1.62}
+  font-size:.78rem;color:var(--ink-2);font-weight:600;line-height:1.62;margin-top:9px}
 .cond b{font-weight:800;color:var(--ink)}
 .cond em{font-style:normal;color:var(--ok);font-weight:800}
-.price{display:flex;align-items:baseline;gap:10px;justify-content:center;flex-wrap:wrap;
-  background:var(--surface);border-radius:var(--r-m);padding:16px;box-shadow:var(--sh-1)}
-.price b{font-size:2rem;font-weight:800;color:var(--green-d);letter-spacing:-.03em}
-.price s{color:var(--ink-3);font-size:1rem;font-weight:700}
-.price span{font-size:.79rem;color:var(--ink-3);font-weight:700}
 
 /* ---------- מוסדות ---------- */
 .inst{display:flex;align-items:center;gap:11px;padding:12px 0;font-size:.93rem;font-weight:700}
@@ -713,24 +702,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
       <div id="quiz-body"></div>
     </div>
 
-    <!-- ===== ספרים ===== -->
-    <div id="v-sfarim" class="view">
-      <button class="back" onclick="show('home')">→ חזרה</button>
-      <div class="hero" style="padding:22px 20px">
-        <span class="glow g1"></span><span class="glow g3"></span>
-        <h2 style="font-size:1.4rem">רכישה מרוכזת</h2>
-        <div class="rule"></div>
-        <div class="sub">שתי מהדורות, שתי דרכי לימוד. כל ישיבה בוחרת את המתאים לה.</div>
-      </div>
-      <div class="price" id="sfarim-price"></div>
-      <div id="sfarim-list" style="display:grid;gap:13px"></div>
-      <div class="card">
-        <h3>הציבו לעצמכם יעד</h3>
-        <p>כמה תלמידים תצליחו להכניס לתוכנית השנה? העריכו מספר — והזמינו לפיו במחיר המוזל.</p>
-      </div>
-    </div>
-
-    <!-- ===== מוסדות ===== -->
+        <!-- ===== מוסדות ===== -->
     <div id="v-insts" class="view">
       <button class="back" onclick="show('home')">→ חזרה</button>
       <div class="sec"><b>ישיבות בתוכנית · תשפ"ז</b><i></i></div>
@@ -800,7 +772,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.4.0';
+var APP_VERSION = '5.5.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -861,7 +833,6 @@ function show(v) {
   window.scrollTo(0, 0);
   if (v === 'home')   renderHome();
   if (v === 'insts')  renderInsts();
-  if (v === 'sfarim') renderSfarim();
   if (v === 'calls')  renderCalls();
   if (v === 'reg')    renderReg();
   if (v === 'gate')   { teamCode = ''; paintPins();
@@ -1023,22 +994,43 @@ function openFromHome(i) {
    מסלול הרשמה.
    בשפה מדוברת, במסך אחד, בלי אשף רב־שלבי — פחות נשירה.
    ============================================================ */
-/* qty — כמות לכל מהדורה. זו גם התשובה ל"כמה תלמידים", ולכן אין
-   שאלה נפרדת, ואפשר להזמין משתי המהדורות באותה הרשמה. */
+/* qty — כמות לכל צירוף של מסכת ומהדורה, במפתח 'מסכת-מהדורה'.
+   זו גם התשובה ל"כמה תלמידים", ולכן אין שאלה נפרדת. */
 var reg = { inst:'', instOther:'', who:'', phone:'', qty:{}, note:'' };
 
 function regSaved() {
   try { return JSON.parse(localStorage.getItem('dfReg') || 'null'); } catch (e) { return null; }
 }
-function regTotalQty() {
-  return SFARIM.reduce(function (a, s) { return a + (reg.qty[s.id] || 0); }, 0);
+/* סך העותקים של מהדורה אחת, בשתי המסכתות — זה המספר שנספר מול
+   סף ההנחה, כי ההוצאה סופרת עותקים ולא כרכים. */
+function sefTotal(sefer, q) {
+  q = q || reg.qty;
+  return TRACKS.reduce(function (a, t) { return a + (q[qk(t.id, sefer)] || 0); }, 0);
 }
-/* הרשמה ישנה נשמרה כ-z/ch ומהדורה אחת. מעבירים אותה למודל החדש
-   כדי שמי שכבר נרשם לא יראה טופס ריק. */
+function regTotalQty(q) {
+  return SFARIM.reduce(function (a, s) { return a + sefTotal(s.id, q); }, 0);
+}
+
+/* שתי צורות ישנות של הרשמה שמורה:
+   1. z/ch + מהדורה אחת — z היה תענית ו-ch מגילה, ולכן ההעברה מדויקת.
+   2. qty לפי מהדורה בלבד, בלי מסכת — צורה שחיה שעות ספורות לפני
+      שהמסכתות הופרדו. אין בה מידע על המסכת, ולכן היא נכנסת לתענית
+      וצריך לוודא אותה בשיחה. */
 function regMigrate(saved) {
-  if (saved.qty) return saved.qty;
-  var q = {}, n = (saved.z || 0) + (saved.ch || 0);
-  if (n && saved.sefer && saved.sefer !== 'later') q[saved.sefer] = n;
+  var q = {};
+  if (saved.qty) {
+    var flat = false;
+    for (var k in saved.qty) { if (k.indexOf('-') < 0) flat = true; }
+    if (!flat) return saved.qty;
+    SFARIM.forEach(function (s) {
+      if (saved.qty[s.id]) q[qk(TRACKS[0].id, s.id)] = saved.qty[s.id];
+    });
+    return q;
+  }
+  if (saved.sefer && saved.sefer !== 'later') {
+    if (saved.z)  q[qk('taanit', saved.sefer)] = saved.z;
+    if (saved.ch) q[qk('megila', saved.sefer)] = saved.ch;
+  }
   return q;
 }
 
@@ -1070,22 +1062,19 @@ function renderReg() {
     '<input type="tel" id="r-phone" placeholder="05X-XXXXXXX" value="' + esc(reg.phone) +
     '" onchange="regSet(\'phone\',this.value)"></div>' +
 
-    /* שאלה אחת ולא שתיים: "כמה תלמידים" ו"איזו מהדורה" הן אותה
-       שאלה, וכמות לכל מהדורה בנפרד מאפשרת גם הזמנה מעורבת. */
-    '<div class="step-n"><i>2</i><b>כמה גמרות להזמין?</b></div>' +
+    /* ההמלצה לפני ההזמנה: קודם מבינים במה בוחרים, אחר כך מזמינים. */
+    '<div class="step-n"><i>2</i><b>ההמלצה שלנו</b></div>' +
+    recBlocks() +
+
+    '<div class="step-n"><i>3</i><b>כמה זה עולה לנו</b></div>' +
     '<p style="font-size:.85rem;color:var(--ink-2);font-weight:600;margin-bottom:11px;' +
-    'line-height:1.6">מספר התלמידים שיצטרפו, בהערכה. אפשר לשלב בין ' +
-    'שתי המהדורות — ותמיד אפשר לעדכן.</p>' +
-    '<div style="display:grid;gap:9px">' +
-      SFARIM.map(function (s) {
-        var p = priceOf(s.id);
-        return numRow(s.id, s.name, s.fit + ' · ' + shek(p.price) + ' לחוברת');
-      }).join('') +
-    '</div>' +
+    'line-height:1.6">כמה גמרות תצטרכו, בהערכה. אפשר לבחור מסכת אחת או ' +
+    'את שתיהן, ולשלב בין המהדורות — ותמיד אפשר לעדכן.</p>' +
+    orderRows() +
 
     regTotal() +
 
-    '<div class="step-n"><i>3</i><b>עוד משהו שכדאי שנדע?</b></div>' +
+    '<div class="step-n"><i>4</i><b>עוד משהו שכדאי שנדע?</b></div>' +
     '<textarea id="r-note" rows="2" placeholder="לא חובה" onchange="regSet(\'note\',this.value)">' +
     esc(reg.note) + '</textarea>' +
 
@@ -1097,19 +1086,56 @@ function renderReg() {
 
   document.getElementById('reg-body').innerHTML = h;
 }
-/* קופסת הסיכום. הכמות ידועה לכל מהדורה בנפרד, ולכן הסכום מדויק
-   גם בהזמנה מעורבת, ומוצגות רק ההערות של המהדורות שנבחרו בפועל. */
+/* ההמלצה: משפט בגוף שני, ומתחתיו הספר סגור ופתוח. אין תיאור —
+   התמונות עושות את העבודה, וזו הסיבה שהן כאן ולא במסך נפרד. */
+function recBlocks() {
+  return '<div style="display:grid;gap:13px">' + SFARIM.map(function (s) {
+    return '<div class="rec ' + s.tone + '"><p>' + s.rec + '</p>' +
+      (s.pics && s.pics.length
+        ? '<div class="pics">' + s.pics.map(function (pic) {
+            return '<img loading="lazy" src="' + esc(pic.src) + '" alt="' + esc(s.name) + '">';
+          }).join('') + '</div>'
+        : '') +
+      '<div class="pr"><b>' + shek(priceOf(s.id).price) + '</b> לחוברת' +
+      (priceOf(s.id).off ? ' <s>' + shek(priceOf(s.id).list) + '</s>' : '') + '</div>' +
+      '</div>';
+  }).join('') + '</div>';
+}
+
+/* ההזמנה לפי מסכת ואז לפי מהדורה. הישיבה בוחרת מסכת אחת או שתיהן,
+   ולכל אחת אפשר לפצל בין המהדורות. */
+function qk(track, sefer) { return track + '-' + sefer; }
+/* "מסכת תענית: 80 ושננתם, 40 הסוגיה היומית · מסכת מגילה: 60 ושננתם" */
+function orderSummary(q) {
+  return TRACKS.map(function (t) {
+    var parts = SFARIM.filter(function (s) { return q[qk(t.id, s.id)] > 0; })
+      .map(function (s) { return q[qk(t.id, s.id)] + ' ' + s.name; });
+    return parts.length ? 'מסכת ' + t.masechet + ': ' + parts.join(', ') : '';
+  }).filter(Boolean).join(' · ');
+}
+function orderRows() {
+  return '<div style="display:grid;gap:16px">' + TRACKS.map(function (t) {
+    return '<div><div class="mtitle">מסכת ' + esc(t.masechet) + '</div>' +
+      '<div style="display:grid;gap:9px">' +
+      SFARIM.map(function (s) {
+        return numRow(qk(t.id, s.id), s.name,
+                      s.fit + ' · ' + shek(priceOf(s.id).price) + ' לחוברת');
+      }).join('') + '</div></div>';
+  }).join('') + '</div>';
+}
+
+/* קופסת הסיכום. הכמות ידועה לכל מסכת ולכל מהדורה, ולכן הסכום מדויק
+   גם בהזמנה מעורבת, ומוצגות רק ההערות של המהדורות שהוזמנו בפועל. */
 function regTotal() {
-  var picked = SFARIM.filter(function (s) { return reg.qty[s.id] > 0; });
+  var picked = SFARIM.filter(function (s) { return sefTotal(s.id) > 0; });
   if (!picked.length) return '';
-  var total = 0, sum = 0, save = 0;
+  var sum = 0, save = 0;
   picked.forEach(function (s) {
-    var n = reg.qty[s.id], p = priceOf(s.id);
-    total += n; sum += n * p.price; save += n * (p.list - p.price);
+    var n = sefTotal(s.id), p = priceOf(s.id);
+    sum += n * p.price; save += n * (p.list - p.price);
   });
-  var t = picked.map(function (s) {
-    return reg.qty[s.id] + ' × ' + shek(priceOf(s.id).price) + ' ' + s.name;
-  }).join(' · ');
+  /* פירוט לפי מסכת — זה הפילוח שקובע כמה כרכים מזמינים מכל אחת */
+  var t = orderSummary(reg.qty);
   return '<div class="total" style="margin-top:14px"><div class="n">' + shek(sum) +
          '</div><div class="t">' + esc(t) +
          (save ? ' · חסכון של ' + shek(save) + ' מול המחיר הרגיל' : '') +
@@ -1152,13 +1178,15 @@ function sendReg() {
   var total = regTotalQty();
   if (!total) { alert('נא למלא כמה גמרות להזמין.'); return; }
 
-  /* עמודה לכל מהדורה בגיליון, ולצידה שורת סיכום קריאה לאדם. */
+  /* עמודה לכל צירוף מסכת-מהדורה בגיליון, ולצידה שורת סיכום
+     קריאה לאדם — כדי שההזמנה תהיה ברורה גם בלי לפענח מפתחות. */
   var payload = { action:'register', inst:name, code:reg.inst, who:reg.who, phone:reg.phone,
                   total:total, note:reg.note, at:new Date().toISOString() };
-  SFARIM.forEach(function (s) { payload[s.id] = reg.qty[s.id] || 0; });
+  TRACKS.forEach(function (t) {
+    SFARIM.forEach(function (s) { payload[qk(t.id, s.id)] = reg.qty[qk(t.id, s.id)] || 0; });
+  });
   payload.qty = reg.qty;
-  payload.seferName = SFARIM.filter(function (s) { return reg.qty[s.id] > 0; })
-    .map(function (s) { return s.name + ' ' + reg.qty[s.id]; }).join(' · ') || 'לא נבחר';
+  payload.seferName = orderSummary(reg.qty) || 'לא נבחר';
 
   localStorage.setItem('dfReg', JSON.stringify(payload));
   var all = Store.get('registrations', []) || [];
@@ -1170,7 +1198,11 @@ function sendReg() {
     'ישיבה: ' + name + '\n' +
     'איש קשר: ' + reg.who + '\n' +
     'טלפון: ' + reg.phone + '\n' +
-    SFARIM.map(function (s) { return s.name + ': ' + (reg.qty[s.id] || 0); }).join('\n') + '\n' +
+    TRACKS.map(function (t) {
+      return 'מסכת ' + t.masechet + ':\n' + SFARIM.map(function (s) {
+        return '  ' + s.name + ': ' + (reg.qty[qk(t.id, s.id)] || 0);
+      }).join('\n');
+    }).join('\n') + '\n' +
     'סה"כ גמרות: ' + total +
     (reg.note ? '\nהערה: ' + reg.note : '');
 
@@ -1223,7 +1255,7 @@ function openTrack(id) {
   var wi = weekIndex(), chaps = CHAPTERS[id], shown = {};
 
   var h = '<div class="head"><b>מסכת ' + esc(tr.masechet) + '</b><i></i><span>' +
-          esc(tr.gradeFull) + ' · ' + tr.dapim + ' דפים · תשפ"ז</span></div><div class="trail">';
+          tr.dapim + ' דפים · תשפ"ז</span></div><div class="trail">';
 
   tr.cal.forEach(function (row, i) {
     var daf = row[2];
@@ -1448,34 +1480,7 @@ function sendQuiz() {
            : 'התשובה הנכונה מסומנת. נכנסת להגרלה השבועית.') + '</div>';
 }
 
-/* ---------- ספרים / מוסדות ---------- */
-function renderSfarim() {
-  /* הכרזת מחיר אחת למעלה רק אם המחיר זהה לשתי המהדורות. אחרת
-     היא לא אומרת דבר שהכרטיסים לא אומרים טוב יותר, ולכן נעלמת. */
-  var u = uniformPrice(), pb = document.getElementById('sfarim-price');
-  pb.style.display = u ? '' : 'none';
-  if (u) pb.innerHTML = '<b>' + shek(u.price) + '</b><s>' + shek(u.list) + '</s>' +
-                        '<span>לחוברת, בהזמנה מרוכזת</span>';
-
-  var h = '';
-  SFARIM.forEach(function (s) {
-    var p = priceOf(s.id);
-    h += '<div class="sf ' + s.tone + '"><div class="top"><b>' + esc(s.name) +
-         '</b></div><div class="body">' +
-         (s.pics && s.pics.length
-           ? '<div class="pics">' + s.pics.map(function (pic) {
-               return '<img loading="lazy" src="' + esc(pic.src) + '" alt="' + esc(s.name) + '">';
-             }).join('') + '</div>'
-           : '<div class="ph">תמונת הספר — תתווסף</div>') +
-         '<div class="fit">' + esc(s.fit) + '</div>' +
-         '<div class="tag-p"><b>' + shek(p.price) + '</b>' +
-         (p.off ? '<s>' + shek(p.list) + '</s><i>בהזמנה מרוכזת</i>'
-                : '<i>לחוברת</i>') + '</div>' +
-         (p.off ? condNote(s.name, p.min) : '') +
-         '</div></div>';
-  });
-  document.getElementById('sfarim-list').innerHTML = h;
-}
+/* ---------- מוסדות ---------- */
 function renderInsts() {
   var h = '';
   INSTITUTIONS.forEach(function (i) {
@@ -1870,27 +1875,35 @@ function admReg(el) {
   }
   var tot = list.reduce(function (a, r) { return a + (r.total || 0); }, 0);
   /* כמות מצטברת לכל מהדורה — זה המספר שקובע אם מגיעים לסף ההנחה */
+  /* per — כמה עותקים מכל צירוף מסכת-מהדורה; זה מה שמזמינים בפועל
+     מההוצאה. הסף להנחה נספר לפי מהדורה, בשתי המסכתות יחד. */
   var per = {}, sum = 0;
   list.forEach(function (r) {
     var q = regMigrate(r);
-    SFARIM.forEach(function (s) {
-      var n = q[s.id] || 0;
-      per[s.id] = (per[s.id] || 0) + n;
-      sum += n * priceOf(s.id).price;
+    TRACKS.forEach(function (t) {
+      SFARIM.forEach(function (s) {
+        var n = q[qk(t.id, s.id)] || 0;
+        per[qk(t.id, s.id)] = (per[qk(t.id, s.id)] || 0) + n;
+        sum += n * priceOf(s.id).price;
+      });
     });
   });
   el.innerHTML =
     '<div class="adm-card" style="margin-bottom:11px"><h4>' + list.length +
     ' הרשמות · ' + tot + ' גמרות</h4>' +
     SFARIM.map(function (s) {
-      var n = per[s.id] || 0, gap = priceOf(s.id).min - n;
+      var p = priceOf(s.id);
+      var n = TRACKS.reduce(function (a, t) { return a + (per[qk(t.id, s.id)] || 0); }, 0);
+      var gap = p.min - n;
       return '<div class="row" style="padding:7px 0"><span>' + esc(s.name) +
-        (priceOf(s.id).min ? ' <span style="color:var(--ink-3)">· יעד ' +
-                             priceOf(s.id).min + '</span>' : '') + '</span>' +
+        (p.min ? ' <span style="color:var(--ink-3)">· יעד ' + p.min + '</span>' : '') +
+        '<div class="sub">' + TRACKS.map(function (t) {
+          return t.masechet + ' ' + (per[qk(t.id, s.id)] || 0);
+        }).join(' · ') + '</div></span>' +
         '<b' + (gap <= 0 ? ' style="color:var(--ok)"' : '') + '>' + n +
-        (priceOf(s.id).min && gap > 0
+        (p.min && gap > 0
           ? ' <span style="font-weight:600;color:var(--ink-3)">(חסרים ' + gap + ')</span>'
-          : priceOf(s.id).min ? ' ✓' : '') + '</b></div>';
+          : p.min ? ' ✓' : '') + '</b></div>';
     }).join('') +
     '<p class="h" style="margin:9px 0 0">סה"כ להזמנה: ' + shek(sum) + '</p></div>' +
     list.map(function (r) {
@@ -1898,9 +1911,12 @@ function admReg(el) {
       return '<div class="adm-card" style="margin-bottom:9px"><h4>' + esc(r.inst) + '</h4>' +
         '<p class="h" style="margin-bottom:8px">' + esc(r.who || '') +
         (r.phone ? ' · ' + esc(r.phone) : '') + '</p>' +
-        SFARIM.map(function (s) {
-          return '<div class="row" style="padding:7px 0"><span>' + esc(s.name) + '</span>' +
-                 '<b>' + (q[s.id] || 0) + '</b></div>';
+        TRACKS.map(function (t) {
+          return SFARIM.map(function (s) {
+            return '<div class="row" style="padding:7px 0"><span>' +
+                   esc(t.masechet + ' · ' + s.name) + '</span>' +
+                   '<b>' + (q[qk(t.id, s.id)] || 0) + '</b></div>';
+          }).join('');
         }).join('') +
         (r.note ? '<div class="row" style="padding:7px 0"><span>הערה</span>' +
                   '<b style="font-weight:600">' + esc(r.note) + '</b></div>' : '') +
