@@ -814,7 +814,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.3.0';
+var APP_VERSION = '5.3.1';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -897,11 +897,11 @@ function contentFor(id) {
   var tr = trackById(id), i = weekOf(tr);
   return { tr:tr, i:i, row:tr.cal[i], c:CONTENT[id + '-' + (i + 1)] };
 }
+/* הבנאי היחיד של נתיב שקף. בגרסה העצמאית השקפים מוטמעים תחת
+   אותו מפתח בדיוק, ולכן אין כאן שני מסלולים שיכולים להיפרד. */
 function slideSrc(c, n) {
-  // בגרסה העצמאית השקפים מוטמעים; אחרת הם קבצים בתיקייה
-  if (typeof SLIDE_DATA !== 'undefined')
-    return SLIDE_DATA[n < 10 ? '0' + n : String(n)] || '';
-  return c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg';
+  var p = c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg';
+  return (typeof SLIDE_DATA !== 'undefined' && SLIDE_DATA[p]) || p;
 }
 
 function pickTrack(id) {
@@ -1312,11 +1312,10 @@ function openWeek(id, i) {
   if (c && c.deck) {
     state.deck = [];
     for (var n = 1; n <= c.deck.n; n++)
-      state.deck.push({ img: c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg' });
+      state.deck.push({ img: slideSrc(c, n) });
     h += '<div class="sec" style="margin-top:20px"><b>מצגת עזר · ' + c.deck.n +
          ' שקפים</b><i></i></div>' +
          '<button class="btn p" onclick="deckOpen()">▶ הצגה על המסך</button>' +
-         '<div class="thumbs" style="margin-top:10px">'.replace('<div class="thumbs" style="margin-top:10px">','') +
          '<div class="thumbs">';
     state.deck.forEach(function (s, k) {
       h += '<img class="thumb" loading="lazy" src="' + s.img +
