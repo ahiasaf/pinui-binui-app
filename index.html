@@ -203,10 +203,19 @@
         <div class="cell" onclick="startDeck('trace')"><b id="c-trace">0</b><span>לאיתור</span></div>
       </div>
 
+      <button class="btn g" id="r-open" onclick="openReplies()"></button>
       <button class="btn g" id="s-open" onclick="openSends()" style="display:none"></button>
 
       <input type="text" id="q" placeholder="חיפוש דייר לפי שם, טלפון או בניין" oninput="search()">
       <div id="q-out"></div>
+    </div>
+
+    <!-- תגובות מדיירים -->
+    <div id="v-replies" class="view">
+      <div class="top"><button onclick="show('v-home')">›</button><span id="p-when"></span></div>
+      <button class="btn ok" id="p-collect" onclick="collectReplies()">אסוף תגובות עכשיו</button>
+      <div class="flagline" id="p-note" style="display:none"></div>
+      <div id="p-list"></div>
     </div>
 
     <!-- מעקב שליחות -->
@@ -331,7 +340,11 @@ var API = localStorage.getItem('pbApi') || '';   // כתובת ה-Apps Script
 var pinCode = localStorage.getItem('pbPin') || '';
 var DEFAULT_CALL_MINUTES = 8;   // עד שיצטבר מספיק מידע אמיתי
 
-var db = { project:{}, apartments:[], sends:[], sending:{ ready:false, cap:0, usedToday:0 } };
+var db = {
+  project:{}, apartments:[], sends:[], replies:[],
+  sending:{ ready:false, cap:0, usedToday:0 },
+  collect:{ state:'', at:'', found:0, note:'' }
+};
 var round = [], idx = 0, current = null, backTo = 'v-home';
 var outcome = '', whenDays = 7, roundMode = 'call';
 var typed = '';
@@ -452,7 +465,21 @@ function normalizeDb() {
   db.project = db.project || {};
   db.apartments = db.apartments || [];
   db.sends = db.sends || [];
+  db.replies = db.replies || [];
   db.sending = db.sending || { ready: false, cap: 0, usedToday: 0 };
+  db.collect = db.collect || { state: '', at: '', found: 0, note: '' };
+  refreshReplied();
+}
+
+// מי כתב לך ועדיין לא טופל. נשמר במפה אחת כי המנוע שואל את זה
+// לכל דירה בנפרד, וגם מסך העדכונים נשען עליו.
+var replied = {};
+function refreshReplied() {
+  replied = {};
+  db.replies.forEach(function (r) {
+    if (r.handled || !r.apartment) return;
+    replied[r.apartment] = true;
+  });
 }
 
 function refresh() {
@@ -546,6 +573,12 @@ function render() {
   document.getElementById('c-trace').textContent = deck('trace').length;
   document.getElementById('c-upd').textContent = updateCandidates().length;
 
+  var waiting = openReplyCount();
+  var replies = document.getElementById('r-open');
+  replies.textContent = waiting
+    ? 'תגובות מדיירים · ' + waiting + ' ממתינות'
+    : 'תגובות מדיירים';
+
   var tally = sendTally();
   var open = document.getElementById('s-open');
   if (!db.sends.length) {
@@ -589,10 +622,20 @@ function addDays(n) {
 // להסביר את עצמו — לא סומכים עליו, ולכן מפסיקים להשתמש בו.
 // ============================================================
 function score(a) {
-  if (a.snoozedUntil && a.snoozedUntil > today()) return null;
   if (a.status === 'objector' || a.status === 'not_relevant') return null;
 
+  // דייר שכתב לך גובר על הכול, וגם על השהיה שהגדרת בעצמך: ההשהיה
+  // נועדה שלא תטריד אותו, והוא זה שפנה אליך. אין מצב שבו נכון
+  // להשאיר פנייה כזו בתחתית הערימה.
+  var wrote = !!replied[a.id];
+  if (!wrote && a.snoozedUntil && a.snoozedUntil > today()) return null;
+
   var pts = 0, why = '';
+
+  if (wrote) {
+    pts += 120;
+    why = 'כתב לך בוואטסאפ';
+  }
 
   if (a.nextAt) {
     var over = daysSince(a.nextAt);
@@ -601,7 +644,7 @@ function score(a) {
       why = over === 0 ? 'הבטחת לחזור אליו היום'
           : over === 1 ? 'הבטחת לחזור אליו אתמול'
           : 'הבטחת לחזור אליו לפני ' + over + ' ימים';
-    } else {
+    } else if (!wrote) {
       return null;   // נקבע תאריך עתידי — לא מציקים לו לפני הזמן
     }
   }
@@ -938,6 +981,9 @@ function updateCandidates() {
     if (a.status !== 'open') return false;
     if (daysSince(a.lastAt) < 7) return false;
     if (hasOpenSend(a.id)) return false;
+    // מי שכתב לך נמצא באמצע שיחה אישית חיה. הודעת עדכון גנרית
+    // לתוך החוט הזה מזיקה יותר משהיא מועילה — הוא צריך תשובה, לא דיוור.
+    if (replied[a.id]) return false;
     var c = dominant(a);
     return !!c.phone;
   });
@@ -1114,6 +1160,175 @@ function sendCard(s) {
   return box;
 }
 
+// ============================================================
+// תגובות מדיירים
+//
+// אין האזנה מסביב לשעון — היא הייתה דורשת מכונה שרצה כל הזמן.
+// יש כפתור: אתה לוחץ, הריצה עולה לכדקה, שואלת את וואטסאפ מי כתב,
+// ונסגרת.
+//
+// מה שמתקבל הוא **מי** כתב, מתי, וכמה הודעות לא נקראו — לא מה הוא
+// כתב. לכן המסך פותח לך את השיחה במקום להציג תוכן שאין לו.
+// ============================================================
+var COLLECT_OPEN = { 'ממתין':1, 'בדרך':1 };
+var collectPolls = 0;
+
+function openReplies() { drawReplies(); show('v-replies'); refresh().then(drawReplies); }
+
+function collectReplies() {
+  if (!db.sending.ready) {
+    alert('החיבור לוואטסאפ עוד לא הוגדר בשרת.');
+    return;
+  }
+  queue({ pin: pinCode, action: 'collect_replies' });
+  db.collect = { state: 'ממתין', at: '', found: 0, note: '' };
+  localStorage.setItem('pbData', JSON.stringify(db));
+  drawReplies();
+  collectPolls = 8;
+  setTimeout(pollCollect, 6000);
+}
+
+// האיסוף לוקח כדקה, ולכן המסך לא מחכה לתשובה אחת אלא בודק שוב
+// כמה פעמים ואז נעצר. בלי העצירה הזו לשונית פתוחה הייתה מייצרת
+// תעבורה לשרת עד סוף היום.
+function pollCollect() {
+  if (collectPolls <= 0) return;
+  collectPolls--;
+  queue({ pin: pinCode, action: 'pump_sends' });
+  setTimeout(function () {
+    refresh().then(function () {
+      drawReplies();
+      render();
+      if (COLLECT_OPEN[db.collect.state]) setTimeout(pollCollect, 12000);
+    });
+  }, 4000);
+}
+
+function openReplyCount() {
+  var n = 0;
+  db.replies.forEach(function (r) { if (!r.handled) n++; });
+  return n;
+}
+
+function drawReplies() {
+  var busy = !!COLLECT_OPEN[db.collect.state];
+  var button = document.getElementById('p-collect');
+  button.textContent = busy ? 'אוסף…' : 'אסוף תגובות עכשיו';
+  button.disabled = busy;
+  button.style.opacity = busy ? '.6' : '1';
+
+  document.getElementById('p-when').textContent = db.collect.at
+    ? 'נבדק לאחרונה ' + db.collect.at
+    : 'עוד לא נבדק';
+
+  var note = document.getElementById('p-note');
+  if (db.collect.state === 'נכשל' && db.collect.note) {
+    note.style.display = 'block';
+    note.textContent = 'האיסוף האחרון נכשל: ' + db.collect.note;
+  } else {
+    note.style.display = 'none';
+  }
+
+  var list = document.getElementById('p-list');
+  list.innerHTML = '';
+  if (!db.replies.length) {
+    var empty = document.createElement('div');
+    empty.className = 'msg';
+    empty.textContent = busy
+      ? 'בודק מי כתב… זה לוקח בערך דקה.'
+      : 'עוד לא נאספו תגובות. לחץ על הכפתור למעלה.';
+    list.appendChild(empty);
+    return;
+  }
+
+  // מי שעוד לא טופל קודם, ובתוך כל קבוצה החדש ביותר ראשון
+  var sorted = db.replies.slice().sort(function (x, y) {
+    if (!!x.handled !== !!y.handled) return x.handled ? 1 : -1;
+    return x.at < y.at ? 1 : (x.at > y.at ? -1 : 0);
+  });
+  sorted.slice(0, 60).forEach(function (r) { list.appendChild(replyCard(r)); });
+}
+
+function replyCard(r) {
+  var box = document.createElement('div');
+  box.className = 'send';
+
+  var head = document.createElement('div');
+  head.className = 'who';
+  var who = document.createElement('b');
+  who.textContent = r.contact || r.waName || r.phone || 'לא מזוהה';
+  var badge = document.createElement('span');
+  badge.className = 'st ' + (r.handled ? '' : (r.unread ? 'bad' : 'wait'));
+  badge.textContent = r.handled ? 'טופל' : (r.unread ? r.unread + ' לא נקראו' : 'כתב');
+  head.appendChild(who);
+  head.appendChild(badge);
+  box.appendChild(head);
+
+  var txt = document.createElement('div');
+  txt.className = 'txt';
+  // אין כאן תוכן הודעה בכוונה — הספרייה לא מחזירה אותו, ולהמציא
+  // תקציר היה גרוע מלומר במפורש שצריך לפתוח את השיחה.
+  txt.textContent = (r.at || '') + (r.apartment ? ' · דירה ' + r.apartment : ' · לא שויך לדייר');
+  box.appendChild(txt);
+
+  var row = document.createElement('div');
+  row.className = 'row2';
+
+  var chat = document.createElement('button');
+  chat.className = 'btn g';
+  chat.textContent = 'פתח שיחה';
+  chat.onclick = function () {
+    var digits = String(r.phone || '').replace(/\D/g, '').replace(/^0/, '972');
+    if (!digits) { alert('אין מספר טלפון לשיחה הזו.'); return; }
+    window.open('https://wa.me/' + digits, '_blank');
+  };
+  row.appendChild(chat);
+
+  var done = document.createElement('button');
+  done.className = 'btn g';
+  done.textContent = r.handled ? 'פתח מחדש' : 'טופל';
+  done.onclick = function () { markReply(r); };
+  row.appendChild(done);
+  box.appendChild(row);
+
+  if (r.apartment) {
+    var card = document.createElement('button');
+    card.className = 'btn g';
+    card.textContent = 'כרטיס הדייר';
+    card.onclick = function () { openApartment(r.apartment); };
+    box.appendChild(card);
+  }
+  return box;
+}
+
+function markReply(r) {
+  if (r.handled) {
+    // פתיחה מחדש היא מקומית בלבד: השרת יחזיר את הסימון ברענון הבא,
+    // ולכן זו רק דרך מהירה למצוא שוב שיחה שסגרת בטעות.
+    r.handled = false;
+  } else {
+    queue({ pin: pinCode, action: 'reply_handled', jid: r.jid });
+    r.handled = true;
+  }
+  refreshReplied();
+  localStorage.setItem('pbData', JSON.stringify(db));
+  drawReplies();
+  render();
+}
+
+function openApartment(id) {
+  for (var i = 0; i < db.apartments.length; i++) {
+    if (db.apartments[i].id === id) {
+      current = { apt: db.apartments[i], why: 'נפתח מתגובות' };
+      roundMode = 'replies';
+      backTo = 'v-replies';
+      openDetail();
+      return;
+    }
+  }
+  alert('הדירה כבר לא נמצאת ברשימה.');
+}
+
 function retrySend(s) {
   queue({ pin: pinCode, action: 'retry_send', sendId: s.id });
   s.state = 'ממתין';
@@ -1127,7 +1342,10 @@ function retrySend(s) {
 // כרטיס דייר מלא
 // ============================================================
 function openDetail() {
-  backTo = roundMode === 'update' ? 'v-update' : (roundMode === 'search' ? 'v-home' : 'v-round');
+  backTo = roundMode === 'update' ? 'v-update'
+         : roundMode === 'replies' ? 'v-replies'
+         : roundMode === 'search' ? 'v-home'
+         : 'v-round';
   var a = current.apt;
   document.getElementById('d-name').textContent = dominant(a).name;
   document.getElementById('d-where').textContent =
@@ -1302,6 +1520,7 @@ function markObjector() {
   // הסבב, ולכן קריאה לו אחרי חיפוש זרקה אותך לסבב שלא התחלת.
   if (roundMode === 'update') { nextUpdate(); return; }
   if (roundMode === 'call') { nextCard(); return; }
+  if (roundMode === 'replies') { drawReplies(); show('v-replies'); return; }
   show('v-home');
 }
 
