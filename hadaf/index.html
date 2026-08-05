@@ -522,6 +522,28 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
 .sf .rhythm{font-size:.72rem;font-weight:800;color:var(--gold);letter-spacing:.06em}
 .sf .ph{background:var(--sunk);border:1.5px dashed var(--rule);border-radius:var(--r-s);
   padding:26px;text-align:center;color:var(--ink-3);font-size:.79rem;font-weight:700}
+/* גלריית התמונות — גלילה אופקית, כי שתי תמונות ביחד צרות מדי בנייד */
+.pics{display:flex;gap:9px;overflow-x:auto;margin:0 -18px;padding:0 18px 2px;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.pics::-webkit-scrollbar{display:none}
+.pics figure{flex:0 0 auto;width:64%;max-width:224px;scroll-snap-align:center;margin:0}
+/* גובה אחיד לכריכה הזקופה ולפריסה הרחבה, כדי שהשורה לא תיראה שבורה */
+.pics img{width:100%;height:150px;object-fit:contain;display:block;
+  border-radius:var(--r-s);background:var(--sunk);padding:5px;
+  box-shadow:0 2px 10px rgba(11,37,80,.13)}
+.pics figcaption{font-size:.7rem;color:var(--ink-3);font-weight:700;
+  text-align:center;margin-top:5px}
+.sf .pr{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  border-top:1px solid var(--rule-2);padding-top:11px}
+.sf .pr b{font-size:1.5rem;font-weight:800;letter-spacing:-.03em}
+.sf.blue .pr b{color:var(--blue-d)}
+.sf.green .pr b{color:var(--green-d)}
+.sf .pr s{color:var(--ink-3);font-size:.92rem;font-weight:700}
+.sf .pr i{font-style:normal;font-size:.75rem;color:var(--ink-3);font-weight:700}
+.cond{background:var(--sunk);border-radius:var(--r-s);padding:11px 13px;
+  font-size:.78rem;color:var(--ink-2);font-weight:600;line-height:1.62}
+.cond b{font-weight:800;color:var(--ink)}
+.cond em{font-style:normal;color:var(--ok);font-weight:800}
 .price{display:flex;align-items:baseline;gap:10px;justify-content:center;flex-wrap:wrap;
   background:var(--surface);border-radius:var(--r-m);padding:16px;box-shadow:var(--sh-1)}
 .price b{font-size:2rem;font-weight:800;color:var(--green-d);letter-spacing:-.03em}
@@ -677,13 +699,6 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
         <div id="inbox"></div>
         <div id="cta" style="margin-top:16px"></div>
       </section>
-        <div class="rv" id="regbar"></div>
-        <div class="rv" id="rings" style="margin-top:18px"></div>
-        <div class="rv" id="inbox" style="margin-top:18px"></div>
-      </div>
-        <div id="stage"></div>
-        <div class="rv" id="mini" style="margin-top:14px"></div>
-      </div>
 
     </div>
 
@@ -720,7 +735,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
         <div class="rule"></div>
         <div class="sub">שתי מהדורות, שתי דרכי לימוד. כל ישיבה בוחרת את המתאים לה.</div>
       </div>
-      <div class="price"><b>15 ₪</b><s>25 ₪</s><span>לחוברת, בהזמנה מרוכזת</span></div>
+      <div class="price"><b>15-22 ₪</b><s>25 ₪</s><span>לחוברת, בהזמנה מרוכזת</span></div>
       <div id="sfarim-list" style="display:grid;gap:13px"></div>
       <div class="card">
         <h3>הציבו לעצמכם יעד</h3>
@@ -798,7 +813,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.1.0';
+var APP_VERSION = '5.2.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -993,7 +1008,7 @@ function renderHome() {
     '<p style="font-size:.8rem;color:var(--ink-3);font-weight:700;text-align:center;' +
     'margin-top:9px;line-height:1.5">' +
     (mine ? 'כבר שלחתם הרשמה — אפשר לעדכן אותה'
-          : 'דקה אחת · הגמרות במחיר מוזל, 15 ₪ במקום 25 ₪') + '</p>';
+          : 'דקה אחת · הגמרות במחיר מוזל, 15-22 ₪ במקום 25 ₪') + '</p>';
 
   reveal();
 }
@@ -1014,6 +1029,26 @@ function regSaved() {
   try { return JSON.parse(localStorage.getItem('dfReg') || 'null'); } catch (e) { return null; }
 }
 
+/* סיכום ההזמנה. המחיר תלוי במהדורה — 15 ₪ לושננתם, 22 ₪ להסוגיה
+   היומית — ולכן כל עוד לא נבחרה מהדורה מוצג טווח ולא מספר אחד. */
+function regTotal(total) {
+  var s = sefPrice(reg.sefer), r = priceRange(), n, t;
+  if (s) {
+    n = (total * s.group).toLocaleString('he-IL') + ' ₪';
+    t = total + ' גמרות × ' + s.group + ' ₪ · חסכון של ' +
+        (total * (s.normal - s.group)).toLocaleString('he-IL') + ' ₪ מול המחיר הרגיל';
+  } else {
+    n = (total * r.lo).toLocaleString('he-IL') + '-' +
+        (total * r.hi).toLocaleString('he-IL') + ' ₪';
+    t = total + ' גמרות · ' + r.lo + '-' + r.hi + ' ₪ לחוברת, לפי המהדורה שתבחרו';
+  }
+  return '<div class="total" style="margin-top:12px"><div class="n">' + n +
+         '</div><div class="t">' + t + '</div></div>' +
+         '<div class="cond" style="margin-top:9px">המחירים המוזלים מותנים בהזמנה ' +
+         'מרוכזת — <b>400 עותקים</b> בושננתם, <b>300</b> בהסוגיה היומית. ' +
+         '<em>אל דאגה, בעזרת ה׳ נגיע לכך!</em></div>';
+}
+
 function renderReg() {
   var saved = regSaved();
   if (saved && !reg.inst) {
@@ -1026,8 +1061,8 @@ function renderReg() {
 
   var total = (reg.z || 0) + (reg.ch || 0);
   var SEF = [
-    ['veshinantam', 'ושננתם', 'מול כל עמוד גמרא — עמוד ביאור מאיר עיניים. מתאים לשתי ישיבות לימוד בשבוע.'],
-    ['sugya', 'הסוגיה היומית', 'החוברת הצבעונית, פורסת את הדף לסוגיות קצרות. מתאים למי שלומד מעט בכל יום.'],
+    ['veshinantam', 'ושננתם · 15 ₪', 'מול כל עמוד גמרא — עמוד ביאור מאיר עיניים. מתאים לשתי ישיבות לימוד בשבוע.'],
+    ['sugya', 'הסוגיה היומית · 22 ₪', 'החוברת הצבעונית, פורסת את הדף לסוגיות קצרות. מתאים למי שלומד מעט בכל יום.'],
     ['later', 'עוד נחליט', 'נרשמים עכשיו, ובוחרים מהדורה בהמשך.']
   ];
 
@@ -1056,11 +1091,7 @@ function renderReg() {
       numRow('z',  'כיתות ז׳', 'מסכת תענית') +
       numRow('ch', 'כיתות ח׳', 'מסכת מגילה') +
     '</div>' +
-    (total ? '<div class="total" style="margin-top:12px"><div class="n">' +
-             (total * SFARIM_PRICE.group).toLocaleString('he-IL') + ' ₪</div>' +
-             '<div class="t">' + total + ' גמרות × 15 ₪ · חסכון של ' +
-             (total * (SFARIM_PRICE.normal - SFARIM_PRICE.group)).toLocaleString('he-IL') +
-             ' ₪ מול המחיר הרגיל</div></div>' : '') +
+    (total ? regTotal(total) : '') +
 
     '<div class="step-n"><i>3</i><b>איזו גמרא מתאימה לכם?</b></div><div class="opt2">' +
     SEF.map(function (s) {
@@ -1406,14 +1437,43 @@ function sendQuiz() {
 }
 
 /* ---------- ספרים / מוסדות ---------- */
+/* המחיר המוזל של כל מהדורה, והתנאי שצמוד אליו. */
+function sefPrice(id) {
+  for (var i = 0; i < SFARIM.length; i++)
+    if (SFARIM[i].id === id) return SFARIM[i].price;
+  return null;
+}
+/* הטווח בין המהדורות — לשימוש כשעדיין לא נבחרה מהדורה. */
+function priceRange() {
+  var p = SFARIM.map(function (s) { return s.price.group; });
+  return { lo: Math.min.apply(null, p), hi: Math.max.apply(null, p),
+           normal: SFARIM[0].price.normal };
+}
+/* ההערה על ההזמנה המרוכזת. חובה בכל מקום שבו מוצג המחיר המוזל —
+   אחרת זה מצג שווא. */
+function condNote(s) {
+  return '<div class="cond">המחיר המסובסד מותנה בכך שנגיע ל־<b>' + s.price.min +
+         ' הזמנות</b> של ' + esc(s.name) + '. <em>אל דאגה, בעזרת ה׳ נגיע לכך!</em></div>';
+}
+
 function renderSfarim() {
   var h = '';
   SFARIM.forEach(function (s) {
     h += '<div class="sf ' + s.tone + '"><div class="top"><b>' + esc(s.name) +
          '</b><span>' + esc(s.tag) + '</span></div><div class="body">' +
-         '<div class="ph">תמונת הספר — תתווסף</div>' +
+         (s.pics && s.pics.length
+           ? '<div class="pics">' + s.pics.map(function (p) {
+               return '<figure><img loading="lazy" src="' + esc(p.src) + '" alt="' +
+                      esc(s.name + ' — ' + p.cap) + '"><figcaption>' +
+                      esc(p.cap) + '</figcaption></figure>';
+             }).join('') + '</div>'
+           : '<div class="ph">תמונת הספר — תתווסף</div>') +
          '<div class="rhythm">קצב הלימוד · ' + esc(s.rhythm) + '</div>' +
-         '<p>' + esc(s.desc) + '</p><p><b>למי מתאים:</b> ' + esc(s.who) + '</p></div></div>';
+         '<p>' + esc(s.desc) + '</p><p><b>למי מתאים:</b> ' + esc(s.who) + '</p>' +
+         '<div class="pr"><b>' + s.price.group + ' ₪</b><s>' + s.price.normal +
+         ' ₪</s><i>לחוברת, בהזמנה מרוכזת</i></div>' +
+         condNote(s) +
+         '</div></div>';
   });
   document.getElementById('sfarim-list').innerHTML = h;
 }
@@ -1772,10 +1832,30 @@ function admReg(el) {
     return;
   }
   var tot = list.reduce(function (a, r) { return a + (r.total || 0); }, 0);
+  /* כמה עותקים נצברו לכל מהדורה — התנאי למחיר המוזל הוא כמות
+     מינימלית, ולכן זה המספר שצריך להיות מול העיניים. */
+  var per = {}, money = 0, undecided = 0;
+  list.forEach(function (r) {
+    var n = r.total || 0, p = sefPrice(r.sefer);
+    if (p) { per[r.sefer] = (per[r.sefer] || 0) + n; money += n * p.group; }
+    else undecided += n;
+  });
   el.innerHTML =
     '<div class="adm-card" style="margin-bottom:11px"><h4>' + list.length +
-    ' הרשמות · ' + tot + ' גמרות</h4><p class="h" style="margin:0">' +
-    'סה"כ להזמנה: ' + (tot * SFARIM_PRICE.group).toLocaleString('he-IL') + ' ₪</p></div>' +
+    ' הרשמות · ' + tot + ' גמרות</h4>' +
+    SFARIM.map(function (s) {
+      var n = per[s.id] || 0, gap = s.price.min - n;
+      return '<div class="row" style="padding:7px 0"><span>' + esc(s.name) +
+        ' <span style="color:var(--ink-3)">· יעד ' + s.price.min + '</span></span>' +
+        '<b style="color:' + (gap <= 0 ? 'var(--ok)' : 'var(--ink)') + '">' + n +
+        (gap > 0 ? ' <span style="font-weight:600;color:var(--ink-3)">(חסרים ' +
+                   gap + ')</span>' : ' ✓') + '</b></div>';
+    }).join('') +
+    (undecided ? '<div class="row" style="padding:7px 0"><span>טרם בחרו מהדורה</span>' +
+                 '<b>' + undecided + '</b></div>' : '') +
+    '<p class="h" style="margin:9px 0 0">סה"כ להזמנה: ' +
+    money.toLocaleString('he-IL') + ' ₪' +
+    (undecided ? ' · בלי ' + undecided + ' שטרם בחרו' : '') + '</p></div>' +
     list.map(function (r) {
       return '<div class="adm-card" style="margin-bottom:9px"><h4>' + esc(r.inst) + '</h4>' +
         '<p class="h" style="margin-bottom:8px">' + esc(r.who || '') +
