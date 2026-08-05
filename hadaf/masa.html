@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>המסע — הדף השבועי של בני עקיבא</title>
+<meta name="theme-color" content="#F6F1E6">
+<meta name="robots" content="noindex">
+<style>
+/* ============================================================
+   אב־טיפוס, סבב 2.
+   כלל אחד: כל פיקסל צריך להצדיק את קיומו. אין מלבנים, אין
+   מסגרות, אין צללים — נייר, טיפוגרפיה, וזהב לרגע אחד.
+   ============================================================ */
+:root{
+  --blue:#17468F; --blue-d:#0B2550; --blue-l:#3574CE;
+  --green:#6FA83B; --green-d:#4A821C; --gold:#C08F2B; --gold-l:#E3B44A;
+
+  --paper:#F6F1E6; --surface:#FFFDF8; --sunk:#EFE6D3;
+  --ink:#1B2A45; --ink-2:#5A6780; --ink-3:#96A0B2;
+  --rule:#E5DAC3;
+  --ok:#3B7D57;
+  --r:14px;
+  --sh-1:0 1px 2px rgba(37,29,12,.05), 0 2px 8px rgba(37,29,12,.05);
+  --sh-2:0 2px 4px rgba(37,29,12,.06), 0 10px 26px rgba(37,29,12,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;
+  font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif}
+html,body{overflow-x:hidden}
+img{max-width:100%}
+body{background:var(--paper);color:var(--ink);min-height:100vh;line-height:1.55;
+     -webkit-font-smoothing:antialiased}
+.app{width:100%;max-width:560px;margin:0 auto;padding:26px 20px 40px}
+.view{display:none}
+.view.on{display:block;animation:in .3s ease}
+@keyframes in{from{opacity:0}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- המשפט ---------- */
+.brand{display:flex;align-items:center;gap:10px;justify-content:center;
+  margin-bottom:34px;opacity:.9}
+.brand img{width:30px;height:30px;object-fit:contain}
+.brand span{font-size:.76rem;font-weight:800;color:var(--ink-3);letter-spacing:.02em}
+
+.sentence{text-align:center;padding:6px 0 4px}
+.sentence .lead{font-size:1.06rem;font-weight:700;color:var(--ink-2);
+  letter-spacing:-.01em}
+.sentence .blank{display:block;background:none;border:none;cursor:pointer;
+  width:100%;padding:9px 0 5px;margin-top:11px;color:var(--blue-d);
+  font-size:2.05rem;font-weight:800;letter-spacing:-.045em;line-height:1.2;
+  position:relative;transition:color .2s}
+.sentence .blank u{text-decoration:none;box-shadow:inset 0 -.22em 0 rgba(227,180,74,.5);
+  padding:0 .06em}
+.sentence .blank.empty{color:var(--ink-3);font-size:1.5rem;font-weight:700}
+.sentence .blank.empty u{box-shadow:none;
+  border-bottom:2.5px dashed var(--rule);padding-bottom:5px}
+.sentence .blank:active{color:var(--blue)}
+.sentence .sub{display:block;font-size:.82rem;font-weight:700;color:var(--ink-3);
+  margin-top:5px}
+
+.beads{display:flex;gap:7px;justify-content:center;margin:32px 0}
+.beads i{width:5px;height:5px;border-radius:50%;background:var(--rule)}
+.beads i.on{background:var(--gold)}
+
+/* ---------- התשובה ---------- */
+.answer{text-align:center;animation:up .42s cubic-bezier(.34,1.3,.5,1)}
+.answer .so{font-size:.74rem;font-weight:800;letter-spacing:.14em;color:var(--gold)}
+.answer h1{font-size:2.5rem;font-weight:800;letter-spacing:-.05em;line-height:1.1;
+  color:var(--blue-d);margin-top:9px}
+.answer h1.g{color:var(--green-d)}
+.answer .pr{font-size:1rem;font-weight:800;color:var(--ink-2);margin-top:11px}
+.answer .pr{font-weight:700}
+.answer .pr s{color:var(--ink-3)}
+.answer .why{font-size:.95rem;font-weight:600;color:var(--ink-2);line-height:1.65;
+  margin:16px auto 0;max-width:27ch}
+.swap{background:none;border:none;cursor:pointer;color:var(--blue);
+  font-size:.88rem;font-weight:800;padding:14px 6px;margin-top:6px;width:100%}
+.swap:after{content:" ‹"}
+
+.two{display:grid;gap:11px;margin-top:6px;text-align:start}
+.two button{background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r);
+  padding:16px 17px;cursor:pointer;color:inherit;text-align:start;width:100%}
+.two b{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  font-size:1.1rem;font-weight:800;letter-spacing:-.03em}
+.two b em{font-style:normal;font-size:.9rem;color:var(--green-d)}
+.two small{display:block;font-size:.83rem;color:var(--ink-2);font-weight:600;
+  margin-top:5px;line-height:1.55}
+
+.acts{margin-top:26px}
+.btn{width:100%;border:none;border-radius:13px;padding:17px;color:#fff;
+  font-size:1rem;font-weight:800;cursor:pointer;letter-spacing:-.01em;
+  box-shadow:var(--sh-2);transition:transform .1s}
+.btn:active{transform:scale(.985)}
+.btn.p{background:linear-gradient(140deg,var(--blue-l),var(--blue))}
+.btn.gr{background:linear-gradient(140deg,var(--green),var(--green-d))}
+.btn.g{background:var(--surface);color:var(--blue);box-shadow:none;
+  border:1.5px solid var(--rule)}
+.btn:disabled{opacity:.35;pointer-events:none}
+.quiet{background:none;border:none;color:var(--ink-3);font-weight:700;
+  font-size:.86rem;cursor:pointer;padding:15px;width:100%}
+.note{text-align:center;font-size:.74rem;color:var(--ink-3);font-weight:700;
+  margin-top:18px;display:flex;align-items:center;justify-content:center;gap:6px}
+.note:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ok);flex:none}
+
+/* ---------- הרשמה ---------- */
+.top{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.top button{background:none;border:none;color:var(--ink-3);font-size:.88rem;
+  font-weight:800;cursor:pointer;padding:4px 0}
+.hd{margin-bottom:22px}
+.hd h2{font-size:1.6rem;font-weight:800;letter-spacing:-.04em;line-height:1.2;
+  color:var(--blue-d)}
+.hd p{font-size:.92rem;color:var(--ink-2);font-weight:600;margin-top:8px;line-height:1.6}
+.form{display:grid;gap:15px}
+.fld{display:grid;gap:6px}
+.fld .label{font-size:.79rem;font-weight:800;color:var(--ink-3)}
+.fld input{width:100%;border:1.5px solid var(--rule);border-radius:var(--r);
+  padding:15px 16px;font-size:1rem;font-weight:700;background:var(--surface);color:var(--ink)}
+.fld input:focus{outline:none;border-color:var(--blue)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--sunk);
+  padding:4px;border-radius:13px}
+.seg button{border:none;background:none;border-radius:10px;padding:13px 8px;
+  font-size:.92rem;font-weight:800;color:var(--ink-3);cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--blue);box-shadow:var(--sh-1)}
+.pk{width:100%;background:var(--surface);border:1.5px solid var(--rule);
+  border-radius:var(--r);padding:15px 16px;text-align:start;cursor:pointer;
+  font-size:1rem;font-weight:700;color:var(--ink);display:flex;
+  align-items:center;justify-content:space-between;gap:10px}
+.pk.empty{color:var(--ink-3)}
+.pk:after{content:"‹";color:var(--ink-3);font-size:1.25rem;font-weight:800}
+.cnt{display:flex;align-items:center;gap:8px}
+.cnt button{width:46px;height:46px;border:none;border-radius:13px;background:var(--sunk);
+  color:var(--blue);font-size:1.3rem;font-weight:800;cursor:pointer;flex:none}
+.cnt button:active{transform:scale(.93)}
+.cnt input{flex:1;height:46px;text-align:center;border:1.5px solid var(--rule);
+  border-radius:13px;font-size:1.05rem;font-weight:800;background:var(--surface);
+  color:var(--ink);font-variant-numeric:tabular-nums}
+.sum{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff;
+  border-radius:var(--r);padding:17px;text-align:center;box-shadow:var(--sh-2)}
+.sum b{display:block;font-size:1.7rem;font-weight:800;letter-spacing:-.04em;line-height:1.1}
+.sum span{font-size:.82rem;opacity:.93;font-weight:700}
+.done{background:rgba(59,125,87,.09);border:1px solid rgba(59,125,87,.22);
+  border-radius:var(--r);padding:18px;text-align:center}
+.done b{display:block;font-size:1.05rem;font-weight:800;color:var(--ok)}
+.done p{font-size:.87rem;color:var(--ink-2);font-weight:600;margin-top:6px;line-height:1.6}
+
+/* ---------- המסך האישי ---------- */
+.hi{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.hi .m{width:44px;height:44px;border-radius:50%;background:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1)}
+.hi .m img{width:28px;height:28px;object-fit:contain}
+.hi .w{flex:1;min-width:0}
+.hi .w b{display:block;font-size:1rem;font-weight:800;letter-spacing:-.03em;
+  color:var(--blue-d);line-height:1.3}
+.hi .w small{font-size:.76rem;font-weight:700;color:var(--gold)}
+.hi .ed{flex:none;background:none;border:none;color:var(--ink-3);font-size:.82rem;
+  font-weight:800;cursor:pointer;padding:6px}
+
+.stage{position:relative;overflow:hidden;border-radius:18px;padding:18px;color:#fff;
+  box-shadow:var(--sh-2);
+  background:radial-gradient(130% 105% at 78% -10%,#2C63B6 0%,var(--blue) 34%,var(--blue-d) 78%)}
+.stage .eyebrow{display:flex;align-items:center;gap:9px;font-size:.7rem;font-weight:800;
+  letter-spacing:.09em;color:var(--gold-l);margin-bottom:9px}
+.stage .eyebrow s{flex:1;height:1px;background:rgba(255,255,255,.16);text-decoration:none}
+.stage h2{font-size:1.36rem;font-weight:800;line-height:1.18;letter-spacing:-.04em}
+.stage .meta{font-size:.83rem;opacity:.74;font-weight:700;margin-top:6px}
+.stage .frame{margin-top:14px;border-radius:12px;overflow:hidden;background:#fff;cursor:pointer}
+.stage .frame img{display:block;width:100%}
+.stage .empty{padding:34px 16px;text-align:center;font-size:.85rem;font-weight:700;
+  color:var(--ink-3);background:var(--sunk)}
+.stage .go{width:100%;margin-top:14px;border:none;border-radius:13px;padding:15px;
+  background:#fff;color:var(--blue-d);font-weight:800;font-size:.95rem;cursor:pointer}
+
+.sec{display:flex;align-items:center;gap:11px;margin:24px 0 12px}
+.sec b{font-size:.73rem;font-weight:800;letter-spacing:.1em;color:var(--ink-3);white-space:nowrap}
+.sec i{flex:1;height:1px;background:var(--rule)}
+.kit{display:grid;gap:8px}
+.lnk{display:flex;align-items:center;gap:13px;background:var(--surface);
+  border-radius:var(--r);padding:14px 15px;text-decoration:none;color:inherit;
+  border:1px solid var(--rule)}
+.lnk .ic{width:38px;height:38px;border-radius:11px;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:1rem;font-weight:800;
+  background:rgba(23,70,143,.08);color:var(--blue)}
+.lnk.gr .ic{background:rgba(111,168,59,.14);color:var(--green-d)}
+.lnk b{display:block;font-size:.94rem;font-weight:800;letter-spacing:-.02em}
+.lnk small{display:block;font-size:.77rem;color:var(--ink-3);font-weight:700;margin-top:1px}
+.lnk.dim{opacity:.5}
+.mine-sef{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:15px 16px}
+.mine-sef b{font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.mine-sef span{font-size:.85rem;font-weight:700;color:var(--ink-2)}
+
+/* ---------- גיליון + מצגת ---------- */
+#sheet{position:fixed;inset:0;z-index:80;display:none}
+#sheet.on{display:block}
+#sheet .veil{position:absolute;inset:0;background:rgba(11,37,80,.4)}
+#sheet .panel{position:absolute;inset-inline:0;bottom:0;background:var(--surface);
+  border-radius:20px 20px 0 0;max-height:80vh;display:flex;flex-direction:column;
+  animation:up .26s cubic-bezier(.34,1.3,.5,1)}
+#sheet .h{padding:14px 20px 10px;flex:none;border-bottom:1px solid var(--rule)}
+#sheet .h i{display:block;width:36px;height:4px;border-radius:3px;background:var(--rule);
+  margin:0 auto 12px}
+#sheet .h b{font-size:.98rem;font-weight:800}
+#sheet .l{overflow-y:auto;padding:6px 0 24px}
+#sheet .it{padding:15px 20px;cursor:pointer;display:flex;align-items:baseline;gap:11px}
+#sheet .it b{display:block;font-size:.98rem;font-weight:800;letter-spacing:-.02em}
+#sheet .it small{display:block;font-size:.8rem;color:var(--ink-3);font-weight:700;margin-top:2px}
+#sheet .it.on{background:rgba(23,70,143,.06)}
+#sheet .it.on b{color:var(--blue)}
+#sheet .it .v{width:16px;flex:none;color:var(--blue);opacity:0;font-weight:800}
+#sheet .it.on .v{opacity:1}
+
+#deck{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;
+  padding:18px;background:var(--blue-d);color:#fff}
+#deck.on{display:flex}
+#deck .dt{display:flex;justify-content:space-between;align-items:center;flex:none;
+  font-size:.78rem;font-weight:800;opacity:.72;padding-bottom:12px}
+#deck .dt button{background:none;border:none;color:#fff;font-size:1.35rem;cursor:pointer}
+#deck .db{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+#deck img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+#deck .dn{display:flex;gap:11px;flex:none;padding-top:14px}
+#deck .dn button{flex:1;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.14);
+  color:#fff;border-radius:12px;padding:14px;font-weight:800;font-size:.92rem;cursor:pointer}
+#deck .dn button:disabled{opacity:.28}
+
+.lab{position:fixed;top:0;inset-inline:0;z-index:70;text-align:center;
+  background:var(--gold);color:#fff;font-size:.68rem;font-weight:800;padding:3px;
+  letter-spacing:.06em}
+.app{padding-top:34px}
+</style>
+</head>
+<body>
+
+<div class="lab">גרסת ניסוי</div>
+
+<div class="app">
+
+  <!-- ===== המשפט ===== -->
+  <div id="v-say" class="view">
+    <div class="brand"><img id="brand-mark" alt=""><span>הדף השבועי · תשפ"ז</span></div>
+    <div id="say-body"></div>
+  </div>
+
+  <!-- ===== הרשמה ===== -->
+  <div id="v-join" class="view">
+    <div class="top"><button onclick="backToSay()">→ חזרה</button></div>
+    <div id="join-body"></div>
+  </div>
+
+  <!-- ===== המסך האישי ===== -->
+  <div id="v-mine" class="view"><div id="mine-body"></div></div>
+
+</div>
+
+<div id="sheet" onclick="if(event.target.id==='sheet'||event.target.className==='veil')sheetClose()">
+  <div class="veil"></div>
+  <div class="panel"><div class="h"><i></i><b id="sheet-t"></b></div>
+    <div class="l" id="sheet-l"></div></div>
+</div>
+
+<div id="deck">
+  <div class="dt"><span id="d-where"></span><button onclick="deckClose()">✕</button></div>
+  <div class="db"><img id="d-img" alt=""></div>
+  <div class="dn">
+    <button id="d-prev" onclick="deckGo(-1)">→ הקודם</button>
+    <button id="d-next" onclick="deckGo(1)">הבא ←</button>
+  </div>
+</div>
+
+<script src="logo.js"></script>
+<script src="data.js"></script>
+<script src="links.js"></script>
+<script src="masa.js"></script>
+</body>
+</html>
