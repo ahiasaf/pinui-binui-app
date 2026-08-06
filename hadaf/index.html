@@ -826,7 +826,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.8.0';
+var APP_VERSION = '5.9.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -1055,6 +1055,13 @@ var reg = { inst:'', instOther:'', who:'', phone:'', qty:{} };
 function regSaved() {
   try { return JSON.parse(localStorage.getItem('dfReg') || 'null'); } catch (e) { return null; }
 }
+/* ניקוי ההרשמה שנשמרה במכשיר — הטופס חוזר להיות ריק */
+function regReset() {
+  localStorage.removeItem('dfReg');
+  reg = { inst:'', instOther:'', who:'', phone:'', qty:{} };
+  renderReg();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
 /* סך העותקים של מהדורה אחת, בשתי המסכתות — זה המספר שנספר מול
    סף ההנחה, כי ההוצאה סופרת עותקים ולא כרכים. */
 function sefTotal(sefer, q) {
@@ -1102,38 +1109,42 @@ function renderReg() {
      זה עולה — ורק בסוף נותנים שם וטלפון. אף אחד לא משאיר פרטים
      לפני שהוא יודע למה, והחששות נענים בדרך למטה. */
   var h =
-    (saved ? '<p class="jump">כבר נרשמתם · ' +
-             '<a href="#" onclick="jumpTo(\'r-who-step\');return false">לעדכון הפרטים</a></p>' : '') +
+    /* הרשמה שכבר במכשיר ממלאת את הטופס מראש. אומרים את זה במפורש,
+       אחרת המספרים נראים כמו ברירת מחדל שהאפליקציה המציאה. */
+    (saved ? '<p class="jump">' + esc(UI.savedNote) + ' · ' +
+             '<a href="#" onclick="jumpTo(\'r-who-step\');return false">' +
+             esc(UI.savedGo) + '</a> · ' +
+             '<a href="#" onclick="regReset();return false">' +
+             esc(UI.savedNew) + '</a></p>' : '') +
 
     '<div class="step-n"><i>1</i><b>' + esc(WAYS.title) + '</b></div>' +
     waysBlock() +
 
-    '<div class="step-n"><i>2</i><b>מה כדאי לנו לרכוש?</b></div>' +
+    '<div class="step-n"><i>2</i><b>' + esc(UI.s2) + '</b></div>' +
     recBlocks() +
 
-    '<div class="step-n"><i>3</i><b>כמה זה עולה לנו</b></div>' +
+    '<div class="step-n"><i>3</i><b>' + esc(UI.s3) + '</b></div>' +
     '<p style="font-size:.85rem;color:var(--ink-2);font-weight:600;margin-bottom:11px;' +
-    'line-height:1.6">בשלב זה אנחנו מבקשים הערכה כללית, כדי שנוכל ' +
-    'להתארגן, ללא התחייבות.</p>' +
-    '<p class="two-m">בתוכנית יש שתי מסכתות לבחירה: מגילה ותענית.</p>' +
+    'line-height:1.6">' + esc(UI.hint) + '</p>' +
+    '<p class="two-m">' + esc(UI.twoM) + '</p>' +
     orderRows() +
 
     regTotal() +
 
-    '<div class="step-n" id="r-who-step"><i>4</i><b>מי אתם?</b></div>' +
-    pkField('', instName, 'בחרו את הישיבה', 'pickInst()') +
+    '<div class="step-n" id="r-who-step"><i>4</i><b>' + esc(UI.s4) + '</b></div>' +
+    pkField('', instName, UI.instLabel, 'pickInst()') +
     '<div class="fld" id="r-other" style="display:' + (reg.inst === 'other' ? 'block' : 'none') + '">' +
     '<input type="text" id="r-otherName" placeholder="שם הישיבה" value="' + esc(reg.instOther) +
     '" onchange="regSet(\'instOther\',this.value)"></div>' +
-    '<div class="fld"><div class="label">מי מרכז את התוכנית בישיבה</div>' +
+    '<div class="fld"><div class="label">' + esc(UI.whoLabel) + '</div>' +
     '<input type="text" id="r-who" placeholder="שם" value="' + esc(reg.who) +
     '" onchange="regSet(\'who\',this.value)"></div>' +
-    '<div class="fld"><div class="label">טלפון לחזרה</div>' +
+    '<div class="fld"><div class="label">' + esc(UI.phoneLabel) + '</div>' +
     '<input type="tel" id="r-phone" placeholder="05X-XXXXXXX" value="' + esc(reg.phone) +
     '" onchange="regSet(\'phone\',this.value)"></div>' +
 
     '<button class="btn gr" style="margin-top:20px" onclick="sendReg()">' +
-    (saved ? 'עדכון ההרשמה' : 'שליחת ההרשמה') + '</button>' +
+    esc(saved ? UI.update : UI.send) + '</button>' +
     '<div id="r-done"></div>';
 
   document.getElementById('reg-body').innerHTML = h;
@@ -1164,7 +1175,8 @@ function recBlocks() {
         ? '<div class="pics">' + s.pics.map(function (pic) {
             return '<img loading="lazy"' + (pic.small ? ' class="sm"' : '') +
                    ' src="' + esc(pic.src) + '" alt="' + esc(s.name) +
-                   '" onclick="zoom(\'' + esc(pic.hi || pic.src) + '\')">';
+                   '" onclick="zoom(\'' + esc(pic.src) + '\',\'' +
+                   esc(pic.hi || '') + '\')">';
           }).join('') + '</div>'
         : '') +
       '<div class="pr"><b>' + shek(p.price) + '</b> לחוברת' +
@@ -1175,11 +1187,21 @@ function recBlocks() {
 }
 
 /* הגדלת תמונה. הפריסה צפופה בכוונה — מי שרוצה באמת לקרוא אותה
-   לפני שהוא מחליט, לוחץ. */
-function zoom(src) {
-  var o = document.getElementById('zoom');
-  o.querySelector('img').src = src;
+   לפני שהוא מחליט, לוחץ.
+
+   מציגים מיד את התמונה שכבר נטענה בכרטיס, ורק אחר כך מחליפים
+   לגרסה החדה. כך אין רגע של מסך ריק, ואם הגרסה החדה חסרה או
+   נכשלת — נשארים עם מה שיש במקום מסך כחול. */
+function zoom(base, hi) {
+  var o = document.getElementById('zoom'), im = o.querySelector('img');
+  im.src = base;
+  o.scrollTop = 0; o.scrollLeft = 0;
   o.classList.add('on');
+  if (hi && hi !== base) {
+    var pre = new Image();
+    pre.onload = function () { if (o.classList.contains('on')) im.src = hi; };
+    pre.src = hi;
+  }
 }
 function zoomClose() { document.getElementById('zoom').classList.remove('on'); }
 
@@ -1222,7 +1244,7 @@ function regTotal() {
   });
   return '<div class="total" style="margin-top:14px"><div class="n">' + shek(sum) +
          '</div>' +
-         (save ? '<div class="t">חסכון של ' + shek(save) + ' מול המחיר הרגיל</div>' : '') +
+         (save ? '<div class="t">' + fill(UI.saving, { sum:shek(save) }) + '</div>' : '') +
          '</div>';
 }
 function numRow(id, label, sub) {
@@ -1295,7 +1317,7 @@ function sendReg() {
 function regDone(txt, viaWa) {
   document.getElementById('r-done').innerHTML =
     '<div class="done-box" style="margin-top:14px">' +
-    'ההרשמה נשלחה. ' + esc(PROGRAM.contact.coord) + ' יחזור אליכם.' + '</div>' +
+    esc(UI.done) + '</div>' +
     (viaWa ? '<div style="text-align:center;margin-top:11px">' +
              '<a style="font-size:.79rem;color:var(--ink-3);font-weight:700" ' +
              'href="https://wa.me/' + COORD_WA + '?text=' + encodeURIComponent(txt) +
@@ -1777,7 +1799,58 @@ function applyCfg() {
     for (var f in CFG.prices[p])
       if (CFG.prices[p][f] != null) PRICES[p][f] = CFG.prices[p][f];
   }
+  relayerTexts();
 }
+
+/* ============================================================
+   עריכת מלל.
+   שלוש שכבות, כל אחת דורסת את שלפניה:
+     data.js  — ברירת המחדל שבקוד
+     הגיליון  — מה שפורסם, וזה מה שכל ראשי החטיבות רואים
+     CFG.texts — טיוטה מקומית, כדי שהרכז יראה מיד מה שערך
+
+   הערך המקורי נשמר ב-TEXT_BASE בטעינה הראשונה, כך ש"שחזור"
+   תמיד חוזר לקוד ולא לערך שנדרס קודם.
+   ============================================================ */
+var TEXT_ROOTS = { ways:WAYS, ui:UI, sfarim:SFARIM };
+var TEXT_BASE = {};
+
+function textRef(k) {
+  var parts = k.split('.'), o = TEXT_ROOTS[parts[0]];
+  for (var i = 1; i < parts.length - 1 && o; i++) o = o[parts[i]];
+  return o ? { o:o, f:parts[parts.length - 1] } : null;
+}
+function textGet(k) { var r = textRef(k); return r ? r.o[r.f] : ''; }
+function textSet(k, v) { var r = textRef(k); if (r) r.o[r.f] = v; }
+
+(function snapshotTexts() {
+  TEXT_FIELDS.forEach(function (f) { if (f.k) TEXT_BASE[f.k] = textGet(f.k); });
+})();
+
+function applyTexts(map) {
+  if (!map) return;
+  TEXT_FIELDS.forEach(function (f) {
+    if (f.k && typeof map[f.k] === 'string' && map[f.k] !== '') textSet(f.k, map[f.k]);
+  });
+}
+function resetTexts() {
+  TEXT_FIELDS.forEach(function (f) { if (f.k) textSet(f.k, TEXT_BASE[f.k]); });
+}
+/* מרכיב מחדש את שלוש השכבות לפי הסדר. כל שינוי — מקומי או מהגיליון
+   — עובר דרך כאן, כדי שמחיקת ערך לא תשאיר אותו תקוע. */
+var PUBLISHED = Store.get('textCache', null) || {};
+function relayerTexts() {
+  resetTexts();
+  applyTexts(PUBLISHED);
+  applyTexts(CFG.texts);
+}
+/* תבנית פשוטה: {n}, {name}, {sum} */
+function fill(tpl, vars) {
+  return String(tpl).replace(/\{(\w+)\}/g, function (m, k) {
+    return vars[k] != null ? vars[k] : m;
+  });
+}
+
 applyCfg();
 
 /* ============================================================
@@ -1796,8 +1869,7 @@ function priceOf(id) {
 /* ההערה למהדורה אחת */
 function condNote(name, min) {
   if (!min) return '';
-  return '<div class="cond">המחיר המסובסד מותנה בכך שנגיע ל־<b>' + min +
-         ' הזמנות</b> של ' + esc(name) + '. <em>אל דאגה, בעזרת ה׳ נגיע לכך!</em></div>';
+  return '<div class="cond">' + fill(UI.cond, { n:min, name:esc(name) }) + '</div>';
 }
 /* אם כל המהדורות באותו מחיר מוזל — אפשר להציג הנחה אחת לכולם */
 function uniformPrice() {
@@ -1868,6 +1940,25 @@ function loadInstitutions() {
       return true;
     });
 }
+/* המלל שפורסם, מלשונית "טקסטים": key | value.
+   נשמר גם במטמון, כדי שפתיחה בלי רשת לא תחזיר את הנוסח הישן. */
+function loadTexts() {
+  return fetchSheet(CFG.sheetId || SHEET_ID, 'טקסטים')
+    .then(function (rows) {
+      if (!rows || rows.length < 2) return false;
+      var map = {};
+      rows.slice(1).forEach(function (r) {
+        var k = (r[0] || '').trim(), v = (r[1] || '').trim();
+        if (k && v) map[k] = v;
+      });
+      if (!Object.keys(map).length) return false;
+      Store.set('textCache', map);
+      PUBLISHED = map;
+      relayerTexts();
+      return true;
+    });
+}
+
 /* אנשי קשר מגיליון פרטי. המזהה מוזן בניהול ונשמר על המכשיר —
    אינו בקוד, כדי שטלפונים של מנהלים לא יישבו בריפו ציבורי. */
 function loadContactsFromSheet() {
@@ -1912,7 +2003,8 @@ var admTab = 'reg';
 
 function renderAdmin() {
   var TABS = [['reg','הרשמות'],['inst','מוסדות'],['calls','שיחות'],
-              ['price','מחירים'],['sugya','הסוגיה'],['set','הגדרות']];
+              ['text','טקסטים'],['price','מחירים'],['sugya','הסוגיה'],
+              ['set','הגדרות']];
   var h = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
           '<div><div style="font-size:1.15rem;font-weight:800;letter-spacing:-.03em">ניהול התוכנית</div>' +
           '<div style="font-size:.76rem;color:var(--ink-3);font-weight:700">' +
@@ -1939,6 +2031,7 @@ function admPane() {
       '<div id="calls-body"></div>';
     return renderCalls();
   }
+  if (admTab === 'text')  return admText(el);
   if (admTab === 'price') return admPrice(el);
   if (admTab === 'sugya') return admSugya(el);
   if (admTab === 'set')   return admSet(el);
@@ -2024,6 +2117,75 @@ function admToggle(code) {
   j[code] = !(cur && cur.joined);
   cfgSet('joined', j);
   admPane();
+}
+
+/* ---- טקסטים ----
+   עריכת המלל בלי לגעת בקוד. "שמירה" משנה את המכשיר הזה בלבד;
+   "פרסום" שולח לגיליון, ומשם זה מגיע לכל מי שפותח את האפליקציה.
+   ההפרדה מכוונת: אפשר לנסח, לראות איך זה נראה, ורק אז לפרסם.  */
+function admText(el) {
+  var d = CFG.texts || {};
+  var dirty = TEXT_FIELDS.filter(function (f) {
+    return f.k && d[f.k] != null && d[f.k] !== TEXT_BASE[f.k];
+  }).length;
+
+  el.innerHTML =
+    '<div class="adm-card" style="margin-bottom:11px"><h4>עריכת המלל</h4>' +
+    '<p class="h">שינוי נשמר במכשיר הזה בלבד עד שלוחצים <b>פרסום</b>. ' +
+    'פרסום כותב לגיליון, וכל מי שפותח את האפליקציה רואה את הנוסח החדש. ' +
+    'שדה ריק חוזר לנוסח שבקוד.</p>' +
+    '<div class="row" style="padding:8px 0"><span>שינויים שטרם פורסמו</span>' +
+    '<b' + (dirty ? '' : ' style="color:var(--ink-3)"') + '>' + dirty + '</b></div>' +
+    '<button class="btn gr" onclick="admTextPublish()">פרסום לכל המשתמשים</button>' +
+    '<button class="btn" style="margin-top:8px" onclick="admTextReset()">' +
+    'שחזור כל הנוסחים שבקוד</button>' +
+    '<div id="adm-text-msg"></div></div>' +
+
+    TEXT_FIELDS.map(function (f) {
+      if (f.g) return '<div class="sec" style="margin:16px 0 8px"><b>' +
+                      esc(f.g) + '</b><i></i></div>';
+      var cur = textGet(f.k), changed = d[f.k] != null && d[f.k] !== TEXT_BASE[f.k];
+      return '<div class="fld"><div class="label">' + esc(f.lbl) +
+        (changed ? ' <span style="color:var(--gold)">•</span>' : '') + '</div>' +
+        (f.ml
+          ? '<textarea rows="3" onchange="admTextSet(\'' + f.k + '\',this.value)">' +
+            esc(cur) + '</textarea>'
+          : '<input type="text" value="' + esc(cur) +
+            '" onchange="admTextSet(\'' + f.k + '\',this.value)">') +
+        '</div>';
+    }).join('');
+}
+function admTextSet(k, v) {
+  var t = CFG.texts || {};
+  v = String(v).trim();
+  if (v === '' || v === TEXT_BASE[k]) delete t[k];   /* ריק = חזרה לקוד */
+  else t[k] = v;
+  resetTexts();                 /* קודם חזרה לבסיס, אחרת ערך שנמחק נשאר */
+  cfgSet('texts', t);
+  admPane();
+}
+function admTextReset() {
+  if (!confirm('להחזיר את כל הנוסחים לערך שבקוד?')) return;
+  resetTexts();
+  cfgSet('texts', {});
+  admPane();
+}
+/* פרסום: שורה לכל מפתח שהשתנה, ללשונית "טקסטים" בגיליון.
+   ההרשמות נשלחות באותו מנגנון, ולכן אין כאן תשתית חדשה. */
+function admTextPublish() {
+  var t = CFG.texts || {}, rows = [];
+  TEXT_FIELDS.forEach(function (f) {
+    if (f.k && t[f.k] != null) rows.push({ key:f.k, value:t[f.k] });
+  });
+  var m = document.getElementById('adm-text-msg');
+  if (!API) {
+    m.innerHTML = '<div class="cond" style="margin-top:10px">אין כתובת שרת. ' +
+      'מלאו אותה בהגדרות ← כתובת שרת, אחרת אפשר לערוך רק במכשיר הזה.</div>';
+    return;
+  }
+  queue({ action:'texts', rows:JSON.stringify(rows), at:new Date().toISOString() });
+  m.innerHTML = '<div class="done-box" style="margin-top:10px">נשלח לפרסום · ' +
+    rows.length + ' נוסחים. השינוי יופיע אצל כולם בטעינה הבאה.</div>';
 }
 
 /* ---- מחירים ----
@@ -2308,6 +2470,10 @@ function registerSW() {
   }
   renderHome(); paintQueue(); paintNet(); flush(); registerSW();
   loadInstitutions().then(function (ok) { if (ok) renderHome(); }).catch(function () {});
+  /* המלל שפורסם. נכשל בשקט — נשארים עם המטמון או עם הקוד. */
+  loadTexts().then(function (ok) {
+    if (ok && document.querySelector('#v-reg.on')) renderReg();
+  }).catch(function () {});
   if (isAdminRoute()) adminEntry(); else show('home');
   setTimeout(function () { document.getElementById('splash').className = 'off'; }, 340);
 })();
