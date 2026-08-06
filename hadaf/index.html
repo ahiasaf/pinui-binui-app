@@ -6,6 +6,14 @@
 <title>הדף השבועי של בני עקיבא</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
+<!-- ספארי מתעלם מהאייקונים שב-manifest. בלי apple-touch-icon
+     "הוספה למסך הבית" באייפון תיצור אייקון של צילום מסך. -->
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="הדף השבועי">
 <meta name="theme-color" content="#0E2E63">
 <meta property="og:title" content="הדף השבועי של בני עקיבא">
 <meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — מסכת תענית ומסכת מגילה.">
@@ -547,9 +555,10 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
 #zoom{position:fixed;inset:0;z-index:120;display:none;overflow:auto;
   background:rgba(11,22,45,.93);cursor:zoom-out;-webkit-overflow-scrolling:touch}
 #zoom.on{display:block;animation:fade .18s ease}
-#zoom .zin{min-height:100%;display:flex;align-items:center;
-  justify-content:center;padding:18px}
-#zoom img{flex:none;max-width:none;border-radius:6px;
+/* margin:auto ולא justify/align center — מרכוז ב-flex חותך את הקצה
+   ההתחלתי כשהתוכן גדול מהמכל, ואז חלק מהתמונה בלתי נגיש בגלילה. */
+#zoom .zin{min-height:100%;display:flex;padding:18px}
+#zoom img{margin:auto;flex:none;max-width:none;border-radius:6px;
   box-shadow:0 18px 50px rgba(0,0,0,.5)}
 #zoom button{position:fixed;top:14px;inset-inline-end:14px;background:none;
   border:none;color:#fff;font-size:1.5rem;cursor:pointer;opacity:.7;line-height:1;z-index:1}
@@ -817,7 +826,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.7.0';
+var APP_VERSION = '5.8.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -1096,7 +1105,7 @@ function renderReg() {
     (saved ? '<p class="jump">כבר נרשמתם · ' +
              '<a href="#" onclick="jumpTo(\'r-who-step\');return false">לעדכון הפרטים</a></p>' : '') +
 
-    '<div class="step-n"><i>1</i><b>שלוש דרכים ללמוד</b></div>' +
+    '<div class="step-n"><i>1</i><b>' + esc(WAYS.title) + '</b></div>' +
     waysBlock() +
 
     '<div class="step-n"><i>2</i><b>מה כדאי לנו לרכוש?</b></div>' +
@@ -1125,13 +1134,11 @@ function renderReg() {
 
     '<button class="btn gr" style="margin-top:20px" onclick="sendReg()">' +
     (saved ? 'עדכון ההרשמה' : 'שליחת ההרשמה') + '</button>' +
-    '<p style="font-size:.78rem;color:var(--ink-3);text-align:center;margin-top:10px;' +
-    'font-weight:600">ההרשמה מגיעה ל' + esc(PROGRAM.contact.coord) + '.</p>' +
     '<div id="r-done"></div>';
 
   document.getElementById('reg-body').innerHTML = h;
 }
-/* שלוש הדרכים ללמוד. ראשון במסך, כי זה החשש שעוצר ראש חטיבה. */
+/* הדרכים ללמוד. ראשון במסך: קודם מבינים שהתוכנית פתוחה לכולם. */
 function waysBlock() {
   return '<div class="ways"><b>' + esc(WAYS.lead) + '</b>' +
     '<p>' + esc(WAYS.sub) + '</p>' +
@@ -1157,7 +1164,7 @@ function recBlocks() {
         ? '<div class="pics">' + s.pics.map(function (pic) {
             return '<img loading="lazy"' + (pic.small ? ' class="sm"' : '') +
                    ' src="' + esc(pic.src) + '" alt="' + esc(s.name) +
-                   '" onclick="zoom(this.src)">';
+                   '" onclick="zoom(\'' + esc(pic.hi || pic.src) + '\')">';
           }).join('') + '</div>'
         : '') +
       '<div class="pr"><b>' + shek(p.price) + '</b> לחוברת' +
