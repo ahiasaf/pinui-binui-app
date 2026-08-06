@@ -215,13 +215,14 @@ var SFARIM = [
     fit:'ללימוד פעמיים בשבוע',
     rec:'אם אתם מעדיפים ללמוד פעמיים בשבוע, בכל פעם עמוד אחד — ' +
         'אנחנו ממליצים על מהדורת <b>ושננתם</b>.',
-    pics:[{ src:'sfarim/veshinantam-cover.jpg' },
+    /* small — הכריכה, רק לזיהוי. הפריסה הפתוחה ברוחב מלא. */
+    pics:[{ src:'sfarim/veshinantam-cover.jpg', small:true },
           { src:'sfarim/veshinantam-page.jpg'  }] },
   { id:'sugya', name:'הסוגיה היומית', tone:'green',
     fit:'ללימוד יומי',
     rec:'אם אתם מעדיפים לימוד יומי, כחמש עד עשר דקות בכל יום — ' +
         'אנחנו ממליצים לכם על <b>הסוגיה היומית</b>.',
-    pics:[{ src:'sfarim/sugya-cover.jpg' },
+    pics:[{ src:'sfarim/sugya-cover.jpg', small:true },
           { src:'sfarim/sugya-page.jpg'  }] }
 ];
 

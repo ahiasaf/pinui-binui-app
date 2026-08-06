@@ -513,9 +513,13 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
 .rec.blue .pr b{color:var(--blue-d)}
 .rec.green .pr b{color:var(--green-d)}
 .rec .pr s{color:var(--ink-3);font-weight:700}
-.pics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.pics img{width:100%;height:132px;object-fit:contain;display:block;padding:6px;
-  border-radius:var(--r-s);background:var(--sunk);box-shadow:0 2px 10px rgba(11,37,80,.13)}
+/* הפריסה הפתוחה ברוחב מלא — ממנה מתרשמים, ולכן היא לא מצטמצמת
+   לחצי טור. הכריכה קטנה מעליה, רק כדי לזהות את הספר. */
+.pics{display:grid;gap:9px;justify-items:center}
+.pics img{width:100%;height:auto;display:block;
+  border-radius:var(--r-s);background:var(--sunk);box-shadow:0 3px 14px rgba(11,37,80,.16)}
+.pics img.sm{width:auto;max-width:118px;max-height:118px;object-fit:contain;
+  padding:5px;box-shadow:0 2px 8px rgba(11,37,80,.12)}
 /* כותרת המסכת בטופס ההזמנה */
 .mtitle{font-size:1rem;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;
   padding-inline-start:11px;border-inline-start:3px solid var(--gold)}
@@ -772,7 +776,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '5.5.0';
+var APP_VERSION = '5.6.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -996,7 +1000,7 @@ function openFromHome(i) {
    ============================================================ */
 /* qty — כמות לכל צירוף של מסכת ומהדורה, במפתח 'מסכת-מהדורה'.
    זו גם התשובה ל"כמה תלמידים", ולכן אין שאלה נפרדת. */
-var reg = { inst:'', instOther:'', who:'', phone:'', qty:{}, note:'' };
+var reg = { inst:'', instOther:'', who:'', phone:'', qty:{} };
 
 function regSaved() {
   try { return JSON.parse(localStorage.getItem('dfReg') || 'null'); } catch (e) { return null; }
@@ -1039,7 +1043,7 @@ function renderReg() {
   if (saved && !reg.inst) {
     reg.inst = saved.code || ''; reg.who = saved.who || ''; reg.phone = saved.phone || '';
     reg.qty = regMigrate(saved);
-    reg.note = saved.note || ''; reg.instOther = saved.instOther || '';
+    reg.instOther = saved.instOther || '';
   }
   var instName = reg.inst === 'other' ? 'ישיבה אחרת'
     : (INSTITUTIONS.filter(function (i) { return i.code === reg.inst; })[0] || {}).name || '';
@@ -1063,20 +1067,15 @@ function renderReg() {
     '" onchange="regSet(\'phone\',this.value)"></div>' +
 
     /* ההמלצה לפני ההזמנה: קודם מבינים במה בוחרים, אחר כך מזמינים. */
-    '<div class="step-n"><i>2</i><b>ההמלצה שלנו</b></div>' +
+    '<div class="step-n"><i>2</i><b>איך ללמוד?</b></div>' +
     recBlocks() +
 
     '<div class="step-n"><i>3</i><b>כמה זה עולה לנו</b></div>' +
     '<p style="font-size:.85rem;color:var(--ink-2);font-weight:600;margin-bottom:11px;' +
-    'line-height:1.6">כמה גמרות תצטרכו, בהערכה. אפשר לבחור מסכת אחת או ' +
-    'את שתיהן, ולשלב בין המהדורות — ותמיד אפשר לעדכן.</p>' +
+    'line-height:1.6">כמה גמרות תצטרכו, בהערכה.</p>' +
     orderRows() +
 
     regTotal() +
-
-    '<div class="step-n"><i>4</i><b>עוד משהו שכדאי שנדע?</b></div>' +
-    '<textarea id="r-note" rows="2" placeholder="לא חובה" onchange="regSet(\'note\',this.value)">' +
-    esc(reg.note) + '</textarea>' +
 
     '<button class="btn gr" style="margin-top:20px" onclick="sendReg()">' +
     (saved ? 'עדכון ההרשמה' : 'שליחת ההרשמה') + '</button>' +
@@ -1086,18 +1085,23 @@ function renderReg() {
 
   document.getElementById('reg-body').innerHTML = h;
 }
-/* ההמלצה: משפט בגוף שני, ומתחתיו הספר סגור ופתוח. אין תיאור —
-   התמונות עושות את העבודה, וזו הסיבה שהן כאן ולא במסך נפרד. */
+/* ההמלצה: משפט בגוף שני, ומתחתיו הספר. אין תיאור — התמונות עושות
+   את העבודה, ולכן הפריסה הפתוחה מוצגת ברוחב מלא: זו התמונה שצריך
+   להתרשם ממנה. הכריכה קטנה לצידה, רק כדי לזהות את הספר.
+   תנאי ההנחה יושב כאן, צמוד למחיר של המהדורה שלו. */
 function recBlocks() {
   return '<div style="display:grid;gap:13px">' + SFARIM.map(function (s) {
+    var p = priceOf(s.id);
     return '<div class="rec ' + s.tone + '"><p>' + s.rec + '</p>' +
       (s.pics && s.pics.length
         ? '<div class="pics">' + s.pics.map(function (pic) {
-            return '<img loading="lazy" src="' + esc(pic.src) + '" alt="' + esc(s.name) + '">';
+            return '<img loading="lazy"' + (pic.small ? ' class="sm"' : '') +
+                   ' src="' + esc(pic.src) + '" alt="' + esc(s.name) + '">';
           }).join('') + '</div>'
         : '') +
-      '<div class="pr"><b>' + shek(priceOf(s.id).price) + '</b> לחוברת' +
-      (priceOf(s.id).off ? ' <s>' + shek(priceOf(s.id).list) + '</s>' : '') + '</div>' +
+      '<div class="pr"><b>' + shek(p.price) + '</b> לחוברת' +
+      (p.off ? ' <s>' + shek(p.list) + '</s>' : '') + '</div>' +
+      (p.off ? condNote(s.name, p.min) : '') +
       '</div>';
   }).join('') + '</div>';
 }
@@ -1124,8 +1128,8 @@ function orderRows() {
   }).join('') + '</div>';
 }
 
-/* קופסת הסיכום. הכמות ידועה לכל מסכת ולכל מהדורה, ולכן הסכום מדויק
-   גם בהזמנה מעורבת, ומוצגות רק ההערות של המהדורות שהוזמנו בפועל. */
+/* קופסת הסיכום: הסכום, ומתחתיו רק החיסכון. הפירוט של הכמויות
+   נמצא בשורות שממש מעליה, ולכן חזרה עליו רק מעמיסה. */
 function regTotal() {
   var picked = SFARIM.filter(function (s) { return sefTotal(s.id) > 0; });
   if (!picked.length) return '';
@@ -1134,16 +1138,10 @@ function regTotal() {
     var n = sefTotal(s.id), p = priceOf(s.id);
     sum += n * p.price; save += n * (p.list - p.price);
   });
-  /* פירוט לפי מסכת — זה הפילוח שקובע כמה כרכים מזמינים מכל אחת */
-  var t = orderSummary(reg.qty);
   return '<div class="total" style="margin-top:14px"><div class="n">' + shek(sum) +
-         '</div><div class="t">' + esc(t) +
-         (save ? ' · חסכון של ' + shek(save) + ' מול המחיר הרגיל' : '') +
-         '</div></div>' +
-         picked.map(function (s) {
-           var p = priceOf(s.id);
-           return p.off ? condNote(s.name, p.min) : '';
-         }).join('');
+         '</div>' +
+         (save ? '<div class="t">חסכון של ' + shek(save) + ' מול המחיר הרגיל</div>' : '') +
+         '</div>';
 }
 function numRow(id, label, sub) {
   return '<div class="num"><div class="lbl">' + esc(label) +
@@ -1181,7 +1179,7 @@ function sendReg() {
   /* עמודה לכל צירוף מסכת-מהדורה בגיליון, ולצידה שורת סיכום
      קריאה לאדם — כדי שההזמנה תהיה ברורה גם בלי לפענח מפתחות. */
   var payload = { action:'register', inst:name, code:reg.inst, who:reg.who, phone:reg.phone,
-                  total:total, note:reg.note, at:new Date().toISOString() };
+                  total:total, at:new Date().toISOString() };
   TRACKS.forEach(function (t) {
     SFARIM.forEach(function (s) { payload[qk(t.id, s.id)] = reg.qty[qk(t.id, s.id)] || 0; });
   });
@@ -1203,8 +1201,7 @@ function sendReg() {
         return '  ' + s.name + ': ' + (reg.qty[qk(t.id, s.id)] || 0);
       }).join('\n');
     }).join('\n') + '\n' +
-    'סה"כ גמרות: ' + total +
-    (reg.note ? '\nהערה: ' + reg.note : '');
+    'סה"כ גמרות: ' + total;
 
   if (API) {
     queue(payload);                       // יש שרת — נשלח, וגם נשמר בתור אם אין רשת
