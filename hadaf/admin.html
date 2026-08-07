@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>הדף השבועי — ניהול</title>
+<!-- קובץ אמיתי, ולא כלל rewrite, ובכוונה: cleanUrls ב-vercel.json
+     הופך יעד rewrite של /index.html ללא-תקף, ואז /admin מחזיר 404.
+     קובץ בשם admin.html נפתר על ידי cleanUrls עצמו ל-/admin, בלי
+     להסתמך על סדר הכללים. -->
+<style>
+  html,body{height:100%;margin:0;background:#0B2550}
+</style>
+<script>
+  location.replace('/#admin');
+</script>
+</head>
+<body>
+<noscript><a href="/#admin" style="color:#fff;font:16px system-ui;padding:20px;display:block">
+  למסך הניהול</a></noscript>
+</body>
+</html>
