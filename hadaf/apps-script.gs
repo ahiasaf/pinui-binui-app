@@ -2,6 +2,19 @@
    הדף השבועי של בני עקיבא — הגשר בין האפליקציה לגיליון
    ============================================================
 
+   הרעיון: הסקריפט הזה טיפש בכוונה.
+   -------------------------------
+   בגרסאות הקודמות הוא ידע דברים על האפליקציה — אילו עמודות יש
+   בהרשמה, אילו לשוניות קיימות — ולכן כל שינוי קטן באפליקציה חייב
+   הדבקה ופריסה מחדש ביד.
+
+   כאן זה נגמר. הסקריפט לא יודע דבר על התוכן: הוא מקבל רשימת
+   עמודות מסודרת מהאפליקציה, וכותב אותה. עמודה חדשה? הוא יוסיף
+   אותה לבד. לשונית חדשה? הוא ייצור אותה לבד. כל שינוי עתידי קורה
+   בקוד האפליקציה בלבד.
+
+   *** זו הפריסה האחרונה שנדרשת ממך. ***
+
    מה זה עושה
    ----------
    1. הרשמות  — ראש חטיבה לוחץ "שליחת ההרשמה", והשורה מופיעה
@@ -27,6 +40,8 @@
 
    4. העתק את ה-Web app URL (מסתיים ב-/exec),
       וב-/admin של האפליקציה ← הגדרות ← "כתובת שרת" ← הדבק.
+      אחר כך: הגדרות ← "בדיקת חיבור". אמור להופיע SCRIPT_VERSION
+      שלמטה. הופיע — סיימת.
 
    חשוב לטקסטים
    ------------
@@ -37,34 +52,45 @@
    מחיקת שורה מחזירה את הנוסח שבקוד.
    ============================================================ */
 
+/* מספר שמוצג ב"בדיקת חיבור". אם מה שרואים במסך הניהול נמוך מזה —
+   הפריסה בגוגל ישנה, ויש ללחוץ Deploy ← Manage deployments ←
+   עריכה ← New version. */
+var SCRIPT_VERSION = 3;
+
 function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
     var d = JSON.parse(e.postData.contents);
 
-    if (d.action === 'register') {
-      /* עמודה לכל צירוף מסכת-מהדורה. שמות השדות מגיעים מהאפליקציה
-         בצורה 'תענית-ושננתם' וכו', ולכן אין כאן רשימה קשוחה. */
-      return writeRow_('הרשמות',
-        ['תאריך', 'ישיבה', 'קוד', 'איש קשר', 'טלפון',
-         'תענית · ושננתם', 'תענית · הסוגיה היומית',
-         'מגילה · ושננתם', 'מגילה · הסוגיה היומית',
-         'סה"כ גמרות', 'פירוט'],
-        [new Date(), d.inst, d.code, d.who, "'" + (d.phone || ''),
-         d['taanit-veshinantam'] || 0, d['taanit-sugya'] || 0,
-         d['megila-veshinantam'] || 0, d['megila-sugya'] || 0,
-         d.total || 0, d.seferName || '']);
+    /* ---- הצורה הכללית: האפליקציה נוקבת בלשונית ובעמודות ---- */
+    if (d.action === 'row')   return appendCols_(d.tab, parse_(d.cols));
+    if (d.action === 'table') return writeTable_(d.tab, parse_(d.cols), parse_(d.rows));
+
+    /* ---- הצורות הישנות. נשארות כדי שמכשיר שמחזיק גרסה ישנה
+            של האפליקציה במטמון לא יאבד הרשמה. ---- */
+    if (d.action === 'register') return appendCols_('הרשמות', d.cols ? parse_(d.cols) : [
+      ['ישיבה', d.inst], ['קוד', d.code], ['איש קשר', d.who], ['טלפון', d.phone],
+      ['תענית · ושננתם', d['taanit-veshinantam'] || 0],
+      ['תענית · הסוגיה היומית', d['taanit-sugya'] || 0],
+      ['מגילה · ושננתם', d['megila-veshinantam'] || 0],
+      ['מגילה · הסוגיה היומית', d['megila-sugya'] || 0],
+      ['סה"כ גמרות', d.total || 0], ['פירוט', d.seferName || '']
+    ]);
+
+    if (d.action === 'quiz') return appendCols_('חידות', d.cols ? parse_(d.cols) : [
+      ['שבוע', d.week], ['ישיבה', d.inst], ['שם', d.name], ['טלפון', d.phone],
+      ['תשובה', d.answer + 1], ['נכון', d.correct ? 'נכון' : 'לא נכון']
+    ]);
+
+    if (d.action === 'texts') {
+      var rows = parse_(d.rows).map(function (r) {
+        return r.key !== undefined ? [r.key, r.value] : r;   /* שתי הצורות */
+      });
+      return writeTable_('טקסטים', ['מפתח', 'נוסח'], rows);
     }
 
-    if (d.action === 'quiz') return writeRow_('חידות',
-      ['תאריך', 'שבוע', 'ישיבה', 'שם', 'טלפון', 'תשובה', 'נכון'],
-      [new Date(), d.week, d.inst, d.name, "'" + (d.phone || ''),
-       (d.answer + 1), d.correct ? 'נכון' : 'לא נכון']);
-
-    if (d.action === 'texts') return writeTexts_(JSON.parse(d.rows || '[]'));
-
-    return json_({ status: 'ignored' });
+    return json_({ status: 'ignored', action: d.action || '' });
   } catch (err) {
     return json_({ status: 'error', message: String(err) });
   } finally {
@@ -72,39 +98,116 @@ function doPost(e) {
   }
 }
 
-/* בדיקה מהדפדפן: פתיחת ה-URL אמורה להחזיר ok */
-function doGet() { return json_({ status: 'ok' }); }
+/* בדיקת חיבור. פתיחת ה-URL בדפדפן, או כפתור "בדיקת חיבור" בניהול,
+   מחזירה את הגרסה הפרוסה ואת הלשוניות שהסקריפט רואה — כך שאין
+   צורך לנחש אם הפריסה עלתה ואם היא מעודכנת.
 
-function writeRow_(tab, header, row) {
-  var sh = sheet_(tab, header);
+   ?callback=foo מחזיר JavaScript במקום JSON. הסיבה: Apps Script
+   מפנה את /exec לדומיין אחר, ודפדפנים חוסמים לעיתים את הקריאה
+   הרגילה בגלל CORS. טעינה כתגית <script> עוקפת את זה תמיד. */
+function doGet(e) {
+  var out = { status: 'ok', version: SCRIPT_VERSION, tabs: [] };
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    out.sheet = ss.getName();
+    out.tabs = ss.getSheets().map(function (s) {
+      return { name: s.getName(), rows: Math.max(0, s.getLastRow() - 1) };
+    });
+  } catch (err) { out.status = 'no-sheet'; out.message = String(err); }
+
+  var cb = e && e.parameter && e.parameter.callback;
+  if (cb && /^[A-Za-z_$][\w$]*$/.test(cb)) {
+    return ContentService.createTextOutput(cb + '(' + JSON.stringify(out) + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return json_(out);
+}
+
+/* ---------- הליבה ----------
+   `cols` הוא מערך מסודר של [כותרת, ערך]. הכותרות הן מקור האמת:
+   כותרת שכבר קיימת בשורה 1 מקבלת את הערך בעמודה שלה, וכותרת
+   חדשה נוספת בסוף. כך שדה חדש באפליקציה מייצר עמודה חדשה לבדו,
+   בלי לגעת כאן ובלי לשבש שורות שכבר נכתבו. */
+function appendCols_(tab, cols) {
+  var sh = sheet_(tab);
+  var head = headers_(sh);
+  var row = [];
+
+  /* "תאריך" תמיד ראשונה — שעון השרת ולא שעון המכשיר */
+  put_(row, idx_(sh, head, 'תאריך'), new Date());
+  cols.forEach(function (c) {
+    if (!c || c[0] == null || c[0] === '') return;
+    put_(row, idx_(sh, head, String(c[0])), cell_(c[1]));
+  });
+
+  for (var i = 0; i < row.length; i++) if (row[i] === undefined) row[i] = '';
   sh.appendRow(row);
-  return json_({ status: 'success' });
+  return json_({ status: 'success', tab: tab, columns: row.length });
 }
 
-/* המלל אינו יומן אלא טבלת הגדרות: כותבים אותה מחדש בכל פרסום,
+/* טבלת הגדרות (כרגע: המלל) — נכתבת מחדש בשלמותה בכל פרסום,
    אחרת נוסח שנמחק היה נשאר בגיליון וממשיך לדרוס את הקוד. */
-function writeTexts_(rows) {
-  var sh = sheet_('טקסטים', ['מפתח', 'נוסח']);
+function writeTable_(tab, cols, rows) {
+  var sh = sheet_(tab);
+  if (!sh.getLastRow()) headRow_(sh, cols);
   var last = sh.getLastRow();
-  if (last > 1) sh.getRange(2, 1, last - 1, 2).clearContent();
+  if (last > 1) sh.getRange(2, 1, last - 1, sh.getLastColumn()).clearContent();
   if (rows.length) {
-    sh.getRange(2, 1, rows.length, 2).setValues(
-      rows.map(function (r) { return [r.key, r.value]; }));
+    var w = cols.length;
+    sh.getRange(2, 1, rows.length, w).setValues(rows.map(function (r) {
+      var out = [];
+      for (var i = 0; i < w; i++) out.push(r[i] === undefined ? '' : cell_(r[i]));
+      return out;
+    }));
   }
-  return json_({ status: 'success', count: rows.length });
+  return json_({ status: 'success', tab: tab, count: rows.length });
 }
 
-function sheet_(tab, header) {
+/* ---------- עזר ---------- */
+function parse_(v) {
+  if (v == null || v === '') return [];
+  return typeof v === 'string' ? JSON.parse(v) : v;
+}
+
+/* מספר טלפון שמתחיל באפס — גוגל מוחקת לו את האפס. גרש מוביל
+   מכריח אותה להתייחס אליו כטקסט. */
+function cell_(v) {
+  if (v == null) return '';
+  if (typeof v === 'string' && /^0\d{7,}$/.test(v.replace(/[-\s]/g, ''))) return "'" + v;
+  return v;
+}
+
+function headers_(sh) {
+  if (!sh.getLastRow() || !sh.getLastColumn()) return [];
+  return sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
+           .map(function (h) { return String(h).trim(); });
+}
+
+/* מאתר עמודה לפי הכותרת, ויוצר אותה אם אינה קיימת */
+function idx_(sh, head, name) {
+  for (var i = 0; i < head.length; i++) if (head[i] === name) return i;
+  head.push(name);
+  var col = head.length;
+  sh.getRange(1, col).setValue(name)
+    .setFontWeight('bold').setBackground('#17468F').setFontColor('#FFFFFF');
+  sh.setFrozenRows(1);
+  return col - 1;
+}
+
+function put_(row, i, v) {
+  while (row.length <= i) row.push('');
+  row[i] = v;
+}
+
+function headRow_(sh, cols) {
+  sh.getRange(1, 1, 1, cols.length).setValues([cols])
+    .setFontWeight('bold').setBackground('#17468F').setFontColor('#FFFFFF');
+  sh.setFrozenRows(1);
+}
+
+function sheet_(tab) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sh = ss.getSheetByName(tab);
-  if (!sh) {
-    sh = ss.insertSheet(tab);
-    sh.appendRow(header);
-    sh.getRange(1, 1, 1, header.length)
-      .setFontWeight('bold').setBackground('#17468F').setFontColor('#FFFFFF');
-    sh.setFrozenRows(1);
-  }
-  return sh;
+  return ss.getSheetByName(tab) || ss.insertSheet(tab);
 }
 
 function json_(o) {

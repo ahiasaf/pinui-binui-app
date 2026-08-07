@@ -16,13 +16,22 @@
 
    שקפי המצגות והאייקונים נטענים מהמטמון קודם. הם כבדים ולעולם
    לא משתנים בשקט — שם מהירות עדיפה.
+
+   ל"מהרשת קודם" יש פסק זמן, וזה קריטי: fetch על חיבור תקוע אינו
+   נכשל — הוא פשוט תלוי, עשרות שניות, עד שהדפדפן מוותר. בלי פסק
+   זמן data.js לא הגיע, boot() לא רץ, ומסך הכניסה נתקע על הלוגו.
+   עכשיו הרשת מתחרה בשעון: לא ענתה בזמן — מגישים מיד את העותק
+   השמור, והרשת ממשיכה ברקע ומעדכנת את המטמון לפעם הבאה.
    ============================================================ */
-var CACHE_NAME = 'hadaf-v5.9.0';
+var CACHE_NAME = 'hadaf-v6.0.0';
 var CORE = ['./', './index.html', './data.js', './links.js',
             './logo.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 // מהרשת קודם: קוד, ותמונות הספרים
 var CODE = /\.(html|js)$|\/$|\/sfarim\//;
+
+// כמה להמתין לרשת לפני שנופלים למטמון. מספיק לחיבור סביר, קצר מכדי להרגיז.
+var NET_TIMEOUT = 2500;
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE_NAME).then(function (c) { return c.addAll(CORE); }));
@@ -56,10 +65,23 @@ self.addEventListener('fetch', function (e) {
   };
 
   if (req.mode === 'navigate' || CODE.test(url.pathname)) {
+    /* הרשת מקבלת הזדמנות ראשונה — אבל לא בלי הגבלה.
+       אם היא איטית או תקועה, העותק השמור מנצח, והרשת ממשיכה
+       ברקע לעדכן את המטמון. אין עותק שמור — ממתינים לרשת עד הסוף,
+       כי אין למה ליפול. */
+    var live = fetch(req).then(save).catch(function () { return null; });
+
     e.respondWith(
-      fetch(req).then(save).catch(function () {
-        return caches.match(req).then(function (m) {
-          return m || caches.match('./index.html');
+      caches.match(req).then(function (m) {
+        return m || caches.match('./index.html');
+      }).then(function (cached) {
+        if (!cached) return live;   // אין למה ליפול — ממתינים לרשת עד הסוף
+
+        return new Promise(function (done) {
+          var settled = false;
+          var finish = function (r) { if (!settled) { settled = true; done(r); } };
+          live.then(function (r) { finish(r || cached); });   // כולל כישלון מיידי
+          setTimeout(function () { finish(cached); }, NET_TIMEOUT);
         });
       })
     );
