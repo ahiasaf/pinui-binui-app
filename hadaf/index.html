@@ -510,24 +510,42 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
   border:1.5px solid var(--ok);color:var(--ok);border-radius:var(--r-m);padding:16px;
   font-weight:800;font-size:.96rem;text-align:center}
 
-/* ---------- למי מתאימה התוכנית — בעמוד הראשי, ממש לפני ההרשמה ----------
-   שלושה כרטיסים עם סמל בקו זהב. בלי איור: באפליקציה כולה אין ולו
-   איור אחד, ואחד בודד היה נראה מודבק. הסמל הדק שומר על אותה שפה. */
-.fit{background:var(--surface);border-radius:var(--r);padding:18px 16px 16px;
-  box-shadow:var(--sh-2)}
-.fit>b{display:block;font-size:1.04rem;font-weight:800;letter-spacing:-.02em;
-  line-height:1.4;text-align:center}
-.fit>p{font-size:.86rem;color:var(--ink-2);font-weight:600;line-height:1.6;
-  text-align:center;margin:7px auto 0;max-width:30ch}
-.fit ul{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:9px}
-.fit li{display:flex;align-items:center;gap:12px;background:var(--surface-2);
-  border:1px solid var(--rule-2);border-radius:var(--r-m);padding:12px 13px}
-.fit li svg{flex:none;width:26px;height:26px;stroke:var(--gold);
+/* ---------- מי יכול להינות מהתוכנית — בראש מסך ההרשמה ----------
+   רצועה, לא פאנל. שלושה סמלים בשורה אחת נסרקים במבט; שלוש שורות
+   זו מתחת לזו נקראות כרשימה, וזה בדיוק מה שלא רצינו כאן.
+
+   הכניסה מדורגת ולא מתחלפת בלולאה: קרוסלה מסתירה שני שלישים
+   מהמסר בכל רגע, וראש חטיבה פותח את המסך הזה פעם אחת בלבד.
+   בלי איור — באפליקציה כולה אין אחד, ואחד בודד היה נראה מודבק. */
+.fit{background:linear-gradient(160deg,var(--surface) 0%,var(--surface-2) 100%);
+  border-radius:var(--r);padding:16px 12px 14px;box-shadow:var(--sh-2);
+  border-top:3px solid var(--gold);margin-bottom:20px}
+.fit>b{display:block;font-size:1rem;font-weight:800;letter-spacing:-.02em;
+  line-height:1.35;text-align:center}
+.fit ul{list-style:none;margin:14px 0 0;padding:0;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.fit li{display:flex;flex-direction:column;align-items:center;text-align:center;
+  gap:7px;padding:2px 2px 0;
+  opacity:0;animation:fitIn .5s cubic-bezier(.34,1.4,.5,1) forwards}
+.fit li:nth-child(1){animation-delay:.10s}
+.fit li:nth-child(2){animation-delay:.22s}
+.fit li:nth-child(3){animation-delay:.34s}
+@keyframes fitIn{from{opacity:0;transform:translateY(11px) scale(.9)}
+  to{opacity:1;transform:none}}
+.fit li i{display:flex;align-items:center;justify-content:center;
+  width:46px;height:46px;border-radius:50%;background:var(--surface);
+  box-shadow:var(--sh-1);border:1px solid var(--rule-2)}
+.fit li svg{width:27px;height:27px;stroke:var(--gold);
   stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.fit li span{font-size:.92rem;font-weight:700;line-height:1.45;color:var(--ink)}
-@media (min-width:560px){.fit ul{grid-template-columns:repeat(3,1fr)}
-  .fit li{flex-direction:column;text-align:center;gap:9px;padding:16px 10px}
-  .fit li svg{width:30px;height:30px}}
+.fit li span{font-size:.75rem;font-weight:800;line-height:1.35;color:var(--ink-2)}
+/* השורה שנושאת את המסר בפועל — היקף, לא רשימת אפשרויות */
+.fit>p{font-size:.85rem;color:var(--ink);font-weight:700;line-height:1.55;
+  text-align:center;margin:15px auto 0;padding-top:13px;max-width:34ch;
+  border-top:1px solid var(--rule-2)}
+@media (min-width:480px){.fit li span{font-size:.83rem}
+  .fit li i{width:52px;height:52px}.fit li svg{width:31px;height:31px}}
+/* בלי אנימציות — עדיין חייבים להיראות */
+@media (prefers-reduced-motion:reduce){.fit li{opacity:1}}
 /* קיצור לעדכון הרשמה קיימת, בלי לגלול את כל המסך */
 .jump{font-size:.82rem;color:var(--ink-3);font-weight:700;text-align:center;
   margin-bottom:14px}
@@ -768,7 +786,6 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
           <span>הצטרפות לתוכנית והזמנת הגמרות.</span></div>
         <div id="rings"></div>
         <div id="inbox"></div>
-        <div id="fit" style="margin-top:14px"></div>
         <div id="cta" style="margin-top:16px"></div>
       </section>
 
@@ -875,7 +892,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '6.0.0';
+var APP_VERSION = '6.1.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -1063,9 +1080,6 @@ function renderHome() {
     (openN ? '<span class="jp open">ועוד ' + openN + ' מקומות פתוחים</span>' : '') +
     '</div><div class="note">הרשימה מתעדכנת בכל הרשת — כל ישיבה שנרשמת מופיעה כאן.</div></div>';
 
-  /* ---- למי מתאימה התוכנית — התשובה האחרונה לפני הכפתור ---- */
-  document.getElementById('fit').innerHTML = fitBlock();
-
   /* ---- קריאה לפעולה, אחרי ההוכחה ולא לפניה ---- */
   /* מחיר אחיד לכולן → מספר אחד; מחירים שונים → החל מהזול שבהם;
      אם ההנחה חלה רק על חלקן → נוקבים בשם המהדורה המוזלת. */
@@ -1157,10 +1171,12 @@ function renderReg() {
   var instName = reg.inst === 'other' ? 'ישיבה אחרת'
     : (INSTITUTIONS.filter(function (i) { return i.code === reg.inst; })[0] || {}).name || '';
 
-  /* מי שהגיע לכאן כבר החליט. לכן ההסבר "למי מתאימה התוכנית" נשאר
-     בעמוד הראשי, והמסך הזה נפתח ישר בבחירה: במה בוחרים, כמה זה
-     עולה, ורק בסוף שם וטלפון. */
-  var h =
+  /* הרצועה בראש: לא הסבר אלא הרחבת אופק, שנייה לפני שמקלידים מספר.
+     זה הרגע היחיד שבו היא שווה משהו — ההבדל בין "כמה לשיעור שלי"
+     לבין "כמה לישיבה שלי". בעמוד הראשי היא הייתה הגוש הרביעי
+     ונסרקה בלי להשאיר רושם.
+     אחריה ישר לעניין: במה בוחרים, כמה זה עולה, ובסוף שם וטלפון. */
+  var h = fitBlock() +
     /* הרשמה שכבר במכשיר ממלאת את הטופס מראש. אומרים את זה במפורש,
        אחרת המספרים נראים כמו ברירת מחדל שהאפליקציה המציאה. */
     (saved ? '<p class="jump">' + esc(UI.savedNote) + ' · ' +
@@ -1220,11 +1236,14 @@ var FIT_ICONS = {
 };
 function fitBlock() {
   return '<div class="fit"><b>' + esc(FIT.title) + '</b>' +
-    (FIT.sub ? '<p>' + esc(FIT.sub) + '</p>' : '') +
     '<ul>' + FIT.items.map(function (f) {
-      return '<li><svg viewBox="0 0 24 24" aria-hidden="true">' +
-        (FIT_ICONS[f.icon] || '') + '</svg><span>' + esc(f.t) + '</span></li>';
-    }).join('') + '</ul></div>';
+      return '<li><i><svg viewBox="0 0 24 24" aria-hidden="true">' +
+        (FIT_ICONS[f.icon] || '') + '</svg></i><span>' + esc(f.t) + '</span></li>';
+    }).join('') + '</ul>' +
+    /* אחרונה בכוונה: קודם רואים את שלוש הדרכים, ואז מקבלים את
+       המשמעות שלהן ביחד — שאפשר להריץ את זה בכל הישיבה. */
+    (FIT.sub ? '<p>' + esc(FIT.sub) + '</p>' : '') +
+    '</div>';
 }
 
 /* ההמלצה: משפט בגוף שני, ומתחתיו הספר. אין תיאור — התמונות עושות
@@ -2250,15 +2269,21 @@ function admTextSet(k, v) {
   else t[k] = v;
   resetTexts();                 /* קודם חזרה לבסיס, אחרת ערך שנמחק נשאר */
   cfgSet('texts', t);
-  renderHome();                 /* "למי מתאימה" יושב שם, ולא במסך ההרשמה */
+  repaintTexts();
   admPane();
 }
 function admTextReset() {
   if (!confirm('להחזיר את כל הנוסחים לערך שבקוד?')) return;
   resetTexts();
   cfgSet('texts', {});
-  renderHome();
+  repaintTexts();
   admPane();
+}
+/* מלל יושב גם בבית וגם בהרשמה. מציירים את שניהם, כדי שהרכז יראה
+   את מה שערך מיד ולא רק אחרי ריענון. */
+function repaintTexts() {
+  renderHome();
+  if (document.getElementById('reg-body').innerHTML) renderReg();
 }
 /* פרסום: שורה לכל מפתח שהשתנה, ללשונית "טקסטים" בגיליון.
    ההרשמות נשלחות באותו מנגנון, ולכן אין כאן תשתית חדשה. */
@@ -2440,7 +2465,9 @@ function admSet(el) {
     '" onchange="cfgSet(\'sheetTab\',this.value.trim())"></div>' +
     '<button class="btn g" onclick="loadInstitutions().then(function(ok){' +
     'alert(ok?\'המוסדות עודכנו מהגיליון.\':\'לא הצלחתי לקרוא מהגיליון.\');renderHome();admPane();})">' +
-    'בדיקה וטעינה</button>' +
+    /* לא "בדיקה וטעינה": השם הזה נבלע ב"בדיקת חיבור" שבכרטיס
+       שמעל, ואי אפשר היה לדעת איזה כפתור בודק מה. */
+    'טעינת רשימת המוסדות</button>' +
     '<div class="fld" style="margin-top:13px"><div class="label">' +
     'מזהה גיליון אנשי הקשר (פרטי)</div>' +
     '<input type="text" dir="ltr" placeholder="נשמר על המכשיר בלבד" value="' +
@@ -2697,11 +2724,7 @@ function registerSW() {
   renderHome(); paintQueue(); paintNet(); flush(); registerSW(); initInstall();
   loadInstitutions().then(function (ok) { if (ok) renderHome(); }).catch(function () {});
   /* המלל שפורסם. נכשל בשקט — נשארים עם המטמון או עם הקוד. */
-  loadTexts().then(function (ok) {
-    if (!ok) return;
-    renderHome();
-    if (document.querySelector('#v-reg.on')) renderReg();
-  }).catch(function () {});
+  loadTexts().then(function (ok) { if (ok) repaintTexts(); }).catch(function () {});
   if (isAdminRoute()) adminEntry(); else show('home');
   setTimeout(function () { document.getElementById('splash').className = 'off'; }, 340);
 })();
