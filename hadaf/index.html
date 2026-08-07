@@ -4,17 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>הדף השבועי של בני עקיבא</title>
-<link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
-<!-- ספארי מתעלם מהאייקונים שב-manifest. בלי apple-touch-icon
-     "הוספה למסך הבית" באייפון תיצור אייקון של צילום מסך. -->
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="הדף השבועי">
-<meta name="theme-color" content="#0E2E63">
+<script>
+  /* שתי אפליקציות מאותו קוד: הרגילה, ומסך הניהול עם אייקון זהב
+     משלו. ה-manifest נבחר כאן ולא בהמשך — הדפדפן קורא אותו פעם
+     אחת בטעינה, והחלפה מאוחרת יותר לא נקלטת. שני הקבצים נבדלים
+     ב-id, ולכן המערכת רואה בהם שתי אפליקציות שאפשר להתקין זו
+     לצד זו, ולא אחת שמחליפה את השנייה.
+
+     ספארי מתעלם מהאייקונים שב-manifest, ולכן apple-touch-icon
+     נכתב כאן גם הוא — בלעדיו "הוספה למסך הבית" באייפון יוצרת
+     אייקון של צילום מסך. */
+  (function () {
+    var adm = /\/admin\/?$/.test(location.pathname) || location.hash === '#admin';
+    var icon = adm ? 'icon-admin-192.png' : 'icon-192.png';
+    document.write(
+      '<link rel="manifest" href="' + (adm ? 'admin-manifest.json' : 'manifest.json') + '">' +
+      '<link rel="apple-touch-icon" href="' + icon + '">' +
+      '<link rel="apple-touch-icon" sizes="180x180" href="' + icon + '">' +
+      '<meta name="apple-mobile-web-app-title" content="' +
+        (adm ? 'ניהול' : 'הדף השבועי') + '">' +
+      '<meta name="theme-color" content="' + (adm ? '#7A5610' : '#0E2E63') + '">');
+  })();
+</script>
+<noscript><link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png"></noscript>
 <meta property="og:title" content="הדף השבועי של בני עקיבא">
 <meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — מסכת תענית ומסכת מגילה.">
 <meta property="og:type" content="website">
@@ -711,6 +728,14 @@ select:focus,input:focus,textarea:focus{border-color:var(--blue)}
   font-family:inherit;font-weight:800;font-size:.89rem;cursor:pointer}
 #inst .yes{background:linear-gradient(140deg,var(--blue-l),var(--blue));color:#fff}
 #inst .no{flex:0 0 auto;background:transparent;color:var(--ink-3);padding-inline:14px}
+
+/* חזרה לניהול מתוך אפליקציית הניהול המותקנת, שאין בה שורת כתובת */
+#adm-chip{position:fixed;inset-inline-end:14px;bottom:16px;z-index:75;display:none;
+  border:0;border-radius:22px;padding:11px 17px;cursor:pointer;font-family:inherit;
+  font-weight:800;font-size:.86rem;color:#fff;
+  background:linear-gradient(140deg,var(--gold-l),var(--gold));
+  box-shadow:0 6px 22px rgba(122,86,16,.42)}
+#adm-chip.on{display:block}
 footer{padding:24px 16px 32px;text-align:center;color:var(--ink-3);font-size:.75rem;
   line-height:1.85;font-weight:600}
 footer b{color:var(--ink-2);font-weight:800}
@@ -738,6 +763,8 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
   <p id="inst-txt"></p>
   <div class="row" id="inst-row"></div>
 </div>
+
+<button id="adm-chip" onclick="admBack()">ניהול →</button>
 
 <script>
   /* רץ לפני שהסקריפטים הכבדים מתחילים להיטען, ולכן הוא היחיד
@@ -892,7 +919,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '6.1.0';
+var APP_VERSION = '6.2.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -957,6 +984,7 @@ function show(v) {
   if (v === 'reg')    renderReg();
   if (v === 'gate')   { teamCode = ''; paintPins();
                         document.getElementById('gate-msg').textContent = ''; }
+  paintAdmChip();
 }
 function backToTrack() { openTrack(state.track.id); }
 function backToWeek()  { openWeek(state.track.id, state.week); }
@@ -2116,7 +2144,7 @@ function renderAdmin() {
           '<div><div style="font-size:1.15rem;font-weight:800;letter-spacing:-.03em">ניהול התוכנית</div>' +
           '<div style="font-size:.76rem;color:var(--ink-3);font-weight:700">' +
           esc(PROGRAM.contact.coord) + ' · גרסה ' + APP_VERSION + '</div></div>' +
-          '<button class="back" onclick="admExit()">יציאה →</button></div>' +
+          '<button class="back" onclick="admExit()">לאפליקציה →</button></div>' +
           '<div class="tabs" style="margin-top:12px">' +
           TABS.map(function (t) {
             return '<button class="' + (admTab === t[0] ? 'on' : '') +
@@ -2126,7 +2154,20 @@ function renderAdmin() {
   admPane();
 }
 function admGo(t) { admTab = t; renderAdmin(); }
-function admExit() { location.hash = ''; show('home'); }
+/* באפליקציית הניהול המותקנת אין שורת כתובת, ולכן יציאה לאפליקציה
+   הרגילה הייתה דרך ללא חזרה — צריך היה לסגור ולפתוח מחדש.
+   השבב הצף מחזיר, ומופיע רק שם: בדפדפן רגיל יש כתובת. */
+var launchedAsAdmin = false;
+function admExit() { location.hash = ''; show('home'); paintAdmChip(); }
+function admBack()  { show('admin'); paintAdmChip(); }
+function paintAdmChip() {
+  var el = document.getElementById('adm-chip');
+  if (!el) return;
+  var away = launchedAsAdmin && isStandalone() &&
+             !document.querySelector('#v-admin.on') &&
+             !document.querySelector('#v-gate.on');
+  el.className = away ? 'on' : '';
+}
 
 function admPane() {
   var el = document.getElementById('adm-pane');
@@ -2141,7 +2182,7 @@ function admPane() {
   if (admTab === 'text')  return admText(el);
   if (admTab === 'price') return admPrice(el);
   if (admTab === 'sugya') return admSugya(el);
-  if (admTab === 'set')   return admSet(el);
+  if (admTab === 'set')   { admSet(el); return admInstallBox(); }
 }
 
 /* ---- הרשמות שהתקבלו ---- */
@@ -2441,6 +2482,41 @@ function admPing() {
     });
 }
 
+/* התקנת מסך הניהול כאפליקציה נפרדת.
+   deferredInstall נתפס בטעינת הדף; כשנמצאים על #admin הוא נושא
+   את admin-manifest, ולכן אותה לחיצה מתקינה את אייקון הזהב.
+   אם הדפדפן לא נתן אירוע — מסבירים ידנית, ולא מציגים כפתור
+   שלא יעשה כלום. */
+function admInstallBox() {
+  var el = document.getElementById('adm-inst');
+  if (!el) return;
+  if (isStandalone()) {
+    el.innerHTML = '<div class="done-box">הניהול כבר פתוח כאפליקציה.</div>';
+    return;
+  }
+  if (deferredInstall) {
+    el.innerHTML = '<button class="btn gd" onclick="admInstall()">' +
+      'הוספת הניהול למסך הבית</button><div id="adm-inst-msg"></div>';
+    return;
+  }
+  el.innerHTML = '<div class="cond">' + (isIOS()
+    ? 'באייפון: תפריט השיתוף בתחתית הדפדפן ← <b>הוספה למסך הבית</b>.'
+    : 'תפריט הדפדפן (שלוש נקודות) ← <b>הוספה למסך הבית</b> / <b>התקנת אפליקציה</b>.') +
+    '<br>חשוב: עשו זאת כשאתם נמצאים במסך הזה, אחרת יותקנת האפליקציה הרגילה.' +
+    '</div>';
+}
+function admInstall() {
+  var p = deferredInstall;
+  if (!p) { admInstallBox(); return; }
+  deferredInstall = null;
+  p.prompt();
+  p.userChoice.then(function (r) {
+    document.getElementById('adm-inst').innerHTML = (r && r.outcome === 'accepted')
+      ? '<div class="done-box">נוסף למסך הבית — חפשו את האייקון הזהוב.</div>'
+      : '<div class="cond">בוטל. אפשר לנסות שוב מתפריט הדפדפן.</div>';
+  }).catch(function () {});
+}
+
 function admSet(el) {
   el.innerHTML =
     '<div class="adm-card" style="margin-bottom:11px"><h4>יעדי שליחה</h4>' +
@@ -2453,6 +2529,11 @@ function admSet(el) {
     esc(CFG.api || API) + '" onchange="cfgSet(\'api\',this.value.trim())"></div>' +
     '<button class="btn g" onclick="admPing()">בדיקת חיבור</button>' +
     '<div id="adm-ping"></div></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>הניהול כאפליקציה</h4>' +
+    '<p class="h">אייקון זהב נפרד במסך הבית, שנפתח ישר כאן. הוא חי לצד ' +
+    'האפליקציה הרגילה ואינו מחליף אותה.</p>' +
+    '<div id="adm-inst"></div></div>' +
 
     '<div class="adm-card" style="margin-bottom:11px"><h4>גוגל־שיטס</h4>' +
     '<p class="h">הגיליון צריך להיות משותף כ"כל מי שיש לו הקישור — מציג". ' +
@@ -2667,21 +2748,32 @@ function instShow(ios) {
   document.getElementById('inst').className = 'on';
 }
 function initInstall() {
-  if (isStandalone() || Store.get('instDone', 0)) return;   /* כבר מותקנת */
-  var snooze = Store.get('instSnooze', 0);
-  if (snooze && Date.now() - snooze < INST_SNOOZE) return;
-
+  /* מאזינים תמיד, גם במסך הניהול: שם האירוע נושא את
+     admin-manifest, וכפתור "הוספת הניהול למסך הבית" צריך אותו. */
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredInstall = e;
-    setTimeout(function () { if (deferredInstall) instShow(false); }, INST_DELAY);
+    if (admTab === 'set') admInstallBox();
+    if (wantsBanner()) setTimeout(function () {
+      if (deferredInstall) instShow(false);
+    }, INST_DELAY);
   });
   window.addEventListener('appinstalled', function () {
-    Store.set('instDone', 1); instHide();
+    Store.set(isAdminRoute() ? 'instDoneAdmin' : 'instDone', 1);
+    instHide();
+    if (admTab === 'set') admInstallBox();
   });
 
   /* אייפון: אין אירוע, ולכן מציגים לפי זיהוי המכשיר */
-  if (isIOS()) setTimeout(function () { instShow(true); }, INST_DELAY);
+  if (isIOS() && wantsBanner()) setTimeout(function () { instShow(true); }, INST_DELAY);
+}
+/* הבאנר הצף הוא לראשי החטיבות. במסך הניהול הוא רק מפריע — שם יש
+   כפתור מפורש בהגדרות, ולרכז לא צריך לרדוף אחרי באנר. */
+function wantsBanner() {
+  if (isAdminRoute() || isStandalone()) return false;
+  if (Store.get('instDone', 0)) return false;
+  var snooze = Store.get('instSnooze', 0);
+  return !(snooze && Date.now() - snooze < INST_SNOOZE);
 }
 
 /* ---------- עדכון גרסה (המנגנון של "יגדיל תורה") ---------- */
@@ -2725,7 +2817,7 @@ function registerSW() {
   loadInstitutions().then(function (ok) { if (ok) renderHome(); }).catch(function () {});
   /* המלל שפורסם. נכשל בשקט — נשארים עם המטמון או עם הקוד. */
   loadTexts().then(function (ok) { if (ok) repaintTexts(); }).catch(function () {});
-  if (isAdminRoute()) adminEntry(); else show('home');
+  if (isAdminRoute()) { launchedAsAdmin = true; adminEntry(); } else show('home');
   setTimeout(function () { document.getElementById('splash').className = 'off'; }, 340);
 })();
 </script>

@@ -23,9 +23,11 @@
    עכשיו הרשת מתחרה בשעון: לא ענתה בזמן — מגישים מיד את העותק
    השמור, והרשת ממשיכה ברקע ומעדכנת את המטמון לפעם הבאה.
    ============================================================ */
-var CACHE_NAME = 'hadaf-v6.1.0';
-var CORE = ['./', './index.html', './data.js', './links.js',
-            './logo.js', './manifest.json', './icon-192.png', './icon-512.png'];
+var CACHE_NAME = 'hadaf-v6.2.0';
+var CORE = ['./', './index.html', './data.js', './links.js', './logo.js',
+            './manifest.json', './admin-manifest.json',
+            './icon-192.png', './icon-512.png',
+            './icon-admin-192.png', './icon-admin-512.png'];
 
 // מהרשת קודם: קוד, ותמונות הספרים
 var CODE = /\.(html|js)$|\/$|\/sfarim\//;
