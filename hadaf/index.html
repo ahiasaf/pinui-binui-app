@@ -919,7 +919,7 @@ footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 aut
 <script src="data.js"></script>
 <script src="links.js"></script>
 <script>
-var APP_VERSION = '6.2.0';
+var APP_VERSION = '6.3.0';
 
 var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
 var myInst = localStorage.getItem('dfInst') || '';
@@ -2483,10 +2483,16 @@ function admPing() {
 }
 
 /* התקנת מסך הניהול כאפליקציה נפרדת.
-   deferredInstall נתפס בטעינת הדף; כשנמצאים על #admin הוא נושא
-   את admin-manifest, ולכן אותה לחיצה מתקינה את אייקון הזהב.
-   אם הדפדפן לא נתן אירוע — מסבירים ידנית, ולא מציגים כפתור
-   שלא יעשה כלום. */
+
+   הדרך שעובדת ברוב המקרים היא דווקא לא ההתקנה: ברגע שהאפליקציה
+   הרגילה מותקנת, כרום מוריד את "הוספה למסך הבית" מהתפריט ומפסיק
+   לירות beforeinstallprompt — גם לאפליקציה השנייה. לכן הפתרון
+   הראשי הוא shortcut שב-manifest: לחיצה ארוכה על האייקון פותחת
+   תפריט ובו "ניהול", ואפשר לגרור אותו למסך הבית כאייקון בפני
+   עצמו. זה עובד בדיוק במצב שבו ההתקנה חסומה.
+
+   הכפתור מוצג רק אם הדפדפן באמת נתן אירוע — כפתור שלא יעשה כלום
+   גרוע מהוראה. */
 function admInstallBox() {
   var el = document.getElementById('adm-inst');
   if (!el) return;
@@ -2494,16 +2500,59 @@ function admInstallBox() {
     el.innerHTML = '<div class="done-box">הניהול כבר פתוח כאפליקציה.</div>';
     return;
   }
-  if (deferredInstall) {
-    el.innerHTML = '<button class="btn gd" onclick="admInstall()">' +
-      'הוספת הניהול למסך הבית</button><div id="adm-inst-msg"></div>';
-    return;
-  }
-  el.innerHTML = '<div class="cond">' + (isIOS()
-    ? 'באייפון: תפריט השיתוף בתחתית הדפדפן ← <b>הוספה למסך הבית</b>.'
-    : 'תפריט הדפדפן (שלוש נקודות) ← <b>הוספה למסך הבית</b> / <b>התקנת אפליקציה</b>.') +
-    '<br>חשוב: עשו זאת כשאתם נמצאים במסך הזה, אחרת יותקנת האפליקציה הרגילה.' +
+
+  var h = deferredInstall
+    ? '<button class="btn gd" onclick="admInstall()">הוספת הניהול למסך הבית</button>'
+    : '';
+
+  h += '<div class="cond"' + (h ? ' style="margin-top:10px"' : '') + '>' +
+    (isIOS()
+      ? '<b>באייפון:</b> תפריט השיתוף בתחתית הדפדפן ← <b>הוספה למסך הבית</b>, ' +
+        'בזמן שאתם נמצאים במסך הזה.'
+      : '<b>לחיצה ארוכה</b> על אייקון "הדף השבועי" במסך הבית ← בתפריט שנפתח ' +
+        'יופיע <b>ניהול</b> ← גררו אותו למסך הבית.<br>' +
+        'זו הדרך לקבל אייקון נפרד כשהאפליקציה כבר מותקנת — במצב הזה כרום ' +
+        'מסתיר את "הוספה למסך הבית" מהתפריט שלו.') +
     '</div>';
+
+  /* גיבוי שתמיד עובד: הקישור עצמו, לכל מקום שנוח לו */
+  h += '<button class="btn g" style="margin-top:8px" onclick="admCopyLink()">' +
+       'העתקת הקישור לניהול</button><div id="adm-inst-msg"></div>';
+  el.innerHTML = h;
+}
+/* רענון בכוח. מוחק את מטמון ה-Service Worker ומשחרר אותו, ואז
+   טוען מחדש — הדרך היחידה לוודא שמכשיר לא מחזיק גרסה ישנה.
+   localStorage לא נוגעים בו: שם יושבות ההגדרות וההרשמות. */
+function admRefresh() {
+  var done = function () { location.reload(true); };
+  var jobs = [];
+  if (window.caches && caches.keys) {
+    jobs.push(caches.keys().then(function (ks) {
+      return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+    }));
+  }
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+    jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+      return Promise.all(rs.map(function (r) { return r.unregister(); }));
+    }));
+  }
+  Promise.all(jobs).then(done).catch(done);
+}
+
+function admCopyLink() {
+  var url = location.origin + '/#admin';
+  var m = document.getElementById('adm-inst-msg');
+  var ok = function () {
+    m.innerHTML = '<div class="done-box" style="margin-top:8px">הועתק · ' +
+      esc(url) + '</div>';
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(ok).catch(function () {
+      m.innerHTML = '<div class="cond" style="margin-top:8px">' + esc(url) + '</div>';
+    });
+  } else {
+    m.innerHTML = '<div class="cond" style="margin-top:8px">' + esc(url) + '</div>';
+  }
 }
 function admInstall() {
   var p = deferredInstall;
@@ -2534,6 +2583,13 @@ function admSet(el) {
     '<p class="h">אייקון זהב נפרד במסך הבית, שנפתח ישר כאן. הוא חי לצד ' +
     'האפליקציה הרגילה ואינו מחליף אותה.</p>' +
     '<div id="adm-inst"></div></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>גרסה</h4>' +
+    '<p class="h">אם משהו נראה ישן — כאן מרעננים בכוח: מוחק את המטמון ' +
+    'וטוען מחדש מהשרת. ההגדרות וההרשמות אינן נמחקות.</p>' +
+    '<div class="row" style="padding:8px 0"><span>גרסת האפליקציה</span>' +
+    '<b>' + esc(APP_VERSION) + '</b></div>' +
+    '<button class="btn g" onclick="admRefresh()">רענון מלא מהשרת</button></div>' +
 
     '<div class="adm-card" style="margin-bottom:11px"><h4>גוגל־שיטס</h4>' +
     '<p class="h">הגיליון צריך להיות משותף כ"כל מי שיש לו הקישור — מציג". ' +
