@@ -542,6 +542,7 @@ function handleW() {
 function panel() {
   var n = S.zones.reduce(function (a, z) { return a + lineCount(z); }, 0);
   document.getElementById('stats').innerHTML =
+    (shown ? row('מוצג כעת', shown) : '') +
     row('שורות גמרא בסך הכול', n) +
     row('אזורים', S.zones.length) +
     (S.simple ? '' : row('מרווח שורה', Math.round(S.gpitch) + 'px'));
@@ -862,9 +863,12 @@ function onDaf() {
 }
 function onSrc() {
   var c = curDaf();
-  var id = fileId(c.links[+document.getElementById('src').value]);
+  var si = +document.getElementById('src').value;
+  var id = fileId(c.links[si]);
   if (!id) { say('אין קובץ לדף הזה.', 1); return; }
-  fetchDaf(id);
+  var mas = document.getElementById('mas');
+  fetchDaf(id, mas.options[mas.selectedIndex].text + ' · דף ' + c.daf +
+               ' · ' + (si ? 'חברותא' : 'צורת הדף'));
 }
 function onPage() {
   if (PDF) return showPdfPage(+document.getElementById('pg').value);
@@ -873,10 +877,22 @@ function onPage() {
 /* משיכת הקובץ דרך הסקריפט. מנסים fetch, ואם ה-CORS חוסם נופלים
    ל-JSONP — בדיוק כמו בבדיקת החיבור שבמסך הניהול. */
 var CACHE = {};
-function fetchDaf(id) {
-  if (CACHE[id]) return openPdfBytes(CACHE[id]);
+var reqId = 0;          /* כל בקשה מקבלת מספר; רק האחרונה מתקבלת */
+var shown = '';         /* מה מוצג בפועל, כדי שאי-התאמה תיראה */
+
+function fetchDaf(id, label) {
+  /* בלי המספר הזה, החלפת דף בזמן שהקודם עדיין בדרך הציגה את מי
+     שהגיע אחרון ולא את מי שנבחר אחרון — ולפעמים כלום, כשהראשון
+     דרס את השני. משיכה מהדרייב לוקחת שניות, ולכן זה קרה תדיר. */
+  var mine = ++reqId;
+  var done = function (buf) {
+    if (mine !== reqId) return;               /* בחירה חדשה גברה */
+    shown = label || '';
+    openPdfBytes(buf);
+  };
+  if (CACHE[id]) return done(CACHE[id]);
   if (!API) { say('אין כתובת שרת. הגדירו אותה ב-/admin ← הגדרות.', 1); return; }
-  say('מביא את הקובץ מהדרייב…');
+  say('מביא מהדרייב: ' + (label || '') + '…');
   var url = API + (API.indexOf('?') < 0 ? '?' : '&') + 'file=' + encodeURIComponent(id);
   fetch(url).then(function (r) { return r.json(); })
     .catch(function () { return jsonp(url); })
@@ -885,9 +901,10 @@ function fetchDaf(id) {
       var bin = atob(d.data), buf = new Uint8Array(bin.length);
       for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       CACHE[id] = buf;
-      openPdfBytes(buf);
+      done(buf);
     })
-    .catch(function (e) {
+    .catch(function () {
+      if (mine !== reqId) return;
       say('לא הצלחתי להביא את הקובץ. ודאו שהסקריפט פרוס בגרסה ' +
           SCRIPT_MIN_STUDIO + ' ומעלה.', 1);
     });
