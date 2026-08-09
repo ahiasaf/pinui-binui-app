@@ -77,6 +77,38 @@ button.c{flex:1;padding:9px 6px;font-size:.78rem;border:1px solid var(--rule);
   background:#fff;border-radius:8px;min-height:40px}
 button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
   color:#fff;border-color:transparent}
+/* שני מצבים לאותו מסך: כיול הדף, וסימון הקטעים.
+   בסימון צריך לראות את הגמרא ואת החברותא זו לצד זו ולתאם
+   ביניהן, ולכן שני חלונות. בנייד חצי מסך לכל אחד, כי אין ברירה
+   ובכל זאת צריך לראות את שניהם בבת אחת. */
+.chav{display:none;background:var(--surface);border-radius:var(--r);
+  box-shadow:0 2px 4px rgba(37,29,12,.06),0 10px 26px rgba(37,29,12,.08);
+  overflow:hidden;flex-direction:column}
+.chd{padding:9px 13px;font-weight:800;font-size:.85rem;background:var(--surface-2,#F7F1E4);
+  border-bottom:1px solid var(--rule);display:flex;justify-content:space-between}
+.chd span{font-weight:700;color:var(--ink-3);font-size:.76rem}
+.chb{overflow:auto;padding:14px 15px;font-size:.95rem;line-height:1.95;
+  -webkit-user-select:text;user-select:text}
+.chb p.cp{margin:0 0 13px}
+.chb p.cp b{font-weight:800}
+.chb ::selection{background:rgba(240,150,20,.42)}
+#marker{display:none}
+body.mark .chav{display:flex}
+body.mark #marker{display:block}
+body.mark aside:not(#marker){display:none}
+body.mark .wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) 300px}
+body.mark .stage,body.mark .chav{height:calc(100vh - 108px)}
+@media (max-width:900px){
+  body.mark .wrap{grid-template-columns:minmax(0,1fr);gap:10px;padding:10px}
+  body.mark .stage,body.mark .chav{height:42vh}
+  body.mark #marker{position:sticky;bottom:0}
+}
+.step{border:1px solid var(--rule);border-radius:9px;padding:8px 10px;margin-top:7px;
+  font-size:.77rem;font-weight:700;line-height:1.5}
+.step .x{float:left;color:var(--stop);font-weight:800;cursor:pointer;padding:0 5px}
+.step .q{color:var(--ink-2);display:block;margin-top:3px}
+#mcur{font-size:.79rem;font-weight:700;line-height:1.6}
+#mcur .ok{color:var(--ok)} #mcur .no{color:var(--ink-3)}
 .hint{margin-top:12px;font-size:.75rem;color:var(--ink-3);font-weight:700;line-height:1.6}
 #msg{font-size:.8rem;font-weight:800;margin-top:10px}
 </style>
@@ -93,6 +125,7 @@ button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
   <label class="alt" id="pick" title="קובץ PDF של דף, או תמונה">
     פתיחת קובץ<input type="file" id="file" accept="application/pdf,image/*" hidden></label>
   <span id="stat"></span>
+  <button id="mode">סימון קטעים ←</button>
   <button id="reset">זיהוי מחדש</button>
   <button class="p" id="save">שמירת JSON</button>
 </header>
@@ -103,6 +136,11 @@ button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
       <img id="page" alt="">
       <svg id="ov" preserveAspectRatio="none"></svg>
     </div>
+  </div>
+
+  <div class="chav" id="chav">
+    <div class="chd">חברותא<span id="chpg"></span></div>
+    <div class="chb" id="chb"></div>
   </div>
 
   <aside>
@@ -117,6 +155,16 @@ button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
       <b>חיצוני</b> = הורחבה עד קצה הגוש, כשטור פירוש נגמר.
       אפשר גם לגרור את הקו העליון של אזור.</div>
     <div id="msg"></div>
+  </aside>
+
+  <aside id="marker">
+    <h2>סימון קטעים</h2>
+    <p class="h" id="mhelp"></p>
+    <div id="mcur"></div>
+    <button class="p" id="addstep" style="width:100%;margin-top:10px" disabled>
+      הוספת הקטע</button>
+    <h2 style="margin-top:16px">הקטעים <span id="mcount"></span></h2>
+    <div id="steps"></div>
   </aside>
 </div>
 
@@ -704,7 +752,7 @@ function bindHandles() {
 document.getElementById('reset').onclick = function () { if (D) run(); };
 
 document.getElementById('save').onclick = function () {
-  var out = { w:S.w, h:S.h,
+  var out = { w:S.w, h:S.h, steps:STEPS,
     core:[S.core[0]/S.w, S.core[1]/S.w],
     zones: S.zones.map(function (z) {
       return { y0:z.y0/S.h, y1:z.y1/S.h, a:z.a/S.w, b:z.b/S.w,
@@ -780,6 +828,86 @@ function showPdfPage(n) {
     return pg.render({ canvasContext: c.getContext('2d', {willReadFrequently:true}),
                        viewport: vp }).promise.then(function () { return c; });
   }).then(useCanvas);
+}
+
+/* ============================================================
+   חברותא כטקסט.
+   ה-PDF אינו סריקה — יש בו שכבת טקסט מלאה, והגופנים מבחינים בין
+   David ל-David-Bold. לכן אפשר לשחזר גם את המילים המודגשות
+   שפותחות כל פסקה, אלה שמצטטות את לשון הגמרא.
+
+   טקסט ולא תמונה, כי חלון ההסבר צריך להימתח לפי אורכו, להישבר
+   לפי רוחב המסך ולהיות קריא בטלפון בלי זום — ובעיקר כדי שסימון
+   קטע יהיה בחירת טקסט רגילה ולא סימון שורות על תמונה.
+   ============================================================ */
+function chavItems(pg) {
+  return pg.getTextContent().then(function (tc) {
+    return tc.items.filter(function (it) { return it.str.trim() !== ''; });
+  });
+}
+
+/* ההדגשה לפי גובה הגליף, ולא לפי שם הגופן.
+   pdf.js מחזיר fontFamily גנרי ("sans-serif") לשני הגופנים, ושם
+   הגופן האמיתי זמין רק אחרי ציור העמוד — יקר מדי לעשרה עמודים.
+   הגובה לעומת זאת חד-משמעי ונמדד על כל הדף:
+     12.96px  גוף הטקסט      8818 תווים
+     15px     המילים המודגשות 3403 תווים
+     18.96px  כותרות
+   הסף נגזר מהגובה השכיח בפועל, ולא מקבוע — כך שינוי גודל
+   בקובץ אחר לא ישבור אותו. */
+function bodyHeight(items) {
+  var hist = {};
+  items.forEach(function (it) {
+    var h = Math.round(it.height * 20) / 20;
+    hist[h] = (hist[h] || 0) + it.str.length;
+  });
+  var best = 0, n = -1;
+  for (var h in hist) if (hist[h] > n) { n = hist[h]; best = +h; }
+  return best;
+}
+
+function chavBuild(items, body) {
+  var lim = body * 1.10, paras = [], cur = null, lastY = null, prev = null;
+  items.forEach(function (it) {
+    var y = Math.round(it.transform[5]);
+    var x = it.transform[4];
+    var bold = it.height >= lim;
+    var newPara = (lastY === null || lastY - y > 26 || y > lastY + 8);
+    if (newPara) { cur = { runs: [] }; paras.push(cur); prev = null; }
+
+    /* ה-PDF אינו שומר רווחים בין קטעי טקסט, ולכן המילים נדבקו.
+       הרווח מוסק מהמרחק: עברית נקראת מימין לשמאל, ולכן הקטע
+       הבא מתחיל שמאלה מקודמו, והפער ביניהם הוא הרווח. גם מעבר
+       שורה בתוך פסקה מפריד בין מילים. */
+    var gap = '';
+    if (prev) {
+      if (y !== prev.y) gap = ' ';
+      /* נמדד בקובץ: רווח בין מילים הוא ~2.9 יחידות, ובתוך
+         מילה או בין "(" ל-"1" הפער הוא 0 או שלילי. 0.15 מגובה
+         הגליף נופל בין השניים בבירור. */
+      else if (prev.x - (x + it.width) > it.height * 0.15) gap = ' ';
+    }
+    prev = { x: x, y: y };
+    lastY = y;
+
+    var last = cur.runs[cur.runs.length - 1];
+    if (last && last.b === bold) last.t += gap + it.str;
+    else { if (last && gap) last.t += gap; cur.runs.push({ t: it.str, b: bold }); }
+  });
+  return paras.filter(function (p) {
+    return p.runs.map(function (r) { return r.t; }).join('').trim().length > 1;
+  });
+}
+
+function chavHtml(paras) {
+  var n = 0;
+  return paras.map(function (p, i) {
+    var html = p.runs.map(function (r) {
+      var t = esc(r.t);
+      return r.b ? '<b>' + t + '</b>' : t;
+    }).join('');
+    return '<p class="cp" data-p="' + i + '">' + html + '</p>';
+  }).join('');
 }
 
 function useCanvas(c) {
@@ -978,12 +1106,242 @@ function run() {
   var t = performance.now();
   S = analyse(D.m, D.w, D.h) || analyseSimple(D.m, D.w, D.h);
   if (!S) { say('לא זיהיתי טקסט בעמוד הזה.', 1); return; }
-  relines(); sel = 0; draw();
+  relines(); sel = 0;
+  if (MODE === 'mark') markDraw(); else draw();
   /* לא לדרוס את שם הדף בזמן הריצה — זו התשובה לבחירה, והיא
      צריכה להישאר על המסך. */
   say((shown ? shown + ' · ' : '') +
       'זוהה ב-' + Math.round(performance.now() - t) + 'ms');
 }
+
+/* ============================================================
+   סימון קטעים — חיבור בין הגמרא לחברותא.
+
+   קטע נסגר בנקודה `(שורה, מיקום בשורה)` ולא בשורה שלמה: הקטע
+   שאליו מתייחסים לא תמיד מתחיל בתחילת שורה ולא תמיד נגמר בסופה.
+   ההדגשה נראית כמו בחירת טקסט — מהנקודה עד קצה השורה, שורות
+   מלאות באמצע, ובאחרונה עד הנקודה. בעברית זה מימין לשמאל.
+
+   החברותא היא טקסט אמיתי, ולכן שם הבחירה היא בחירת טקסט רגילה.
+   ============================================================ */
+var MODE = 'cal';
+var CHV = null;          // פסקאות החברותא
+var STEPS = [];
+var GSEL = null;         // { a:{i,x}, b:{i,x} } לפי אינדקס שורה
+var CSEL = null;         // { from, to, text }
+
+function flatLines() {
+  var out = [];
+  (S ? S.zones : []).forEach(function (z) {
+    (z.lines || []).forEach(function (l) {
+      out.push({ t: l[0], b: l[1], a: z.a, x2: z.b });
+    });
+  });
+  return out.sort(function (p, q) { return p.t - q.t; });
+}
+
+/* ההדגשה של קטע: הראשונה חלקית מימין, האחרונה חלקית משמאל.
+   x הוא שבר מרוחב השורה, 0 = הקצה הימני (תחילת הקריאה). */
+function selShapes(sel) {
+  var ls = flatLines(), out = [];
+  if (!sel) return out;
+  var i0 = Math.min(sel.a.i, sel.b.i), i1 = Math.max(sel.a.i, sel.b.i);
+  var xa = sel.a.i <= sel.b.i ? sel.a.x : sel.b.x;
+  var xb = sel.a.i <= sel.b.i ? sel.b.x : sel.a.x;
+  for (var i = i0; i <= i1 && i < ls.length; i++) {
+    var l = ls[i], w = l.x2 - l.a;
+    var from = (i === i0) ? l.x2 - w * xa : l.x2;      // ימין = התחלה
+    var to   = (i === i1) ? l.x2 - w * xb : l.a;
+    out.push([Math.min(from, to), l.t, Math.abs(to - from), l.b - l.t]);
+  }
+  return out;
+}
+
+function markDraw() {
+  var ov = document.getElementById('ov');
+  ov.setAttribute('viewBox', '0 0 ' + S.w + ' ' + S.h);
+  var s = '';
+  var ls = flatLines();
+  ls.forEach(function (l, i) {
+    s += '<rect class="ml" data-i="' + i + '" x="' + l.a + '" y="' + l.t +
+         '" width="' + (l.x2 - l.a) + '" height="' + (l.b - l.t) +
+         '" fill="rgba(30,120,225,.07)" style="cursor:pointer"/>';
+  });
+  selShapes(GSEL).forEach(function (r) {
+    s += '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] +
+         '" fill="rgba(240,150,20,.45)" stroke="#C08F2B" stroke-width="2"/>';
+  });
+  /* ידיות לכוונון בתוך השורה */
+  if (GSEL) {
+    var sh = selShapes(GSEL);
+    if (sh.length) {
+      s += hand(sh[0][0] + sh[0][2], sh[0][1], sh[0][3], 'a');
+      var last = sh[sh.length - 1];
+      s += hand(last[0], last[1], last[3], 'b');
+    }
+  }
+  ov.innerHTML = s;
+  [].forEach.call(ov.querySelectorAll('.ml'), function (el) {
+    el.onclick = function () { pickLine(+el.dataset.i); };
+  });
+  bindMarkHandles();
+  markPanel();
+}
+function hand(x, y, h, which) {
+  return '<g class="mh" data-e="' + which + '" style="cursor:ew-resize">' +
+    '<rect x="' + (x - 26) + '" y="' + (y - 6) + '" width="52" height="' + (h + 12) +
+    '" fill="rgba(0,0,0,0)"/>' +
+    '<rect x="' + (x - 3) + '" y="' + (y - 4) + '" width="6" height="' + (h + 8) +
+    '" fill="#C08F2B" rx="3"/></g>';
+}
+
+function pickLine(i) {
+  if (!GSEL || GSEL.a.i !== GSEL.b.i || GSEL.done) {
+    GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } };   /* שורה שלמה */
+  } else {
+    GSEL = { a: { i: Math.min(GSEL.a.i, i), x: 0 },
+             b: { i: Math.max(GSEL.a.i, i), x: 1 }, done: true };
+  }
+  markDraw();
+}
+
+function bindMarkHandles() {
+  var ov = document.getElementById('ov');
+  [].forEach.call(ov.querySelectorAll('.mh'), function (g) {
+    g.style.touchAction = 'none';
+    g.onpointerdown = function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      var which = g.dataset.e;
+      var move = function (m) {
+        var r = ov.getBoundingClientRect();
+        var px = (m.clientX - r.left) / r.width * S.w;
+        var sh = selShapes(GSEL);
+        var idx = which === 'a' ? 0 : sh.length - 1;
+        var ls = flatLines();
+        var li = (which === 'a' ? Math.min(GSEL.a.i, GSEL.b.i)
+                                : Math.max(GSEL.a.i, GSEL.b.i));
+        var l = ls[li]; if (!l) return;
+        var f = (l.x2 - px) / (l.x2 - l.a);
+        f = Math.max(0, Math.min(1, f));
+        if (which === 'a') (GSEL.a.i <= GSEL.b.i ? GSEL.a : GSEL.b).x = f;
+        else               (GSEL.a.i <= GSEL.b.i ? GSEL.b : GSEL.a).x = f;
+        markDraw();
+      };
+      var up = function () {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    };
+  });
+}
+
+/* בחירת החברותא: בחירת טקסט רגילה, ממופה למספרי תו בתוך המכל */
+function chavOffsets() {
+  var box = document.getElementById('chb');
+  var sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !box.contains(sel.anchorNode)) return null;
+  var r = sel.getRangeAt(0);
+  var pre = r.cloneRange();
+  pre.selectNodeContents(box); pre.setEnd(r.startContainer, r.startOffset);
+  var from = pre.toString().length;
+  var txt = r.toString();
+  if (!txt.trim()) return null;
+  return { from: from, to: from + txt.length, text: txt };
+}
+
+function markPanel() {
+  var g = GSEL ? (Math.min(GSEL.a.i, GSEL.b.i) + 1) + '–' + (Math.max(GSEL.a.i, GSEL.b.i) + 1) : null;
+  document.getElementById('mhelp').innerHTML =
+    'לחצו על שורה בגמרא, ואז על השורה האחרונה. גררו את הידיות הזהובות ' +
+    'כדי לעצור באמצע שורה. בחברותא — סמנו טקסט כרגיל.';
+  document.getElementById('mcur').innerHTML =
+    '<div class="' + (g ? 'ok' : 'no') + '">גמרא: ' +
+      (g ? 'שורות ' + g : 'טרם נבחר') + '</div>' +
+    '<div class="' + (CSEL ? 'ok' : 'no') + '">חברותא: ' +
+      (CSEL ? '“' + esc(CSEL.text.slice(0, 40)) + '…”' : 'טרם נבחר') + '</div>';
+  document.getElementById('addstep').disabled = !(GSEL && CSEL);
+  document.getElementById('mcount').textContent = STEPS.length ? '· ' + STEPS.length : '';
+  document.getElementById('steps').innerHTML = STEPS.map(function (st, i) {
+    return '<div class="step"><span class="x" data-x="' + i + '">✕</span>' +
+      '<b>' + (i + 1) + '.</b> גמרא ' + (st.g.from.line + 1) + '–' + (st.g.to.line + 1) +
+      '<span class="q">' + esc(st.c.text.slice(0, 60)) + '…</span></div>';
+  }).join('') || '<div class="hint">עדיין אין קטעים.</div>';
+  [].forEach.call(document.querySelectorAll('[data-x]'), function (b) {
+    b.onclick = function () { STEPS.splice(+b.dataset.x, 1); markPanel(); };
+  });
+}
+
+function setMode(m) {
+  MODE = m;
+  document.body.classList.toggle('mark', m === 'mark');
+  document.getElementById('mode').textContent =
+    m === 'mark' ? '→ כיול הדף' : 'סימון קטעים ←';
+  if (m === 'mark') { loadChav(); markDraw(); } else if (S) draw();
+}
+
+/* בסימון צריך את שני הקבצים בבת אחת: צורת הדף מוצגת, והחברותא
+   נטענת לצידה כטקסט. */
+function loadChav() {
+  var c = curDaf();
+  var id = fileId(c.links[1]);
+  if (!id) { document.getElementById('chb').innerHTML =
+    '<div class="hint">אין קובץ חברותא לדף הזה.</div>'; return; }
+  var box = document.getElementById('chb');
+  box.innerHTML = '<div class="hint">טוען את החברותא…</div>';
+  var render = function (buf) {
+    pdfReady()
+      .then(function () { return pdfjsLib.getDocument({ data: buf.slice(0) }).promise; })
+      .then(function (doc) {
+        var jobs = [];
+        for (var i = 1; i <= doc.numPages; i++) jobs.push(doc.getPage(i).then(chavItems));
+        return Promise.all(jobs);
+      })
+      .then(function (pages) {
+        /* הסף נקבע על כל הקובץ ולא לעמוד, כדי שעמוד שכולו כותרות
+           לא יסיט אותו. */
+        var all = [].concat.apply([], pages);
+        var body = bodyHeight(all);
+        CHV = [].concat.apply([], pages.map(function (it) {
+          return chavBuild(it, body);
+        }));
+        box.innerHTML = chavHtml(CHV);
+        document.getElementById('chpg').textContent = CHV.length + ' פסקאות';
+      })
+      .catch(function () { box.innerHTML = '<div class="hint">לא הצלחתי לקרוא.</div>'; });
+  };
+  if (CACHE[id]) return render(CACHE[id]);
+  var url = API + (API.indexOf('?') < 0 ? '?' : '&') + 'file=' + encodeURIComponent(id);
+  fetch(url).then(function (r) { return r.json(); }).catch(function () { return jsonp(url); })
+    .then(function (d) {
+      var bin = atob(d.data), buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      CACHE[id] = buf; render(buf);
+    })
+    .catch(function () { box.innerHTML = '<div class="hint">לא הצלחתי להביא.</div>'; });
+}
+
+document.addEventListener('selectionchange', function () {
+  if (MODE !== 'mark') return;
+  var o = chavOffsets();
+  if (o) { CSEL = o; markPanel(); }
+});
+document.getElementById('mode').onclick = function () {
+  setMode(MODE === 'mark' ? 'cal' : 'mark');
+};
+document.getElementById('addstep').onclick = function () {
+  if (!GSEL || !CSEL) return;
+  var i0 = Math.min(GSEL.a.i, GSEL.b.i), i1 = Math.max(GSEL.a.i, GSEL.b.i);
+  var xa = GSEL.a.i <= GSEL.b.i ? GSEL.a.x : GSEL.b.x;
+  var xb = GSEL.a.i <= GSEL.b.i ? GSEL.b.x : GSEL.a.x;
+  STEPS.push({ g: { from: { line: i0, x: +xa.toFixed(3) },
+                    to:   { line: i1, x: +xb.toFixed(3) } },
+               c: { from: CSEL.from, to: CSEL.to, text: CSEL.text } });
+  GSEL = null; CSEL = null;
+  window.getSelection().removeAllRanges();
+  markDraw();
+};
 
 window.studioLoad = load;      // לבדיקות
 </script>
