@@ -229,12 +229,16 @@ body.mark.solo:not(.on-chav) .chav{display:none}
     <button id="clearsel">✕ ניקוי הסימון</button>
   </div>
   <div class="brow">
+    <button id="pgprev" title="העמוד הקודם">▸ עמוד</button>
+    <span class="gh" id="pglbl"></span>
+    <button id="pgnext" title="העמוד הבא">עמוד ◂</button>
     <button id="undo">◂ ביטול הקטע האחרון</button>
     <span class="gap"></span>
     <span class="gh" id="ghint"></span>
     <button id="swap" title="החלפת צדדים">⇄</button>
     <button id="layout">מסך מלא</button>
     <button class="add" id="addstep2">הוספת הקטע</button>
+    <button class="p" id="save2">שמירה</button>
   </div>
 </div>
 
@@ -1390,6 +1394,14 @@ function markPanel() {
     'מהמקום שהקודם נגמר. <b>הקשה על שורה אחרת מזיזה את הסוף</b>, ולכן ' +
     'סימנתם שורה אחת יותר מדי — הקישו על הקודמת. הקשה ארוכה מתחילה מחדש.';
 
+  var pl = document.getElementById('pglbl');
+  if (pl) {
+    var el = document.getElementById('pg');
+    var it = el._items && el._items[+el.value];
+    pl.textContent = it ? it[1] : '';
+    document.getElementById('pgprev').disabled = +el.value <= 0;
+    document.getElementById('pgnext').disabled = +el.value >= el.options.length - 1;
+  }
   var cnt = document.getElementById('mcount');
   if (cnt) cnt.textContent = STEPS.length ? '· ' + STEPS.length : '';
   var box = document.getElementById('steps');
@@ -1436,7 +1448,15 @@ function setMode(m) {
   document.body.classList.toggle('mark', m === 'mark');
   document.getElementById('mode').textContent =
     m === 'mark' ? '→ חזרה לכיול' : 'סימון קטעים ←';
-  if (m === 'mark') { loadChav(); markDraw(); } else if (S) draw();
+  if (m === 'mark') {
+    loadChav();
+    /* מה שכבר סומן בדף הזה בפעם קודמת חוזר מהגיליון */
+    loadFromSheet().then(function (n) {
+      if (n) { PKEY = ''; loadPageState(); paintChav(); markDraw();
+               say('נטענו סימונים קודמים מ-' + n + ' עמודים'); }
+    });
+    markDraw();
+  } else if (S) draw();
   markPanel();
 }
 
@@ -1480,6 +1500,83 @@ function loadChav() {
       CACHE[id] = buf; render(buf);
     })
     .catch(function () { box.innerHTML = '<div class="hint">לא הצלחתי להביא.</div>'; });
+}
+
+/* ============================================================
+   שמירה לגיליון.
+   הכל חייב לשבת ברשת ולא במכשיר: שעה של סימון שנמחקת בריענון
+   היא נזק אמיתי. הכתיבה עוברת באותו Apps Script, בפעולת `table`
+   שכבר קיימת בו — לשונית שלמה נכתבת מחדש בכל שמירה.
+
+   ומכיוון ש-`table` כותב מחדש, חייבים למזג: קוראים קודם את מה
+   שכבר בגיליון, מחליפים רק את הדף שעליו עבדנו, וכותבים הכל
+   בחזרה. בלי זה שמירה של דף אחד הייתה מוחקת את כל השאר.
+   ============================================================ */
+var MARK_TAB = 'סימוני הדף';
+
+function sheetCsv(tab) {
+  var id = (window.CFG && CFG.sheetId) || window.SHEET_ID;
+  if (!id) return Promise.resolve(null);
+  return fetch('https://docs.google.com/spreadsheets/d/' + id +
+      '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(tab) + '&t=' + Date.now())
+    .then(function (r) { return r.ok ? r.text() : null; })
+    .then(function (t) { return t ? csvRows(t) : null; })
+    .catch(function () { return null; });
+}
+function csvRows(text) {
+  var rows = [], row = [], f = '', q = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (q) {
+      if (c === '"' && text[i+1] === '"') { f += '"'; i++; }
+      else if (c === '"') q = false; else f += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
+    else if (c !== '\r') f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(function (r) { return r.join('').trim() !== ''; });
+}
+
+var COLS = ['מסכת', 'דף', 'עמוד', 'נתונים'];
+
+function saveToSheet() {
+  if (!API) { say('אין כתובת שרת.', 1); return Promise.resolve(false); }
+  keepPageState();
+  say('שומר בגיליון…');
+  return sheetCsv(MARK_TAB).then(function (rows) {
+    var keep = [];
+    (rows || []).slice(1).forEach(function (r) {
+      /* שומרים כל מה ששייך לדפים אחרים, ומחליפים רק את שלנו */
+      if (!BOOK[r[0] + '|' + r[1] + '|' + r[2]]) keep.push(r.slice(0, 4));
+    });
+    for (var k in BOOK) {
+      var a = k.split('|');
+      keep.push([a[0] || '', a[1] || '', a.slice(2).join('|'),
+                 JSON.stringify(BOOK[k])]);
+    }
+    return fetch(API, { method:'POST', mode:'no-cors',
+      body: JSON.stringify({ action:'table', tab: MARK_TAB,
+        cols: JSON.stringify(COLS), rows: JSON.stringify(keep) }) })
+      .then(function () {
+        var n = 0; for (var q in BOOK) n += (BOOK[q].steps || []).length;
+        say('נשמר בגיליון · ' + n + ' קטעים · לשונית "' + MARK_TAB + '"');
+        return true;
+      });
+  }).catch(function () { say('השמירה נכשלה.', 1); return false; });
+}
+
+function loadFromSheet() {
+  return sheetCsv(MARK_TAB).then(function (rows) {
+    if (!rows || rows.length < 2) return 0;
+    var mas = selVal('mas'), daf = selVal('daf'), n = 0;
+    rows.slice(1).forEach(function (r) {
+      if (r[0] !== mas || r[1] !== daf) return;
+      try { BOOK[r[0] + '|' + r[1] + '|' + r[2]] = JSON.parse(r[3]); n++; } catch (e) {}
+    });
+    return n;
+  }).catch(function () { return 0; });
 }
 
 /* ============================================================
@@ -1660,6 +1757,15 @@ document.getElementById('undo').onclick = function () {
 document.getElementById('clearsel').onclick = function () {
   GSEL = null; markDraw();
 };
+function stepPage(d) {
+  var el = document.getElementById('pg');
+  var i = +el.value + d;
+  if (i < 0 || i >= el.options.length) return;
+  el.value = i; el.dispatchEvent(new Event('change'));
+}
+document.getElementById('pgprev').onclick = function () { stepPage(-1); };
+document.getElementById('pgnext').onclick = function () { stepPage(1); };
+document.getElementById('save2').onclick = function () { saveToSheet(); };
 document.getElementById('swap').onclick = function () {
   if (document.body.classList.contains('solo'))
     document.body.classList.toggle('on-chav');
