@@ -332,9 +332,19 @@ function analyse(m, w, h, pit0) {
   var mid = (bx0+bx1)/2;
   var spine = core.slice().sort(function(p,q){
     return Math.abs((p.a+p.b)/2-mid) - Math.abs((q.a+q.b)/2-mid); })[0];
+  /* הפריסה זהה בכל הסדרה: השדרה יושבת ב-0.298 עד 0.702 מרוחב
+     הגוש, ונמדד כך בארבעה דפים בשני מנועי ציור שונים. לכן כל
+     קצה שסוטה מהיחס ביותר מ-6% מוחזר אליו.
+
+     קודם הגנתי רק על המקרה שהשדרה יצאה רחבה מדי — טור שכן נבלע
+     בה כשהמרזב שלידו לא שרד. המקרה ההפוך לא נתפס: בדף ב׳ ע"ב
+     נמצא מרזב מדומה בתוך הגמרא, השדרה יצאה צרה בחצי, וכל
+     האזורים נחתכו באמצע הדף. */
   var cw = bx1 - bx0, gA = spine.a, gB = spine.b;
   var nomA = Math.round(bx0 + cw*.298), nomB = Math.round(bx0 + cw*.702);
-  if (gB - gA > cw*.55) { gA = Math.max(gA, nomA); gB = Math.min(gB, nomB); }
+  var tol = cw * 0.06;
+  if (Math.abs(gA - nomA) > tol) gA = nomA;
+  if (Math.abs(gB - nomB) > tol) gB = nomB;
 
   /* --- נוכחות שני המרזבים, שורה אחר שורה --- */
   var wmin = C.wmin;
@@ -577,16 +587,22 @@ function ctrls(i) {
 }
 function row(k, v) { return '<div class="stat"><span>'+k+'</span><b>'+v+'</b></div>'; }
 
-/* צעד של שורה אחת: מוצאים את השורה הסמוכה בפועל ולא מזיזים
-   בפיקסלים. בדף צפוף זה ההבדל בין מדויק למקרי. */
-function stepLine(y, dir, z) {
-  var ls = allLines(z);
+/* צעד של שורה אחת: קופצים לשורה הסמוכה בפועל ולא מזיזים
+   בפיקסלים. בדף צפוף זה ההבדל בין מדויק למקרי.
+
+   `edge` קובע איזה קצה של השורה מעניין: הגבול העליון נצמד
+   לתחילות שורות, והתחתון לסופיהן. כשהתחתון נצמד לתחילות, כל
+   צעד בלע גם את הרווח שאחרי השורה — ואז שורה אחת והמילה
+   המרחפת שאחריה נכנסו או יצאו תמיד ביחד, בלי דרך להפריד. */
+function stepLine(y, dir, z, edge) {
+  var k = edge === 'end' ? 1 : 0;
   var best = null;
-  ls.forEach(function (l) {
-    if (dir < 0 && l[0] < y - 2 && (!best || l[0] > best)) best = l[0];
-    if (dir > 0 && l[0] > y + 2 && (best === null || l[0] < best)) best = l[0];
+  allLines(z).forEach(function (l) {
+    var v = l[k];
+    if (dir < 0 && v < y - 2 && (best === null || v > best)) best = v;
+    if (dir > 0 && v > y + 2 && (best === null || v < best)) best = v;
   });
-  return best === null ? y + dir * Math.round(S.gpitch) : best;
+  return best === null ? null : best;
 }
 function allLines(z) {
   return linesIn(D.m, D.w, z.a, z.b, S.bbox[1], S.bbox[3], S.gpitch);
@@ -599,18 +615,29 @@ function act(a, i) {
   if (a === 'lin')  { z.inA = true;  applySides(z); }
   if (a === 'lout') { z.inA = false; applySides(z); }
   if (a === 'up' || a === 'down') {
-    var y = stepLine(z.y0, a === 'up' ? -1 : 1, z);
+    var y = stepLine(z.y0, a === 'up' ? -1 : 1, z, 'start');
+    if (y === null) return;
     y = Math.max(S.bbox[1], Math.min(z.y1 - S.gpitch, y));
     z.y0 = y; if (prev) prev.y1 = y - 1;
   }
   if (a === 'bup' || a === 'bdown') {
-    var y2 = stepLine(z.y1, a === 'bup' ? -1 : 1, z);
+    /* נספר לפי שורות שנכללות בפועל, ולא לפי המרחק מהגבול.
+       הגבול התחתון יושב בדרך כלל מתחת לשורה האחרונה, ולכן צעד
+       "לפי הסוף הקרוב" רק היה מהדק אליה בלי להסיר אותה — לחיצה
+       ראשונה לא עשתה כלום. */
+    var inside = allLines(z).filter(function (l) { return l[1] <= z.y1 + 2; });
+    var after  = allLines(z).filter(function (l) { return l[1] >  z.y1 + 2; });
+    var y2 = a === 'bup'
+      ? (inside.length > 1 ? inside[inside.length - 2][1] : null)
+      : (after.length ? after[0][1] : null);
+    if (y2 === null) return;              /* אין שורה נוספת — לא זזים */
     y2 = Math.max(z.y0 + S.gpitch, Math.min(S.bbox[3], y2));
     z.y1 = y2; if (next) next.y0 = y2 + 1;
   }
   if (a === 'split') {
     if (z.y1 - z.y0 < S.gpitch * 2) return;
-    var mid = stepLine((z.y0 + z.y1) >> 1, 1, z);
+    var mid = stepLine((z.y0 + z.y1) >> 1, 1, z, 'start');
+    if (mid === null) return;
     S.zones.splice(i+1, 0, { y0:mid, y1:z.y1, inA:z.inA, inB:z.inB, a:z.a, b:z.b });
     z.y1 = mid - 1;
   }
