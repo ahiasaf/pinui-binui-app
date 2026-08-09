@@ -1253,10 +1253,14 @@ function markDraw() {
   }
   /* קו דק במקום שממנו ימשיך הקטע הבא */
   var ls2 = flatLines();
-  if (!GSEL && USED_G >= 0 && ls2[USED_G + 1]) {
-    var nx = ls2[USED_G + 1];
-    s += '<rect x="' + nx.a + '" y="' + nx.t + '" width="' + (nx.x2 - nx.a) +
-         '" height="' + (nx.b - nx.t) + '" fill="rgba(59,125,87,.20)"/>';
+  if (!GSEL && USED_G) {
+    var st2 = nextStart(), nx = ls2[st2.i];
+    if (nx) {
+      /* אם נותר חצי שורה, מסמנים בדיוק את החצי הזה */
+      var w2 = nx.x2 - nx.a, from = nx.x2 - w2 * st2.x;
+      s += '<rect x="' + nx.a + '" y="' + nx.t + '" width="' + (from - nx.a) +
+           '" height="' + (nx.b - nx.t) + '" fill="rgba(59,125,87,.22)"/>';
+    }
   }
   ov.innerHTML = s;
   [].forEach.call(ov.querySelectorAll('.ml'), function (el) {
@@ -1282,10 +1286,9 @@ function hand(x, y, h, which) {
    אחת על הסוף מספיקה. הקשה ארוכה קובעת התחלה חדשה, למקרה
    שבכל זאת צריך לדלג. */
 function pickLine(i, longPress) {
-  var start = Math.max(0, USED_G + 1);
-  if (longPress) { GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } }; }
-  else if (i < start) { GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } }; }
-  else { GSEL = { a: { i: start, x: 0 }, b: { i: i, x: 1 } }; }
+  var st = nextStart();
+  if (longPress || i < st.i) { GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } }; }
+  else { GSEL = { a: { i: st.i, x: st.x }, b: { i: i, x: 1 } }; }
   markDraw();
 }
 
@@ -1368,14 +1371,15 @@ function addStep() {
   STEPS.push({ g: { from: { line: i0, x: +xa.toFixed(3) },
                     to:   { line: i1, x: +xb.toFixed(3) } },
                c: { from: CSEL_P.a, to: CSEL_P.b, text: chavText() } });
-  USED_G = i1; USED_C = CSEL_P.b;
+  USED_G = { line: i1, x: +xb.toFixed(3) };
+  USED_C = CSEL_P.b;
   GSEL = null; CSEL_P = null;
   paintChav(); markDraw();
 }
 function removeStep(i) {
   STEPS.splice(i, 1);
   var last = STEPS[STEPS.length - 1];
-  USED_G = last ? last.g.to.line : -1;
+  USED_G = last ? { line: last.g.to.line, x: last.g.to.x } : null;
   USED_C = last ? last.c.to : -1;
   paintChav(); markDraw();
 }
@@ -1505,7 +1509,16 @@ document.getElementById('zfit').onclick = function () { setZoom(1); };
    ============================================================ */
 var CSEL_P = null;      // { a, b } אינדקסי פסקאות
 var USED_C = -1;        // הפסקה האחרונה שכבר שובצה
-var USED_G = -1;        // השורה האחרונה שכבר שובצה
+var USED_G = null;      // הנקודה שבה נגמר הקטע הקודם: {line, x}
+
+/* היכן מתחיל הקטע הבא. לא די במספר השורה: קטע שנעצר באמצע שורה
+   משאיר את חציה, והחצי הזה שייך לקטע הבא. אם הקודם מיצה את
+   השורה — מתחילים בשורה שאחריה. */
+function nextStart() {
+  if (!USED_G) return { i: 0, x: 0 };
+  if (USED_G.x >= 0.98) return { i: USED_G.line + 1, x: 0 };
+  return { i: USED_G.line, x: USED_G.x };
+}
 
 function chavBind() {
   [].forEach.call(document.querySelectorAll('#chb p.cp'), function (el) {
