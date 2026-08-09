@@ -67,6 +67,14 @@ aside p.h{margin:0 0 12px;font-size:.79rem;color:var(--ink-2);line-height:1.6;fo
 .zone .t{font-weight:800;font-size:.83rem}
 .zone .d{color:var(--ink-2)}
 .zone .rm{float:left;color:var(--stop);font-weight:800;padding:0 4px}
+.zone .n{float:left;font-weight:800;color:var(--ink-3);font-size:.74rem}
+.ctl{margin-top:9px;border-top:1px solid var(--rule);padding-top:8px;display:grid;gap:6px}
+.cg{display:flex;align-items:center;gap:6px}
+.cg>span{flex:0 0 74px;font-size:.72rem;color:var(--ink-2);font-weight:800}
+button.c{flex:1;padding:9px 6px;font-size:.78rem;border:1px solid var(--rule);
+  background:#fff;border-radius:8px;min-height:40px}
+button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
+  color:#fff;border-color:transparent}
 .hint{margin-top:12px;font-size:.75rem;color:var(--ink-3);font-weight:700;line-height:1.6}
 #msg{font-size:.8rem;font-weight:800;margin-top:10px}
 </style>
@@ -96,14 +104,15 @@ aside p.h{margin:0 0 12px;font-size:.79rem;color:var(--ink-2);line-height:1.6;fo
 
   <aside>
     <h2>מה שזוהה</h2>
-    <p class="h">גררו את הקווים האופקיים כדי לשנות גבול בין אזורים,
-      ואת האנכיים כדי לשנות את רוחב הגמרא. השורות מחושבות מחדש מיד.</p>
+    <p class="h">הירוק המקווקו הוא גוש הכתב, הכחול הוא המסגרת
+      הפנימית של הגמרא. כל שינוי מחשב את השורות מחדש מיד.</p>
     <div id="stats"></div>
     <h2 style="margin-top:14px">אזורים</h2>
     <div id="zones"></div>
-    <button style="margin-top:10px;width:100%" id="split">פיצול האזור הנבחר באמצע</button>
-    <div class="hint">קליק על אזור בוחר אותו · הקו העליון של כל אזור ניתן לגרירה ·
-      הגבולות נצמדים לרשת שנמצאה בדף</div>
+    <div class="hint">לחיצה על אזור פותחת את הכלים שלו.
+      <b>פנימי</b> = הגמרא לבדה, בין שני הרווחים הקבועים.
+      <b>חיצוני</b> = הורחבה עד קצה הגוש, כשטור פירוש נגמר.
+      אפשר גם לגרור את הקו העליון של אזור.</div>
     <div id="msg"></div>
   </aside>
 </div>
@@ -185,6 +194,29 @@ function pitchOf(m, w, a, b, y0, y1) {
   return d.length ? median(d) : null;
 }
 
+/* מילה מרחפת (קאצ'וורד).
+   בדפוס וילנא נהוג לשים בתחתית טור את המילה שפותחת את העמוד
+   הבא, מרחפת בתוך הרווח. "איזהו", "יתיב", "אליה".
+
+   היא הרסה את הזיהוי בשתי דרכים: מילאה את הרווח שאמור להפריד
+   בין הגמרא לגוש שמתחתיה, ולכן הגמרא נראתה כממשיכה; והיא יושבת
+   בטור אחר מהשורה שלידה, ולכן שורה צרה נמדדה כרחבה.
+
+   היא ניתנת להבחנה בלי לקרוא אותה: שורת טקסט אמיתית פרושה על
+   רוב רוחב הטור, ומילה בודדת מרוכזת בכתם צר אחד. */
+function isFloating(m, w, a, b, t, bt) {
+  var wide = b - a, cover = 0, xs = -1, xe = -1;
+  for (var x = a; x < b; x++) {
+    var any = 0;
+    for (var y = t; y < bt && !any; y++) if (m[y*w+x]) any = 1;
+    if (any) { cover++; if (xs < 0) xs = x; xe = x; }
+  }
+  if (!cover) return true;
+  var span = xe - xs + 1;
+  /* פרושה על פחות מרבע הטור, ומרוכזת בשליש ממנו — מילה, לא שורה */
+  return (cover / wide) < 0.25 && (span / wide) < 0.34;
+}
+
 function linesIn(m, w, a, b, y0, y1, pit) {
   var p = new Float32Array(y1 - y0);
   for (var y = y0; y < y1; y++) p[y-y0] = rowMean(m, w, y, a, b);
@@ -211,7 +243,7 @@ function linesIn(m, w, a, b, y0, y1, pit) {
     for (var i = 0; i < cuts.length-1; i++)
       if (cuts[i+1]-cuts[i] >= 5) out.push([cuts[i]+y0, cuts[i+1]+y0]);
   });
-  return out;
+  return out.filter(function (l) { return !isFloating(m, w, a, b, l[0], l[1]); });
 }
 
 /* הקבועים נגזרים ממרווח השורה של הדף ולא מרוחב התמונה.
@@ -307,6 +339,10 @@ function analyse(m, w, h, pit0) {
   /* --- נוכחות שני המרזבים, שורה אחר שורה --- */
   var wmin = C.wmin;
   var L = new Uint8Array(h), R = new Uint8Array(h);
+  var rowInk = new Float32Array(h);
+  for (var y = y0; y <= y1; y++) rowInk[y] = rowMean(m, w, y, bx0, bx1);
+  var thinInk = median(Array.prototype.slice.call(rowInk, y0, y1 + 1)
+                  .filter(function (v) { return v > 0.004; })) * 0.22;
   for (var y = y0; y <= y1; y++) {
     var row = [];
     var s = null;
@@ -320,20 +356,24 @@ function analyse(m, w, h, pit0) {
       if (Math.abs(g[1]-gA) <= wmin*2 && g[0] >= bx0-wmin) L[y] = 1;
       if (Math.abs(g[0]-gB) <= wmin*2 && g[1] <= bx1+wmin) R[y] = 1;
     });
+    /* שורה שכל תוכנה מילה בודדת אינה עדות לכלום — לא לקיום מרזב
+       ולא להיעדרו. מסמנים כ"לא ידוע" ומשאירים להחלקה למלא. */
+    if (rowInk[y] < thinInk) { L[y] = 2; R[y] = 2; }
   }
   var gpit = spine.pitch;
   var mm = Math.round(gpit*1.2);
   function sm(v) {
-    /* ממוצע נע ממורכז. גרסה מוטה קודמת הזיזה את הגבולות והבהבה. */
-    var o = new Uint8Array(h), acc = 0, half = mm >> 1;
+    /* ממוצע נע ממורכז, שמדלג על שורות "לא ידוע" (מילה מרחפת)
+       במקום לספור אותן כהיעדר מרזב. */
+    var o = new Uint8Array(h), acc = 0, cnt = 0, half = mm >> 1;
+    var add = function (y, k) {
+      if (y < 0 || y >= h || v[y] === 2) return;
+      acc += k * v[y]; cnt += k;
+    };
     for (var y = 0; y < h + half; y++) {
-      if (y < h) acc += v[y];
-      if (y - mm >= 0) acc -= v[y - mm];
+      add(y, 1); add(y - mm, -1);
       var c = y - half;
-      if (c >= 0 && c < h) {
-        var n = Math.min(y + 1, mm, h - c + half);
-        o[c] = (acc / n) > .45 ? 1 : 0;
-      }
+      if (c >= 0 && c < h) o[c] = cnt ? ((acc / cnt) > .45 ? 1 : 0) : 0;
     }
     return o;
   }
@@ -354,8 +394,11 @@ function analyse(m, w, h, pit0) {
   }
   zones = zones.filter(function(z){ return z.y1-z.y0 > gpit; });
   zones.forEach(function (z) {
-    z.a = (z.k & 2) ? gA : bx0;
-    z.b = (z.k & 1) ? gB : bx1;
+    /* inA/inB = הצד נמצא על המסגרת הפנימית. שני מצבים בלבד לכל
+       צד, ולכן זה מתגים ולא גרירה. */
+    z.inA = !!(z.k & 2); z.inB = !!(z.k & 1);
+    z.a = z.inA ? gA : bx0;
+    z.b = z.inB ? gB : bx1;
     z.pitch = pitchOf(m, w, z.a, z.b, z.y0, z.y1) || gpit;
   });
 
@@ -364,12 +407,18 @@ function analyse(m, w, h, pit0) {
      11% הפרש, ולכן משווים לשני העוגנים ולא לסף שרירותי. */
   var others = core.filter(function(c){ return c !== spine; });
   var cpit = median(others.map(function(c){return c.pitch;})) || gpit*.88;
-  while (zones.length && zones[zones.length-1].k === 0) {
-    var z = zones[zones.length-1];
-    if (Math.abs(z.pitch-cpit) < Math.abs(z.pitch-gpit)) zones.pop(); else break;
-  }
+  /* הגמרא נגמרת לפעמים באמצע הדף, ורש"י או תוספות נכתבים
+     מתחתיה. אזור שמרווח השורה בו קרוב לפירוש ולא לגמרא אינו
+     גמרא — גם אם הוא לא האחרון. 33 מול 29-30, ולכן משווים
+     לשני העוגנים ולא לסף שרירותי. */
+  zones = zones.filter(function (z) {
+    if (z.k !== 0) return true;                 /* טור צר — ודאי גמרא */
+    return Math.abs(z.pitch - gpit) <= Math.abs(z.pitch - cpit);
+  });
 
-  return { w:w, h:h, sc:sc, bbox:[x0,y0,x1,y1], core:[bx0,bx1], spine:[gA,gB],
+  return { w:w, h:h, sc:sc, bbox:[x0,y0,x1,y1],
+           outer:[bx0,bx1], inner:[gA,gB],
+           core:[bx0,bx1], spine:[gA,gB],
            gpitch:gpit, cpitch:cpit, zones:zones, grid:[bx0, gA, gB, bx1] };
 }
 
@@ -397,7 +446,9 @@ function analyseSimple(m, w, h) {
     else { cur = { y0:l[0], y1:l[1], last:l[1], k:3, a:x0, b:x1, pitch:pit }; zones.push(cur); }
   });
   zones.forEach(function (z) { delete z.last; });
-  return { w:w, h:h, sc:w/REF_W, bbox:[x0,y0,x1,y1], core:[x0,x1], spine:[x0,x1],
+  zones.forEach(function (z) { z.inA = z.inB = true; });
+  return { w:w, h:h, sc:w/REF_W, bbox:[x0,y0,x1,y1],
+           outer:[x0,x1], inner:[x0,x1], core:[x0,x1], spine:[x0,x1],
            gpitch:pit, cpitch:pit, zones:zones, grid:[x0,x1], simple:true };
 }
 
@@ -411,111 +462,214 @@ function relines() {
    ציור ואינטראקציה
    ============================================================ */
 var sel = 0;
+
+/* ============================================================
+   הצגה ועריכה.
+
+   הגמרא נמצאת בכל אזור, בכל צד בנפרד, באחד משני מצבים בלבד:
+   על **המסגרת הפנימית** — שני הרווחים הקבועים שמשני צדי הגמרא,
+   שמתחילים אחרי ארבע שורות של רש"י ותוספות — או מורחבת אל
+   **המסגרת החיצונית**, כשטור פירוש נגמר.
+
+   לכן אין כאן גרירה חופשית של הרוחב אלא שני מתגים לאזור. זה
+   מדויק יותר, זה בלחיצה אחת, וזה עובד באצבע.
+   הגובה נערך שורה־שורה מאותה סיבה.
+   ============================================================ */
+function zoneName(z) {
+  var i = z.inA, o = z.inB;
+  return S.simple ? 'פסקה'
+       : (i && o) ? 'הגמרא בלבד'
+       : (!i && !o) ? 'מורחב לשני הצדדים'
+       : i ? 'מורחב ימינה' : 'מורחב שמאלה';
+}
+function applySides(z) {
+  z.a = z.inA ? S.inner[0] : S.outer[0];
+  z.b = z.inB ? S.inner[1] : S.outer[1];
+}
+function lineCount(z) { return (z.lines || []).length; }
+
 function draw() {
   var ov = document.getElementById('ov');
   ov.setAttribute('viewBox', '0 0 ' + S.w + ' ' + S.h);
   var s = '';
-  s += '<rect x="'+S.core[0]+'" y="'+S.bbox[1]+'" width="'+(S.core[1]-S.core[0])+
-       '" height="'+(S.bbox[3]-S.bbox[1])+'" fill="none" stroke="#3B7D57" stroke-width="3" stroke-dasharray="14 10"/>';
+  /* המסגרות עצמן, כדי שיהיה ברור לאן אפשר להרחיב */
+  s += box(S.outer[0], S.bbox[1], S.outer[1], S.bbox[3], '#3B7D57', 3, '16 12');
+  if (!S.simple)
+    s += box(S.inner[0], S.bbox[1], S.inner[1], S.bbox[3], '#17468F', 2, '6 9');
+
   S.zones.forEach(function (z, i) {
     var on = i === sel;
     s += '<rect x="'+z.a+'" y="'+z.y0+'" width="'+(z.b-z.a)+'" height="'+(z.y1-z.y0)+
-         '" fill="rgba(192,143,43,'+(on?.10:.05)+')" stroke="'+(on?'#C08F2B':'#A5382D')+
-         '" stroke-width="'+(on?5:3)+'"/>';
+         '" fill="rgba(192,143,43,'+(on?.16:.04)+')" stroke="'+(on?'#C08F2B':'#C9B79A')+
+         '" stroke-width="'+(on?7:3)+'"/>';
     (z.lines||[]).forEach(function (ln, j) {
       s += '<rect x="'+z.a+'" y="'+ln[0]+'" width="'+(z.b-z.a)+'" height="'+(ln[1]-ln[0])+
-           '" fill="'+(j%2?'rgba(240,150,20,.42)':'rgba(30,120,225,.42)')+'"/>';
+           '" fill="'+(j%2?'rgba(240,150,20,'+(on?.5:.22)+')'
+                          :'rgba(30,120,225,'+(on?.5:.22)+')')+'"/>';
     });
-    /* ידיות גרירה */
-    s += '<line class="hy" data-i="'+i+'" data-e="top" x1="'+S.bbox[0]+'" y1="'+z.y0+
-         '" x2="'+S.bbox[2]+'" y2="'+z.y0+'" stroke="rgba(0,0,0,0)" stroke-width="26" style="cursor:ns-resize"/>';
-    s += '<line class="hx" data-i="'+i+'" data-e="a" x1="'+z.a+'" y1="'+z.y0+
-         '" x2="'+z.a+'" y2="'+z.y1+'" stroke="rgba(0,0,0,0)" stroke-width="26" style="cursor:ew-resize"/>';
-    s += '<line class="hx" data-i="'+i+'" data-e="b" x1="'+z.b+'" y1="'+z.y0+
-         '" x2="'+z.b+'" y2="'+z.y1+'" stroke="rgba(0,0,0,0)" stroke-width="26" style="cursor:ew-resize"/>';
+    if (on) s += '<text x="'+((z.a+z.b)/2)+'" y="'+(z.y0+S.gpitch*1.4)+
+      '" text-anchor="middle" font-size="'+(S.gpitch*1.5)+
+      '" font-weight="700" fill="#8A5A00">'+(i+1)+'</text>';
+    /* ידית הגבול העליון. העובי נקבע לפי גודל התצוגה בפועל, כדי
+       שיהיה ~44 פיקסלים של מסך גם בנייד. */
+    s += '<line class="hy" data-i="'+i+'" x1="'+S.bbox[0]+'" y1="'+z.y0+
+         '" x2="'+S.bbox[2]+'" y2="'+z.y0+'" stroke="rgba(0,0,0,0)" stroke-width="'+
+         handleW() + '"/>';
   });
   ov.innerHTML = s;
   bindHandles();
   panel();
 }
+function box(a, t, b, bt, col, w, dash) {
+  return '<rect x="'+a+'" y="'+t+'" width="'+(b-a)+'" height="'+(bt-t)+
+         '" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-dasharray="'+dash+'"/>';
+}
+function handleW() {
+  var r = document.getElementById('ov').getBoundingClientRect();
+  return Math.max(20, Math.round(44 * S.w / (r.width || S.w)));
+}
 
 function panel() {
-  var n = S.zones.reduce(function (a, z) { return a + (z.lines||[]).length; }, 0);
+  var n = S.zones.reduce(function (a, z) { return a + lineCount(z); }, 0);
   document.getElementById('stats').innerHTML =
-    row('גוש הכתב המרכזי', S.core[0] + '–' + S.core[1]) +
-    row('השדרה', S.spine[0] + '–' + S.spine[1]) +
-    row('מרווח שורה — גמרא', Math.round(S.gpitch) + 'px') +
-    row('מרווח שורה — פירושים', Math.round(S.cpitch) + 'px') +
-    row('סה"כ שורות', n);
+    row('שורות גמרא בסך הכול', n) +
+    row('אזורים', S.zones.length) +
+    (S.simple ? '' : row('מרווח שורה', Math.round(S.gpitch) + 'px'));
 
   document.getElementById('zones').innerHTML = S.zones.map(function (z, i) {
-    var k = (z.k & 2 ? 1 : 0) + (z.k & 1 ? 1 : 0);
-    var name = S.simple ? 'פסקה'
-             : k === 2 ? 'טור צר' : k === 0 ? 'רוחב מלא'
-             : (z.k & 1) ? 'התרחב שמאלה' : 'התרחב ימינה';
-    return '<div class="zone'+(i===sel?' on':'')+'" data-i="'+i+'">' +
-      (S.zones.length > 1 ? '<span class="rm" data-rm="'+i+'">✕</span>' : '') +
-      '<div class="t">'+(i+1)+'. '+name+'</div>' +
-      '<div class="d">y '+z.y0+'–'+z.y1+' · x '+z.a+'–'+z.b+
-      ' · '+(z.lines||[]).length+' שורות</div></div>';
-  }).join('');
+    var on = i === sel;
+    var pct = function (v) { return Math.round(v / S.h * 100); };
+    return '<div class="zone'+(on?' on':'')+'" data-i="'+i+'">' +
+      '<div class="t">' + (i+1) + '. ' + zoneName(z) +
+        '<span class="n">' + lineCount(z) + ' שורות</span></div>' +
+      '<div class="d">מ-' + pct(z.y0) + '% עד ' + pct(z.y1) + '% מגובה הדף</div>' +
+      (on ? ctrls(i) : '') + '</div>';
+  }).join('') || '<div class="hint">לא נמצאו אזורים.</div>';
 
   [].forEach.call(document.querySelectorAll('.zone'), function (el) {
     el.onclick = function (e) {
-      if (e.target.dataset.rm !== undefined) {
-        var i = +e.target.dataset.rm;
-        if (S.zones.length < 2) return;
-        var z = S.zones.splice(i, 1)[0];
-        if (S.zones[i-1]) S.zones[i-1].y1 = z.y1;
-        else if (S.zones[i]) S.zones[i].y0 = z.y0;
-        sel = Math.max(0, i-1); relines(); draw(); return;
-      }
-      sel = +el.dataset.i; draw();
+      if (e.target.closest('[data-act]')) return;
+      sel = +el.dataset.i; draw(); scrollToZone();
     };
   });
+  [].forEach.call(document.querySelectorAll('[data-act]'), function (b) {
+    b.onclick = function (e) { e.stopPropagation(); act(b.dataset.act, +b.dataset.i); };
+  });
+}
+function ctrls(i) {
+  var z = S.zones[i];
+  var t = function (a, lbl, hot) {
+    return '<button class="c'+(hot?' hot':'')+'" data-act="'+a+'" data-i="'+i+'">'+lbl+'</button>';
+  };
+  return '<div class="ctl">' +
+    (S.simple ? '' :
+      '<div class="cg"><span>ימין</span>' +
+        t('rin', 'פנימי', z.inB) + t('rout', 'חיצוני', !z.inB) + '</div>' +
+      '<div class="cg"><span>שמאל</span>' +
+        t('lin', 'פנימי', z.inA) + t('lout', 'חיצוני', !z.inA) + '</div>') +
+    '<div class="cg"><span>גבול עליון</span>' +
+      t('up', '▲ שורה') + t('down', '▼ שורה') + '</div>' +
+    '<div class="cg"><span>גבול תחתון</span>' +
+      t('bup', '▲ שורה') + t('bdown', '▼ שורה') + '</div>' +
+    '<div class="cg"><span></span>' +
+      t('split', 'פיצול') + t('del', 'מחיקה') + '</div>' +
+    '</div>';
 }
 function row(k, v) { return '<div class="stat"><span>'+k+'</span><b>'+v+'</b></div>'; }
 
+/* צעד של שורה אחת: מוצאים את השורה הסמוכה בפועל ולא מזיזים
+   בפיקסלים. בדף צפוף זה ההבדל בין מדויק למקרי. */
+function stepLine(y, dir, z) {
+  var ls = allLines(z);
+  var best = null;
+  ls.forEach(function (l) {
+    if (dir < 0 && l[0] < y - 2 && (!best || l[0] > best)) best = l[0];
+    if (dir > 0 && l[0] > y + 2 && (best === null || l[0] < best)) best = l[0];
+  });
+  return best === null ? y + dir * Math.round(S.gpitch) : best;
+}
+function allLines(z) {
+  return linesIn(D.m, D.w, z.a, z.b, S.bbox[1], S.bbox[3], S.gpitch);
+}
+
+function act(a, i) {
+  var z = S.zones[i], prev = S.zones[i-1], next = S.zones[i+1];
+  if (a === 'rin')  { z.inB = true;  applySides(z); }
+  if (a === 'rout') { z.inB = false; applySides(z); }
+  if (a === 'lin')  { z.inA = true;  applySides(z); }
+  if (a === 'lout') { z.inA = false; applySides(z); }
+  if (a === 'up' || a === 'down') {
+    var y = stepLine(z.y0, a === 'up' ? -1 : 1, z);
+    y = Math.max(S.bbox[1], Math.min(z.y1 - S.gpitch, y));
+    z.y0 = y; if (prev) prev.y1 = y - 1;
+  }
+  if (a === 'bup' || a === 'bdown') {
+    var y2 = stepLine(z.y1, a === 'bup' ? -1 : 1, z);
+    y2 = Math.max(z.y0 + S.gpitch, Math.min(S.bbox[3], y2));
+    z.y1 = y2; if (next) next.y0 = y2 + 1;
+  }
+  if (a === 'split') {
+    if (z.y1 - z.y0 < S.gpitch * 2) return;
+    var mid = stepLine((z.y0 + z.y1) >> 1, 1, z);
+    S.zones.splice(i+1, 0, { y0:mid, y1:z.y1, inA:z.inA, inB:z.inB, a:z.a, b:z.b });
+    z.y1 = mid - 1;
+  }
+  if (a === 'del') {
+    if (S.zones.length < 2) return;
+    S.zones.splice(i, 1);
+    if (prev && next) prev.y1 = next.y0 - 1;
+    sel = Math.max(0, i - 1);
+  }
+  relines(); draw();
+}
+
+function scrollToZone() {
+  var z = S.zones[sel]; if (!z) return;
+  var st = document.querySelector('.stage'), ov = document.getElementById('ov');
+  var r = ov.getBoundingClientRect();
+  st.scrollTop = Math.max(0, z.y0 / S.h * r.height - st.clientHeight * 0.3);
+}
+
+/* הגרירה נשברה קודם מסיבה מביכה: כל תזוזה בנתה מחדש את כל
+   השכבה הגרפית, וזה מחק את הקו שהאצבע מחזיקה. עכשיו האזנה על
+   החלון עצמו, כך שבנייה מחדש אינה מפריעה. */
 function bindHandles() {
   var ov = document.getElementById('ov');
-  [].forEach.call(ov.querySelectorAll('.hy,.hx'), function (el) {
+  [].forEach.call(ov.querySelectorAll('.hy'), function (el) {
+    el.style.touchAction = 'none';
+    el.style.cursor = 'ns-resize';
     el.onpointerdown = function (ev) {
-      ev.preventDefault();
-      el.setPointerCapture(ev.pointerId);
-      var i = +el.dataset.i, e = el.dataset.e;
+      ev.preventDefault(); ev.stopPropagation();
+      var i = +el.dataset.i;
       sel = i;
+      var stage = document.querySelector('.stage');
+      var wasOverflow = stage.style.overflow;
+      stage.style.overflow = 'hidden';        /* שלא ייגלל מתחת לאצבע */
+
       var move = function (m) {
         var r = ov.getBoundingClientRect();
-        if (e === 'top') {
-          var y = Math.round((m.clientY - r.top) / r.height * S.h);
-          var lo = i ? S.zones[i-1].y0 + 20 : S.bbox[1];
-          var hi = S.zones[i].y1 - 20;
-          y = Math.max(lo, Math.min(hi, y));
-          S.zones[i].y0 = y;
-          if (i) S.zones[i-1].y1 = y - 1;
-        } else {
-          var x = Math.round((m.clientX - r.left) / r.width * S.w);
-          /* הצמדה לרשת שנמצאה — ברוב הדפים לא צריך לגעת בכלל */
-          S.grid.forEach(function (g) { if (Math.abs(g - x) < 22 * S.sc) x = g; });
-          if (e === 'a') S.zones[i].a = Math.min(x, S.zones[i].b - 60);
-          else           S.zones[i].b = Math.max(x, S.zones[i].a + 60);
-        }
+        var y = Math.round((m.clientY - r.top) / r.height * S.h);
+        var lo = i ? S.zones[i-1].y0 + S.gpitch : S.bbox[1];
+        var hi = S.zones[i].y1 - S.gpitch;
+        y = Math.max(lo, Math.min(hi, y));
+        S.zones[i].y0 = y;
+        if (i) S.zones[i-1].y1 = y - 1;
         relines(); draw();
       };
-      el.onpointermove = move;
-      el.onpointerup = function () { el.onpointermove = null; };
+      var up = function () {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        stage.style.overflow = wasOverflow;
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
     };
   });
 }
 
-document.getElementById('split').onclick = function () {
-  var z = S.zones[sel]; if (!z || z.y1 - z.y0 < 60) return;
-  var mid = (z.y0 + z.y1) >> 1;
-  var nz = { y0: mid+1, y1: z.y1, k: z.k, a: z.a, b: z.b, pitch: z.pitch };
-  z.y1 = mid;
-  S.zones.splice(sel+1, 0, nz);
-  relines(); draw();
-};
+
 document.getElementById('reset').onclick = function () { if (D) run(); };
 
 document.getElementById('save').onclick = function () {
