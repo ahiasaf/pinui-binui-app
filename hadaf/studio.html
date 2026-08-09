@@ -77,6 +77,37 @@ button.c{flex:1;padding:9px 6px;font-size:.78rem;border:1px solid var(--rule);
   background:#fff;border-radius:8px;min-height:40px}
 button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
   color:#fff;border-color:transparent}
+/* זום: התמונה מוגדלת בטרנספורם ולא בשינוי גודל, כדי שהקואורדינטות
+   של הסימון יישארו זהות. פינץ' ושתי אצבעות מזיזים; הקשה אחת
+   נשארת בחירה, ולכן אין התנגשות. */
+#holder{transform-origin:0 0}
+.stage{touch-action:pan-x pan-y pinch-zoom}
+.zbar{position:absolute;inset-inline-end:10px;top:10px;z-index:5;display:flex;
+  flex-direction:column;gap:5px}
+.zbar button{width:38px;height:38px;padding:0;font-size:1.05rem;
+  box-shadow:0 2px 8px rgba(0,0,0,.18)}
+
+/* הפס התחתון: כל מה שנחוץ תוך כדי סימון, במקום אחד ונגיש לאגודל */
+.bar{position:fixed;inset-inline:0;bottom:0;z-index:60;display:none;
+  align-items:center;gap:10px;padding:9px 12px;
+  background:linear-gradient(150deg,var(--blue-d),var(--blue));
+  box-shadow:0 -6px 22px rgba(0,0,0,.22)}
+body.mark .bar{display:flex}
+.bar .gap{flex:1}
+.bar button{padding:11px 13px;font-size:.83rem}
+.bar .add{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff}
+.bar .sl{background:rgba(255,255,255,.16);color:#fff;font-weight:800}
+.bar .gh{color:#fff;font-size:.76rem;font-weight:800;opacity:.85;line-height:1.3}
+
+/* פסקאות החברותא נבחרות בהקשה. בלי גרירה — גרירה באצבע נלחמת
+   בגלילה, וזו הייתה הסיבה שאי אפשר היה לסמן כלום בנייד. */
+.chb p.cp{cursor:pointer;border-radius:7px;padding:3px 6px;margin:0 -6px 9px;
+  transition:background .12s}
+.chb p.cp.hot{background:rgba(240,150,20,.28);
+  box-shadow:inset 3px 0 0 var(--gold)}
+.chb p.cp.used{opacity:.45}
+.chb p.cp.nextup{box-shadow:inset 3px 0 0 var(--ok)}
+
 /* שני מצבים לאותו מסך: כיול הדף, וסימון הקטעים.
    בסימון צריך לראות את הגמרא ואת החברותא זו לצד זו ולתאם
    ביניהן, ולכן שני חלונות. בנייד חצי מסך לכל אחד, כי אין ברירה
@@ -96,13 +127,21 @@ button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
 body.mark .chav{display:flex}
 body.mark #marker{display:block}
 body.mark aside:not(#marker){display:none}
-body.mark .wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) 300px}
-body.mark .stage,body.mark .chav{height:calc(100vh - 108px)}
+body.mark .wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) 290px;
+  padding-bottom:70px}
+body.mark .stage,body.mark .chav{height:calc(100vh - 168px)}
+body.mark.swap .stage{order:2}
 @media (max-width:900px){
-  body.mark .wrap{grid-template-columns:minmax(0,1fr);gap:10px;padding:10px}
-  body.mark .stage,body.mark .chav{height:42vh}
-  body.mark #marker{position:sticky;bottom:0}
+  body.mark .wrap{grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 8px 70px}
+  body.mark .stage,body.mark .chav{height:41vh}
+  body.mark #marker{display:none}
 }
+/* מסך מלא לכל צד, להליכה ולעיניים עייפות */
+body.mark.solo .wrap{grid-template-columns:minmax(0,1fr);padding-bottom:70px}
+body.mark.solo #marker{display:none}
+body.mark.solo .stage,body.mark.solo .chav{height:calc(100vh - 132px)}
+body.mark.solo.on-chav .stage{display:none}
+body.mark.solo:not(.on-chav) .chav{display:none}
 .step{border:1px solid var(--rule);border-radius:9px;padding:8px 10px;margin-top:7px;
   font-size:.77rem;font-weight:700;line-height:1.5}
 .step .x{float:left;color:var(--stop);font-weight:800;cursor:pointer;padding:0 5px}
@@ -132,6 +171,11 @@ body.mark .stage,body.mark .chav{height:calc(100vh - 108px)}
 
 <div class="wrap">
   <div class="stage">
+    <div class="zbar">
+      <button id="zin" title="הגדלה">+</button>
+      <button id="zout" title="הקטנה">−</button>
+      <button id="zfit" title="התאמה למסך">⤢</button>
+    </div>
     <div id="holder">
       <img id="page" alt="">
       <svg id="ov" preserveAspectRatio="none"></svg>
@@ -166,6 +210,17 @@ body.mark .stage,body.mark .chav{height:calc(100vh - 108px)}
     <h2 style="margin-top:16px">הקטעים <span id="mcount"></span></h2>
     <div id="steps"></div>
   </aside>
+</div>
+
+<div class="bar">
+  <button id="undo">◂ ביטול אחרון</button>
+  <button class="sl" id="slide">שקף 1</button>
+  <button id="slnext">▸</button>
+  <span class="gap"></span>
+  <span class="gh" id="ghint"></span>
+  <button id="swap" title="החלפת צדדים">⇄</button>
+  <button id="layout">מסך מלא</button>
+  <button class="add" id="addstep2">הוספת הקטע</button>
 </div>
 
 <!-- לוח השנה וקישורי הדפים — אותם קבצים שהאפליקציה משתמשת בהם.
@@ -268,7 +323,7 @@ function isFloating(m, w, a, b, t, bt) {
   return (cover / wide) < 0.25 && (span / wide) < 0.34;
 }
 
-function linesIn(m, w, a, b, y0, y1, pit) {
+function linesIn(m, w, a, b, y0, y1, pit, vilna) {
   var p = new Float32Array(y1 - y0);
   for (var y = y0; y < y1; y++) p[y-y0] = rowMean(m, w, y, a, b);
   p = smooth3(p);
@@ -294,6 +349,9 @@ function linesIn(m, w, a, b, y0, y1, pit) {
     for (var i = 0; i < cuts.length-1; i++)
       if (cuts[i+1]-cuts[i] >= 5) out.push([cuts[i]+y0, cuts[i+1]+y0]);
   });
+  /* הכלל הזה שייך לדף וילנא בלבד. בחברותא "א. מפתח של גשמים,"
+     הוא משפט לגיטימי שתופס חמישית מהשורה, והוא נמחק. */
+  if (!vilna) return out;
   return out.filter(function (l) { return !isFloating(m, w, a, b, l[0], l[1]); });
 }
 
@@ -498,7 +556,7 @@ function analyseSimple(m, w, h) {
   if (y1 - y0 < 40) return null;
 
   var pit = pitchOf(m, w, x0, x1, y0, y1) || 30;
-  var ln = linesIn(m, w, x0, x1, y0, y1, pit);
+  var ln = linesIn(m, w, x0, x1, y0, y1, pit, false);
   if (!ln.length) return null;
 
   var zones = [], cur = null;
@@ -515,7 +573,7 @@ function analyseSimple(m, w, h) {
 
 function relines() {
   S.zones.forEach(function (z) {
-    z.lines = linesIn(D.m, D.w, z.a, z.b, z.y0, z.y1, S.gpitch);
+    z.lines = linesIn(D.m, D.w, z.a, z.b, z.y0, z.y1, S.gpitch, !S.simple);
   });
 }
 
@@ -657,7 +715,7 @@ function stepLine(y, dir, z, edge) {
   return best === null ? null : best;
 }
 function allLines(z) {
-  return linesIn(D.m, D.w, z.a, z.b, S.bbox[1], S.bbox[3], S.gpitch);
+  return linesIn(D.m, D.w, z.a, z.b, S.bbox[1], S.bbox[3], S.gpitch, !S.simple);
 }
 
 function act(a, i) {
@@ -1128,8 +1186,6 @@ var MODE = 'cal';
 var CHV = null;          // פסקאות החברותא
 var STEPS = [];
 var GSEL = null;         // { a:{i,x}, b:{i,x} } לפי אינדקס שורה
-var CSEL = null;         // { from, to, text }
-
 function flatLines() {
   var out = [];
   (S ? S.zones : []).forEach(function (z) {
@@ -1180,9 +1236,21 @@ function markDraw() {
       s += hand(last[0], last[1], last[3], 'b');
     }
   }
+  /* קו דק במקום שממנו ימשיך הקטע הבא */
+  var ls2 = flatLines();
+  if (!GSEL && USED_G >= 0 && ls2[USED_G + 1]) {
+    var nx = ls2[USED_G + 1];
+    s += '<rect x="' + nx.a + '" y="' + nx.t + '" width="' + (nx.x2 - nx.a) +
+         '" height="' + (nx.b - nx.t) + '" fill="rgba(59,125,87,.20)"/>';
+  }
   ov.innerHTML = s;
   [].forEach.call(ov.querySelectorAll('.ml'), function (el) {
-    el.onclick = function () { pickLine(+el.dataset.i); };
+    var t = null;
+    el.onpointerdown = function () { t = setTimeout(function () {
+      t = null; pickLine(+el.dataset.i, true); }, 550); };
+    el.onpointerup = function () {
+      if (t) { clearTimeout(t); t = null; pickLine(+el.dataset.i); } };
+    el.onpointercancel = function () { if (t) clearTimeout(t); t = null; };
   });
   bindMarkHandles();
   markPanel();
@@ -1195,13 +1263,14 @@ function hand(x, y, h, which) {
     '" fill="#C08F2B" rx="3"/></g>';
 }
 
-function pickLine(i) {
-  if (!GSEL || GSEL.a.i !== GSEL.b.i || GSEL.done) {
-    GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } };   /* שורה שלמה */
-  } else {
-    GSEL = { a: { i: Math.min(GSEL.a.i, i), x: 0 },
-             b: { i: Math.max(GSEL.a.i, i), x: 1 }, done: true };
-  }
+/* הקטעים רצים ברצף ואין דילוגים, ולכן ההתחלה כבר ידועה והקשה
+   אחת על הסוף מספיקה. הקשה ארוכה קובעת התחלה חדשה, למקרה
+   שבכל זאת צריך לדלג. */
+function pickLine(i, longPress) {
+  var start = Math.max(0, USED_G + 1);
+  if (longPress) { GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } }; }
+  else if (i < start) { GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } }; }
+  else { GSEL = { a: { i: start, x: 0 }, b: { i: i, x: 1 } }; }
   markDraw();
 }
 
@@ -1237,40 +1306,66 @@ function bindMarkHandles() {
   });
 }
 
-/* בחירת החברותא: בחירת טקסט רגילה, ממופה למספרי תו בתוך המכל */
-function chavOffsets() {
-  var box = document.getElementById('chb');
-  var sel = window.getSelection();
-  if (!sel || sel.isCollapsed || !box.contains(sel.anchorNode)) return null;
-  var r = sel.getRangeAt(0);
-  var pre = r.cloneRange();
-  pre.selectNodeContents(box); pre.setEnd(r.startContainer, r.startOffset);
-  var from = pre.toString().length;
-  var txt = r.toString();
-  if (!txt.trim()) return null;
-  return { from: from, to: from + txt.length, text: txt };
-}
-
 function markPanel() {
   var g = GSEL ? (Math.min(GSEL.a.i, GSEL.b.i) + 1) + '–' + (Math.max(GSEL.a.i, GSEL.b.i) + 1) : null;
-  document.getElementById('mhelp').innerHTML =
-    'לחצו על שורה בגמרא, ואז על השורה האחרונה. גררו את הידיות הזהובות ' +
-    'כדי לעצור באמצע שורה. בחברותא — סמנו טקסט כרגיל.';
-  document.getElementById('mcur').innerHTML =
-    '<div class="' + (g ? 'ok' : 'no') + '">גמרא: ' +
-      (g ? 'שורות ' + g : 'טרם נבחר') + '</div>' +
-    '<div class="' + (CSEL ? 'ok' : 'no') + '">חברותא: ' +
-      (CSEL ? '“' + esc(CSEL.text.slice(0, 40)) + '…”' : 'טרם נבחר') + '</div>';
-  document.getElementById('addstep').disabled = !(GSEL && CSEL);
-  document.getElementById('mcount').textContent = STEPS.length ? '· ' + STEPS.length : '';
-  document.getElementById('steps').innerHTML = STEPS.map(function (st, i) {
-    return '<div class="step"><span class="x" data-x="' + i + '">✕</span>' +
-      '<b>' + (i + 1) + '.</b> גמרא ' + (st.g.from.line + 1) + '–' + (st.g.to.line + 1) +
-      '<span class="q">' + esc(st.c.text.slice(0, 60)) + '…</span></div>';
-  }).join('') || '<div class="hint">עדיין אין קטעים.</div>';
-  [].forEach.call(document.querySelectorAll('[data-x]'), function (b) {
-    b.onclick = function () { STEPS.splice(+b.dataset.x, 1); markPanel(); };
+  var c = CSEL_P ? (CSEL_P.a + 1) + (CSEL_P.b > CSEL_P.a ? '–' + (CSEL_P.b + 1) : '') : null;
+  var ready = !!(GSEL && CSEL_P);
+
+  var hint = document.getElementById('ghint');
+  if (hint) hint.innerHTML = ready ? 'מוכן להוספה'
+    : (g ? 'נותר לסמן בחברותא' : c ? 'נותר לסמן בגמרא' : 'סמנו בשני הצדדים');
+  ['addstep','addstep2'].forEach(function (id) {
+    var b = document.getElementById(id); if (b) b.disabled = !ready;
   });
+  var sl = document.getElementById('slide');
+  if (sl) sl.textContent = 'שקף ' + SLIDE;
+
+  var mc = document.getElementById('mcur');
+  if (mc) mc.innerHTML =
+    '<div class="' + (g ? 'ok' : 'no') + '">גמרא: ' + (g ? 'שורות ' + g : 'טרם נבחר') + '</div>' +
+    '<div class="' + (c ? 'ok' : 'no') + '">חברותא: ' + (c ? 'פסקה ' + c : 'טרם נבחר') + '</div>';
+  var mh = document.getElementById('mhelp');
+  if (mh) mh.innerHTML = 'הקשה על שורה בגמרא ועל פסקה בחברותא — ' +
+    'הקטע ממשיך מהמקום שהקודם נגמר. הקשה ארוכה מתחילה מחדש.';
+
+  var cnt = document.getElementById('mcount');
+  if (cnt) cnt.textContent = STEPS.length ? '· ' + STEPS.length : '';
+  var box = document.getElementById('steps');
+  if (box) {
+    box.innerHTML = STEPS.map(function (st, i) {
+      return '<div class="step"><span class="x" data-x="' + i + '">✕</span>' +
+        '<b>' + (i + 1) + '.</b> שורות ' + (st.g.from.line + 1) + '–' + (st.g.to.line + 1) +
+        ' · פסקה ' + (st.c.from + 1) + (st.c.to > st.c.from ? '–' + (st.c.to + 1) : '') +
+        ' · שקף ' + st.slide +
+        '<span class="q">' + esc((st.c.text || '').slice(0, 55)) + '…</span></div>';
+    }).join('') || '<div class="hint">עדיין אין קטעים.</div>';
+    [].forEach.call(document.querySelectorAll('[data-x]'), function (b) {
+      b.onclick = function () { removeStep(+b.dataset.x); };
+    });
+  }
+  var u = document.getElementById('undo');
+  if (u) u.disabled = !STEPS.length;
+}
+
+function addStep() {
+  if (!GSEL || !CSEL_P) return;
+  var i0 = Math.min(GSEL.a.i, GSEL.b.i), i1 = Math.max(GSEL.a.i, GSEL.b.i);
+  var xa = GSEL.a.i <= GSEL.b.i ? GSEL.a.x : GSEL.b.x;
+  var xb = GSEL.a.i <= GSEL.b.i ? GSEL.b.x : GSEL.a.x;
+  STEPS.push({ g: { from: { line: i0, x: +xa.toFixed(3) },
+                    to:   { line: i1, x: +xb.toFixed(3) } },
+               c: { from: CSEL_P.a, to: CSEL_P.b, text: chavText() },
+               slide: SLIDE });
+  USED_G = i1; USED_C = CSEL_P.b;
+  GSEL = null; CSEL_P = null;
+  paintChav(); markDraw();
+}
+function removeStep(i) {
+  STEPS.splice(i, 1);
+  var last = STEPS[STEPS.length - 1];
+  USED_G = last ? last.g.to.line : -1;
+  USED_C = last ? last.c.to : -1;
+  paintChav(); markDraw();
 }
 
 function setMode(m) {
@@ -1279,6 +1374,7 @@ function setMode(m) {
   document.getElementById('mode').textContent =
     m === 'mark' ? '→ כיול הדף' : 'סימון קטעים ←';
   if (m === 'mark') { loadChav(); markDraw(); } else if (S) draw();
+  markPanel();
 }
 
 /* בסימון צריך את שני הקבצים בבת אחת: צורת הדף מוצגת, והחברותא
@@ -1308,6 +1404,7 @@ function loadChav() {
         }));
         box.innerHTML = chavHtml(CHV);
         document.getElementById('chpg').textContent = CHV.length + ' פסקאות';
+        chavBind(); paintChav();
       })
       .catch(function () { box.innerHTML = '<div class="hint">לא הצלחתי לקרוא.</div>'; });
   };
@@ -1322,25 +1419,182 @@ function loadChav() {
     .catch(function () { box.innerHTML = '<div class="hint">לא הצלחתי להביא.</div>'; });
 }
 
-document.addEventListener('selectionchange', function () {
-  if (MODE !== 'mark') return;
-  var o = chavOffsets();
-  if (o) { CSEL = o; markPanel(); }
-});
+/* ============================================================
+   זום ופאן.
+   הקשה נשארת בחירה, ולכן הזום חייב להיות פינץ' או כפתורים —
+   לא גרירה. הטרנספורם על המכל בלבד, כדי שהקואורדינטות של
+   הסימון לא ישתנו.
+   ============================================================ */
+var ZOOM = 1, PANX = 0, PANY = 0;
+function applyZoom() {
+  var h = document.getElementById('holder');
+  h.style.transform = 'translate(' + PANX + 'px,' + PANY + 'px) scale(' + ZOOM + ')';
+}
+function setZoom(z, cx, cy) {
+  var st = document.querySelector('.stage'), r = st.getBoundingClientRect();
+  cx = cx === undefined ? r.width / 2 : cx;
+  cy = cy === undefined ? r.height / 2 : cy;
+  var k = Math.max(1, Math.min(6, z)) / ZOOM;
+  PANX = cx - (cx - PANX) * k;
+  PANY = cy - (cy - PANY) * k;
+  ZOOM = Math.max(1, Math.min(6, z));
+  if (ZOOM === 1) { PANX = PANY = 0; }
+  applyZoom();
+}
+function zoomToSel() {
+  var sh = selShapes(GSEL); if (!sh.length) return;
+  var st = document.querySelector('.stage'), r = st.getBoundingClientRect();
+  var top = sh[0][1], bot = sh[sh.length - 1][1] + sh[sh.length - 1][3];
+  var img = document.getElementById('page');
+  var base = img.clientWidth / S.w;                 /* פיקסל תמונה → מסך */
+  var want = Math.min(4, r.height / ((bot - top) * base * 2.2));
+  ZOOM = Math.max(1, want);
+  PANX = 0;
+  PANY = -((top + bot) / 2 * base * ZOOM) + r.height / 2;
+  applyZoom();
+}
+document.getElementById('zin').onclick  = function () { setZoom(ZOOM * 1.5); };
+document.getElementById('zout').onclick = function () { setZoom(ZOOM / 1.5); };
+document.getElementById('zfit').onclick = function () { setZoom(1); };
+(function pinch() {
+  var st = document.querySelector('.stage'), pts = {}, base = null;
+  st.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse') return;
+    pts[e.pointerId] = e;
+    var k = Object.keys(pts);
+    if (k.length === 2) {
+      var a = pts[k[0]], b = pts[k[1]];
+      base = { d: Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY), z: ZOOM,
+               x: PANX, y: PANY };
+    }
+  });
+  st.addEventListener('pointermove', function (e) {
+    if (!pts[e.pointerId]) return;
+    var was = pts[e.pointerId]; pts[e.pointerId] = e;
+    var k = Object.keys(pts);
+    if (k.length === 2 && base) {
+      var a = pts[k[0]], b = pts[k[1]];
+      var d = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+      var r = st.getBoundingClientRect();
+      setZoom(base.z * d / base.d, (a.clientX+b.clientX)/2 - r.left,
+                                   (a.clientY+b.clientY)/2 - r.top);
+    } else if (k.length === 1 && ZOOM > 1) {
+      PANX += e.clientX - was.clientX; PANY += e.clientY - was.clientY;
+      applyZoom();
+    }
+  });
+  var drop = function (e) { delete pts[e.pointerId]; if (Object.keys(pts).length < 2) base = null; };
+  st.addEventListener('pointerup', drop);
+  st.addEventListener('pointercancel', drop);
+})();
+
+/* ============================================================
+   בחירת פסקאות בחברותא — בהקשה, לא בגרירה.
+   ============================================================ */
+var CSEL_P = null;      // { a, b } אינדקסי פסקאות
+var USED_C = -1;        // הפסקה האחרונה שכבר שובצה
+var USED_G = -1;        // השורה האחרונה שכבר שובצה
+
+function chavBind() {
+  [].forEach.call(document.querySelectorAll('#chb p.cp'), function (el) {
+    el.onclick = function () { pickPara(+el.dataset.p); };
+  });
+}
+function pickPara(i) {
+  /* הקטע ממשיך מהמקום שהקודם נגמר, ולכן די בהקשה על הסוף.
+     הקשה על פסקה שכבר בתוך הבחירה מבטלת. */
+  if (CSEL_P && i >= CSEL_P.a && i <= CSEL_P.b && CSEL_P.b > CSEL_P.a) {
+    CSEL_P = { a: CSEL_P.a, b: i };
+  } else if (!CSEL_P) {
+    CSEL_P = { a: Math.max(0, USED_C + 1), b: i };
+    if (CSEL_P.a > i) CSEL_P.a = i;
+  } else {
+    CSEL_P = { a: CSEL_P.a, b: i };
+    if (CSEL_P.b < CSEL_P.a) { CSEL_P = { a: i, b: i }; }
+  }
+  paintChav(); markPanel();
+}
+function paintChav() {
+  [].forEach.call(document.querySelectorAll('#chb p.cp'), function (el) {
+    var i = +el.dataset.p;
+    el.classList.toggle('hot', !!CSEL_P && i >= CSEL_P.a && i <= CSEL_P.b);
+    el.classList.toggle('used', i <= USED_C);
+    el.classList.toggle('nextup', !CSEL_P && i === USED_C + 1);
+  });
+}
+function chavText() {
+  if (!CSEL_P || !CHV) return '';
+  var out = [];
+  for (var i = CSEL_P.a; i <= CSEL_P.b && i < CHV.length; i++)
+    out.push(CHV[i].runs.map(function (r) { return r.t; }).join(''));
+  return out.join(' ');
+}
+
+/* ============================================================
+   כוונון בתוך שורה — לפי מילים.
+   גבולות המילים מזוהים באותה שיטה כמו הכול כאן: הטלת דיו, והפער
+   בין מילים הוא רווח. הכוונון נצמד למילה ולא למקום שהאצבע נחתה בו.
+   ============================================================ */
+function wordEdges(li) {
+  var ls = flatLines(), l = ls[li];
+  if (!l) return [];
+  var gapMin = Math.max(3, Math.round(S.gpitch * 0.18)), col = [];
+  for (var x = l.a; x < l.x2; x++) {
+    var any = 0;
+    for (var y = l.t; y < l.b && !any; y++) if (D.m[y*D.w+x]) any = 1;
+    col.push(any);
+  }
+  var edges = [l.x2], run = 0;
+  for (var i = col.length - 1; i >= 0; i--) {     /* מימין לשמאל */
+    if (!col[i]) { run++; }
+    else { if (run >= gapMin) edges.push(l.a + i + run); run = 0; }
+  }
+  edges.push(l.a);
+  return edges.map(function (x) { return (l.x2 - x) / (l.x2 - l.a); })
+              .sort(function (p, q) { return p - q; });
+}
+function nudge(which, dir) {
+  if (!GSEL) return;
+  var first = GSEL.a.i <= GSEL.b.i ? GSEL.a : GSEL.b;
+  var last  = GSEL.a.i <= GSEL.b.i ? GSEL.b : GSEL.a;
+  var pt = which === 'start' ? first : last;
+  var es = wordEdges(pt.i);
+  if (!es.length) return;
+  var cur = pt.x, best = null;
+  es.forEach(function (e) {
+    if (dir > 0 && e > cur + 0.005 && (best === null || e < best)) best = e;
+    if (dir < 0 && e < cur - 0.005 && (best === null || e > best)) best = e;
+  });
+  if (best === null) return;
+  pt.x = best;
+  markDraw();
+}
+
+var SLIDE = 1;
+
 document.getElementById('mode').onclick = function () {
   setMode(MODE === 'mark' ? 'cal' : 'mark');
 };
-document.getElementById('addstep').onclick = function () {
-  if (!GSEL || !CSEL) return;
-  var i0 = Math.min(GSEL.a.i, GSEL.b.i), i1 = Math.max(GSEL.a.i, GSEL.b.i);
-  var xa = GSEL.a.i <= GSEL.b.i ? GSEL.a.x : GSEL.b.x;
-  var xb = GSEL.a.i <= GSEL.b.i ? GSEL.b.x : GSEL.a.x;
-  STEPS.push({ g: { from: { line: i0, x: +xa.toFixed(3) },
-                    to:   { line: i1, x: +xb.toFixed(3) } },
-               c: { from: CSEL.from, to: CSEL.to, text: CSEL.text } });
-  GSEL = null; CSEL = null;
-  window.getSelection().removeAllRanges();
-  markDraw();
+['addstep','addstep2'].forEach(function (id) {
+  var b = document.getElementById(id); if (b) b.onclick = addStep;
+});
+document.getElementById('undo').onclick = function () {
+  if (STEPS.length) removeStep(STEPS.length - 1);
+};
+document.getElementById('slnext').onclick = function () { SLIDE++; markPanel(); };
+document.getElementById('slide').onclick = function () {
+  var v = prompt('מספר השקף', SLIDE);
+  if (v && +v > 0) { SLIDE = +v; markPanel(); }
+};
+document.getElementById('swap').onclick = function () {
+  if (document.body.classList.contains('solo'))
+    document.body.classList.toggle('on-chav');
+  else document.body.classList.toggle('swap');
+};
+document.getElementById('layout').onclick = function () {
+  var solo = document.body.classList.toggle('solo');
+  this.textContent = solo ? 'מקביל' : 'מסך מלא';
+  document.getElementById('swap').textContent = solo ? '⇄ הצד השני' : '⇄';
 };
 
 window.studioLoad = load;      // לבדיקות
