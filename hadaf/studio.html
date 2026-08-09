@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>סטודיו הדף — זיהוי אזורים ושורות</title>
+<style>
+/* ============================================================
+   סטודיו הדף.
+   כל הזיהוי רץ כאן בדפדפן ולא בשרת, ובכוונה: גרירת גבול חייבת
+   לחשב את השורות מחדש מיד. שליחה לשרת וחזרה הייתה הופכת עבודה
+   של שלוש שניות להמתנה.
+
+   מה שנמדד בארבעה דפים ומשמש כאן כקבוע:
+     מרווח שורה — שוליים 21-22px · רש"י ותוספות 29-30px · גמרא 33px
+     (ברוחב ייחוס 2539px). הפער שוליים↔גוש 35%, ולכן אפשר לסמוך
+     עליו; הפער גמרא↔פירוש 11% בלבד, ומשמש רק להכרעה אחת —
+     האם הגוש שבתחתית הדף הוא עדיין גמרא.
+     הגיאומטריה קבועה בסדרה: הגוש המרכזי והשדרה יצאו זהים
+     בארבעת הדפים, ולכן הגבולות נצמדים לרשת שנמצאה.
+   ============================================================ */
+:root{
+  --blue:#17468F; --blue-d:#0B2550; --gold:#C08F2B; --gold-l:#E3B44A;
+  --paper:#F6F1E6; --surface:#FFFDF8; --ink:#1B2A45; --ink-2:#5A6780;
+  --ink-3:#96A0B2; --rule:#E5DAC3; --ok:#3B7D57; --stop:#A5382D;
+  --r:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(150deg,var(--blue-d),var(--blue));color:#fff;
+  padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-.02em}
+header .sp{flex:1}
+button{font-family:inherit;font-weight:800;font-size:.86rem;cursor:pointer;
+  border:0;border-radius:9px;padding:9px 14px;background:var(--surface);color:var(--ink)}
+button.p{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff}
+button:disabled{opacity:.45;cursor:default}
+input[type=file]{font-family:inherit;font-size:.8rem;color:#fff}
+
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;
+  padding:16px;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+
+.stage{background:var(--surface);border-radius:var(--r);padding:10px;
+  box-shadow:0 2px 4px rgba(37,29,12,.06),0 10px 26px rgba(37,29,12,.08);
+  overflow:auto;position:relative}
+#holder{position:relative;display:inline-block;line-height:0}
+#page{max-width:100%;height:auto;display:block}
+#ov{position:absolute;inset:0;width:100%;height:100%}
+
+aside{background:var(--surface);border-radius:var(--r);padding:14px;
+  box-shadow:0 2px 4px rgba(37,29,12,.06),0 10px 26px rgba(37,29,12,.08)}
+aside h2{margin:0 0 4px;font-size:.95rem;font-weight:800}
+aside p.h{margin:0 0 12px;font-size:.79rem;color:var(--ink-2);line-height:1.6;font-weight:600}
+.stat{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;
+  padding:5px 0;border-bottom:1px solid var(--rule)}
+.stat b{font-weight:800}
+.zone{border:1px solid var(--rule);border-radius:9px;padding:9px 10px;margin-top:8px;
+  font-size:.78rem;font-weight:700;line-height:1.55;cursor:pointer}
+.zone.on{border-color:var(--gold);background:#FFF8E8}
+.zone .t{font-weight:800;font-size:.83rem}
+.zone .d{color:var(--ink-2)}
+.zone .rm{float:left;color:var(--stop);font-weight:800;padding:0 4px}
+.hint{margin-top:12px;font-size:.75rem;color:var(--ink-3);font-weight:700;line-height:1.6}
+#msg{font-size:.8rem;font-weight:800;margin-top:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>סטודיו הדף</h1>
+  <input type="file" id="file" accept="image/*">
+  <span class="sp"></span>
+  <button id="reset">זיהוי מחדש</button>
+  <button class="p" id="save">שמירת JSON</button>
+</header>
+
+<div class="wrap">
+  <div class="stage">
+    <div id="holder">
+      <img id="page" alt="">
+      <svg id="ov" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
+  <aside>
+    <h2>מה שזוהה</h2>
+    <p class="h">גררו את הקווים האופקיים כדי לשנות גבול בין אזורים,
+      ואת האנכיים כדי לשנות את רוחב הגמרא. השורות מחושבות מחדש מיד.</p>
+    <div id="stats"></div>
+    <h2 style="margin-top:14px">אזורים</h2>
+    <div id="zones"></div>
+    <button style="margin-top:10px;width:100%" id="split">פיצול האזור הנבחר באמצע</button>
+    <div class="hint">קליק על אזור בוחר אותו · הקו העליון של כל אזור ניתן לגרירה ·
+      הגבולות נצמדים לרשת שנמצאה בדף</div>
+    <div id="msg"></div>
+  </aside>
+</div>
+
+<script>
+/* ============================================================
+   זיהוי. אותו אלגוריתם שנבדק בפייתון על ארבעה דפים, בדפדפן.
+   ============================================================ */
+var REF_W = 2539;              // הרוחב שבו נמדדו כל הקבועים
+var IMG = null, D = null, S = null;   // תמונה · נתוני פיקסלים · מצב
+
+function ink(data, w, h) {
+  /* מסכת דיו כמערך ביטים לפי שורות, לחישוב מהיר של ממוצעים */
+  var m = new Uint8Array(w * h);
+  for (var i = 0, p = 0; i < m.length; i++, p += 4) {
+    m[i] = (data[p] * .299 + data[p+1] * .587 + data[p+2] * .114) < 150 ? 1 : 0;
+  }
+  return m;
+}
+function colSum(m, w, h, x) { var s = 0; for (var y = 0; y < h; y++) s += m[y*w+x]; return s; }
+function rowMean(m, w, y, a, b) {
+  if (b <= a) return 0;
+  var s = 0, o = y * w;
+  for (var x = a; x < b; x++) s += m[o + x];
+  return s / (b - a);
+}
+function runs(arr, hmin) {
+  var out = [], s = null;
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] && s === null) s = i;
+    else if (!arr[i] && s !== null) { if (i - s >= hmin) out.push([s, i]); s = null; }
+  }
+  if (s !== null && arr.length - s >= hmin) out.push([s, arr.length]);
+  return out;
+}
+function smooth3(a) {
+  var o = new Float32Array(a.length);
+  for (var i = 0; i < a.length; i++) {
+    var s = a[i], n = 1;
+    if (i) { s += a[i-1]; n++; }
+    if (i < a.length-1) { s += a[i+1]; n++; }
+    o[i] = s / n;
+  }
+  return o;
+}
+function median(v) {
+  if (!v.length) return 0;
+  var s = v.slice().sort(function(a,b){return a-b;});
+  return s[s.length >> 1];
+}
+
+/* מרווח שורה = המרחק בין תחילות שורות, ולא גובה הרצף.
+   זה מה שמבדיל בין שלוש שכבות הטקסט בדף. */
+function pitchOf(m, w, a, b, y0, y1) {
+  var p = new Float32Array(y1 - y0);
+  for (var y = y0; y < y1; y++) p[y-y0] = rowMean(m, w, y, a, b);
+  p = smooth3(p);
+  var st = [], on = false;
+  for (var i = 0; i < p.length; i++) {
+    var v = p[i] > .02;
+    if (v && !on) st.push(i);
+    on = v;
+  }
+  if (st.length < 4) return null;
+  var d = [];
+  for (var i = 1; i < st.length; i++) { var q = st[i]-st[i-1]; if (q > 6 && q < 70) d.push(q); }
+  return d.length ? median(d) : null;
+}
+
+function linesIn(m, w, a, b, y0, y1, pit) {
+  var p = new Float32Array(y1 - y0);
+  for (var y = y0; y < y1; y++) p[y-y0] = rowMean(m, w, y, a, b);
+  p = smooth3(p);
+  var on = new Uint8Array(p.length);
+  for (var i = 0; i < p.length; i++) on[i] = p[i] > .02 ? 1 : 0;
+  var out = [];
+  runs(on, 6).forEach(function (r) {
+    var s = r[0], e = r[1], h = e - s;
+    var n = pit ? Math.max(1, Math.round(h / pit)) : 1;
+    if (n === 1 || h < pit * 1.45) { out.push([s+y0, e+y0]); return; }
+    /* שורות שנדבקו. חותכים במינימום הדיו סביב הגבול הצפוי —
+       רצועה ברוחב כפול היא תמיד באג, לא שורה. */
+    var cuts = [s];
+    for (var k = 1; k < n; k++) {
+      var t = s + Math.round(h * k / n);
+      var lo = Math.max(s+3, t - Math.round(pit*.3)), hi = Math.min(e-3, t + Math.round(pit*.3));
+      if (hi <= lo) { cuts.push(t); continue; }
+      var bi = lo, bv = Infinity;
+      for (var q = lo; q < hi; q++) if (p[q] < bv) { bv = p[q]; bi = q; }
+      cuts.push(bi);
+    }
+    cuts.push(e);
+    for (var i = 0; i < cuts.length-1; i++)
+      if (cuts[i+1]-cuts[i] >= 5) out.push([cuts[i]+y0, cuts[i+1]+y0]);
+  });
+  return out;
+}
+
+function analyse(m, w, h) {
+  var sc = w / REF_W;
+  /* --- גבולות הכתב --- */
+  var rs = [], cs = [];
+  for (var y = 0; y < h; y++) { var s=0,o=y*w; for (var x=0;x<w;x++) s+=m[o+x]; rs.push(s); }
+  for (var x = 0; x < w; x++) cs.push(colSum(m, w, h, x));
+  var y0=0,y1=h-1,x0=0,x1=w-1;
+  while (y0 < h && rs[y0] <= w*.004) y0++;
+  while (y1 > y0 && rs[y1] <= w*.004) y1--;
+  while (x0 < w && cs[x0] <= h*.004) x0++;
+  while (x1 > x0 && cs[x1] <= h*.004) x1--;
+
+  /* --- מרזבים: עמודה ריקה לאורך חלון של ~3 שורות ---
+     ההחלקה היא הלב. רווח בין מילים מזיז את מקומו משורה לשורה
+     ונמחק; מרזב בין טורים יושב באותו x לאורך שורות רבות ושורד. */
+  var win = Math.round(70 * sc) | 1, half = win >> 1;
+  var emptyCnt = new Int32Array(w);
+  var empt = new Uint8Array(w * h);
+  for (var x = x0; x <= x1; x++) {
+    var acc = 0;
+    for (var y = 0; y < Math.min(win, h); y++) acc += m[y*w+x];
+    for (var y = 0; y < h; y++) {
+      var t = y - half, bt = t + win;
+      if (y > 0) {
+        if (bt-1 < h) acc += m[(bt-1)*w+x];
+        if (t-1 >= 0) acc -= m[(t-1)*w+x];
+      }
+      var e = (acc / win) < .004 ? 1 : 0;
+      empt[y*w+x] = e;
+      if (e && y >= y0 && y <= y1) emptyCnt[x]++;
+    }
+  }
+
+  /* --- טורים --- */
+  var gcand = new Uint8Array(w);
+  for (var x = x0; x <= x1; x++) gcand[x] = emptyCnt[x] > (y1-y0)*.25 ? 1 : 0;
+  var guts = runs(gcand, Math.round(10*sc));
+  var edges = [[x0,x0]].concat(guts).concat([[x1,x1]]);
+  var cols = [];
+  for (var i = 0; i < edges.length-1; i++) {
+    var a = edges[i][1], b = edges[i+1][0];
+    if (b - a < 90*sc) continue;
+    var pt = pitchOf(m, w, a, b, y0, y1);
+    if (pt) cols.push({a:a, b:b, pitch:pt});
+  }
+  if (cols.length < 3) return null;
+
+  /* --- הגוש המרכזי: שלושת הטורים, בלי השוליים ---
+     השוליים ב-21-22 מול 29-33 בגוש. פער של 35% אינו מטעה. */
+  var pmax = Math.max.apply(null, cols.map(function(c){return c.pitch;}));
+  var core = cols.filter(function(c){ return c.pitch > pmax*.80; });
+  var bx0 = Math.min.apply(null, core.map(function(c){return c.a;}));
+  var bx1 = Math.max.apply(null, core.map(function(c){return c.b;}));
+
+  /* --- השדרה, עם נפילה לרשת הידועה ---
+     בסדרה מוקלדת אחיד השדרה יושבת ב-0.298 עד 0.702 מרוחב הגוש.
+     בדף שבו תוספות קצר, המרזב שלידו אינו שורד את הסף והטור נבלע
+     בשדרה; אז היחס מחזיר את הגבול הנומינלי, וההתרחבות נרשמת
+     כאזור במקום להיטמע בגבול. */
+  var mid = (bx0+bx1)/2;
+  var spine = core.slice().sort(function(p,q){
+    return Math.abs((p.a+p.b)/2-mid) - Math.abs((q.a+q.b)/2-mid); })[0];
+  var cw = bx1 - bx0, gA = spine.a, gB = spine.b;
+  var nomA = Math.round(bx0 + cw*.298), nomB = Math.round(bx0 + cw*.702);
+  if (gB - gA > cw*.55) { gA = Math.max(gA, nomA); gB = Math.min(gB, nomB); }
+
+  /* --- נוכחות שני המרזבים, שורה אחר שורה --- */
+  var wmin = Math.round(20*sc);
+  var L = new Uint8Array(h), R = new Uint8Array(h);
+  for (var y = y0; y <= y1; y++) {
+    var row = [];
+    var s = null;
+    for (var x = x0; x <= x1; x++) {
+      var e = empt[y*w+x];
+      if (e && s === null) s = x;
+      else if (!e && s !== null) { if (x-s >= wmin) row.push([s,x]); s = null; }
+    }
+    if (s !== null && x1-s >= wmin) row.push([s,x1]);
+    row.forEach(function (g) {
+      if (Math.abs(g[1]-gA) <= wmin*2 && g[0] >= bx0-wmin) L[y] = 1;
+      if (Math.abs(g[0]-gB) <= wmin*2 && g[1] <= bx1+wmin) R[y] = 1;
+    });
+  }
+  var gpit = spine.pitch;
+  var mm = Math.round(gpit*1.2);
+  function sm(v) {
+    var o = new Uint8Array(h), acc = 0;
+    for (var y = 0; y < h; y++) {
+      acc += v[y]; if (y >= mm) acc -= v[y-mm];
+      o[Math.max(0, y - (mm>>1))] = (acc/Math.min(mm, y+1)) > .45 ? 1 : 0;
+    }
+    return o;
+  }
+  L = sm(L); R = sm(R);
+
+  /* --- היכן הגמרא מתחילה ---
+     לא לפי דיו אלא לפי מבנה: מעל הנקודה שבה שני המרזבים מופיעים,
+     רש"י ותוספות חוצים את המרכז ואין גמרא כלל. */
+  var gtop = y0;
+  for (var y = y0; y <= y1; y++) if (L[y] && R[y]) { gtop = y; break; }
+
+  /* --- אזורים: רצפים שבהם צמד המרזבים אינו משתנה --- */
+  var zones = [], cur = null, st = gtop;
+  for (var y = gtop; y <= y1+1; y++) {
+    var k = (y <= y1) ? (L[y]?1:0)*2 + (R[y]?1:0) : -1;
+    if (cur === null) { cur = k; st = y; }
+    else if (k !== cur) { zones.push({y0:st, y1:y-1, k:cur}); cur = k; st = y; }
+  }
+  zones = zones.filter(function(z){ return z.y1-z.y0 > gpit; });
+  zones.forEach(function (z) {
+    z.a = (z.k & 2) ? gA : bx0;
+    z.b = (z.k & 1) ? gB : bx1;
+    z.pitch = pitchOf(m, w, z.a, z.b, z.y0, z.y1) || gpit;
+  });
+
+  /* --- האם האזור האחרון עדיין גמרא ---
+     כשהגמרא נגמרת, הפירושים מתפרשים ברוחב מלא במרווח שלהם.
+     11% הפרש, ולכן משווים לשני העוגנים ולא לסף שרירותי. */
+  var others = core.filter(function(c){ return c !== spine; });
+  var cpit = median(others.map(function(c){return c.pitch;})) || gpit*.88;
+  while (zones.length && zones[zones.length-1].k === 0) {
+    var z = zones[zones.length-1];
+    if (Math.abs(z.pitch-cpit) < Math.abs(z.pitch-gpit)) zones.pop(); else break;
+  }
+
+  return { w:w, h:h, sc:sc, bbox:[x0,y0,x1,y1], core:[bx0,bx1], spine:[gA,gB],
+           gpitch:gpit, cpitch:cpit, zones:zones, grid:[bx0, gA, gB, bx1] };
+}
+
+function relines() {
+  S.zones.forEach(function (z) {
+    z.lines = linesIn(D.m, D.w, z.a, z.b, z.y0, z.y1, S.gpitch);
+  });
+}
+
+/* ============================================================
+   ציור ואינטראקציה
+   ============================================================ */
+var sel = 0;
+function draw() {
+  var ov = document.getElementById('ov');
+  ov.setAttribute('viewBox', '0 0 ' + S.w + ' ' + S.h);
+  var s = '';
+  s += '<rect x="'+S.core[0]+'" y="'+S.bbox[1]+'" width="'+(S.core[1]-S.core[0])+
+       '" height="'+(S.bbox[3]-S.bbox[1])+'" fill="none" stroke="#3B7D57" stroke-width="3" stroke-dasharray="14 10"/>';
+  S.zones.forEach(function (z, i) {
+    var on = i === sel;
+    s += '<rect x="'+z.a+'" y="'+z.y0+'" width="'+(z.b-z.a)+'" height="'+(z.y1-z.y0)+
+         '" fill="rgba(192,143,43,'+(on?.10:.05)+')" stroke="'+(on?'#C08F2B':'#A5382D')+
+         '" stroke-width="'+(on?5:3)+'"/>';
+    (z.lines||[]).forEach(function (ln, j) {
+      s += '<rect x="'+z.a+'" y="'+ln[0]+'" width="'+(z.b-z.a)+'" height="'+(ln[1]-ln[0])+
+           '" fill="'+(j%2?'rgba(240,150,20,.42)':'rgba(30,120,225,.42)')+'"/>';
+    });
+    /* ידיות גרירה */
+    s += '<line class="hy" data-i="'+i+'" data-e="top" x1="'+S.bbox[0]+'" y1="'+z.y0+
+         '" x2="'+S.bbox[2]+'" y2="'+z.y0+'" stroke="rgba(0,0,0,0)" stroke-width="26" style="cursor:ns-resize"/>';
+    s += '<line class="hx" data-i="'+i+'" data-e="a" x1="'+z.a+'" y1="'+z.y0+
+         '" x2="'+z.a+'" y2="'+z.y1+'" stroke="rgba(0,0,0,0)" stroke-width="26" style="cursor:ew-resize"/>';
+    s += '<line class="hx" data-i="'+i+'" data-e="b" x1="'+z.b+'" y1="'+z.y0+
+         '" x2="'+z.b+'" y2="'+z.y1+'" stroke="rgba(0,0,0,0)" stroke-width="26" style="cursor:ew-resize"/>';
+  });
+  ov.innerHTML = s;
+  bindHandles();
+  panel();
+}
+
+function panel() {
+  var n = S.zones.reduce(function (a, z) { return a + (z.lines||[]).length; }, 0);
+  document.getElementById('stats').innerHTML =
+    row('גוש הכתב המרכזי', S.core[0] + '–' + S.core[1]) +
+    row('השדרה', S.spine[0] + '–' + S.spine[1]) +
+    row('מרווח שורה — גמרא', Math.round(S.gpitch) + 'px') +
+    row('מרווח שורה — פירושים', Math.round(S.cpitch) + 'px') +
+    row('סה"כ שורות', n);
+
+  document.getElementById('zones').innerHTML = S.zones.map(function (z, i) {
+    var k = (z.k & 2 ? 1 : 0) + (z.k & 1 ? 1 : 0);
+    var name = k === 2 ? 'טור צר' : k === 0 ? 'רוחב מלא'
+             : (z.k & 1) ? 'התרחב שמאלה' : 'התרחב ימינה';
+    return '<div class="zone'+(i===sel?' on':'')+'" data-i="'+i+'">' +
+      (S.zones.length > 1 ? '<span class="rm" data-rm="'+i+'">✕</span>' : '') +
+      '<div class="t">'+(i+1)+'. '+name+'</div>' +
+      '<div class="d">y '+z.y0+'–'+z.y1+' · x '+z.a+'–'+z.b+
+      ' · '+(z.lines||[]).length+' שורות</div></div>';
+  }).join('');
+
+  [].forEach.call(document.querySelectorAll('.zone'), function (el) {
+    el.onclick = function (e) {
+      if (e.target.dataset.rm !== undefined) {
+        var i = +e.target.dataset.rm;
+        if (S.zones.length < 2) return;
+        var z = S.zones.splice(i, 1)[0];
+        if (S.zones[i-1]) S.zones[i-1].y1 = z.y1;
+        else if (S.zones[i]) S.zones[i].y0 = z.y0;
+        sel = Math.max(0, i-1); relines(); draw(); return;
+      }
+      sel = +el.dataset.i; draw();
+    };
+  });
+}
+function row(k, v) { return '<div class="stat"><span>'+k+'</span><b>'+v+'</b></div>'; }
+
+function bindHandles() {
+  var ov = document.getElementById('ov');
+  [].forEach.call(ov.querySelectorAll('.hy,.hx'), function (el) {
+    el.onpointerdown = function (ev) {
+      ev.preventDefault();
+      el.setPointerCapture(ev.pointerId);
+      var i = +el.dataset.i, e = el.dataset.e;
+      sel = i;
+      var move = function (m) {
+        var r = ov.getBoundingClientRect();
+        if (e === 'top') {
+          var y = Math.round((m.clientY - r.top) / r.height * S.h);
+          var lo = i ? S.zones[i-1].y0 + 20 : S.bbox[1];
+          var hi = S.zones[i].y1 - 20;
+          y = Math.max(lo, Math.min(hi, y));
+          S.zones[i].y0 = y;
+          if (i) S.zones[i-1].y1 = y - 1;
+        } else {
+          var x = Math.round((m.clientX - r.left) / r.width * S.w);
+          /* הצמדה לרשת שנמצאה — ברוב הדפים לא צריך לגעת בכלל */
+          S.grid.forEach(function (g) { if (Math.abs(g - x) < 22 * S.sc) x = g; });
+          if (e === 'a') S.zones[i].a = Math.min(x, S.zones[i].b - 60);
+          else           S.zones[i].b = Math.max(x, S.zones[i].a + 60);
+        }
+        relines(); draw();
+      };
+      el.onpointermove = move;
+      el.onpointerup = function () { el.onpointermove = null; };
+    };
+  });
+}
+
+document.getElementById('split').onclick = function () {
+  var z = S.zones[sel]; if (!z || z.y1 - z.y0 < 60) return;
+  var mid = (z.y0 + z.y1) >> 1;
+  var nz = { y0: mid+1, y1: z.y1, k: z.k, a: z.a, b: z.b, pitch: z.pitch };
+  z.y1 = mid;
+  S.zones.splice(sel+1, 0, nz);
+  relines(); draw();
+};
+document.getElementById('reset').onclick = function () { if (D) run(); };
+
+document.getElementById('save').onclick = function () {
+  var out = { w:S.w, h:S.h,
+    core:[S.core[0]/S.w, S.core[1]/S.w],
+    zones: S.zones.map(function (z) {
+      return { y0:z.y0/S.h, y1:z.y1/S.h, a:z.a/S.w, b:z.b/S.w,
+               lines:(z.lines||[]).map(function(l){ return [l[0]/S.h, l[1]/S.h]; }) };
+    })};
+  var blob = new Blob([JSON.stringify(out, null, 1)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'daf.json'; a.click();
+  document.getElementById('msg').innerHTML =
+    '<span style="color:var(--ok)">נשמר · ' + S.zones.length + ' אזורים, ' +
+    S.zones.reduce(function(t,z){return t+(z.lines||[]).length;},0) + ' שורות</span>';
+};
+
+document.getElementById('file').onchange = function (e) {
+  var f = e.target.files[0]; if (!f) return;
+  var img = new Image();
+  img.onload = function () { IMG = img; load(img); };
+  img.src = URL.createObjectURL(f);
+};
+
+function load(img) {
+  var c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  c.getContext('2d', {willReadFrequently:true}).drawImage(img, 0, 0);
+  var px = c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+  D = { m: ink(px, c.width, c.height), w: c.width, h: c.height };
+  document.getElementById('page').src = img.src;
+  run();
+}
+function run() {
+  var t = performance.now();
+  S = analyse(D.m, D.w, D.h);
+  if (!S) { document.getElementById('msg').textContent = 'לא זיהיתי מבנה של דף גמרא.'; return; }
+  relines(); sel = 0; draw();
+  document.getElementById('msg').innerHTML =
+    '<span style="color:var(--ink-3)">הזיהוי ארך ' + Math.round(performance.now()-t) + 'ms</span>';
+}
+window.studioLoad = load;      // לבדיקות
+</script>
+</body>
+</html>
