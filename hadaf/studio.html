@@ -37,7 +37,11 @@ button{font-family:inherit;font-weight:800;font-size:.86rem;cursor:pointer;
   border:0;border-radius:9px;padding:9px 14px;background:var(--surface);color:var(--ink)}
 button.p{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff}
 button:disabled{opacity:.45;cursor:default}
-input[type=file]{font-family:inherit;font-size:.8rem;color:#fff}
+select{font-family:inherit;font-weight:800;font-size:.84rem;border:0;border-radius:9px;
+  padding:9px 11px;background:rgba(255,255,255,.14);color:#fff;cursor:pointer}
+select option{color:var(--ink);background:#fff}
+label.alt{font-size:.8rem;font-weight:800;cursor:pointer;opacity:.75;
+  border:1px solid rgba(255,255,255,.4);border-radius:9px;padding:8px 12px}
 
 .wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;
   padding:16px;align-items:start}
@@ -71,8 +75,12 @@ aside p.h{margin:0 0 12px;font-size:.79rem;color:var(--ink-2);line-height:1.6;fo
 
 <header>
   <h1>סטודיו הדף</h1>
-  <input type="file" id="file" accept="image/*">
+  <select id="mas"></select>
+  <select id="daf"></select>
+  <select id="pg"></select>
   <span class="sp"></span>
+  <label class="alt" id="pick" title="קובץ PDF של דף, או תמונה">
+    פתיחת קובץ<input type="file" id="file" accept="application/pdf,image/*" hidden></label>
   <button id="reset">זיהוי מחדש</button>
   <button class="p" id="save">שמירת JSON</button>
 </header>
@@ -99,6 +107,14 @@ aside p.h{margin:0 0 12px;font-size:.79rem;color:var(--ink-2);line-height:1.6;fo
   </aside>
 </div>
 
+<script type="module">
+  /* pdf.js מצורף ולא נטען מרשת חיצונית. נטען כמודול כי זו הצורה
+     שבה הוא מפורסם, ומגושר ל-window כדי שהקוד הרגיל שלמטה ישתמש בו. */
+  import * as pdfjsLib from './vendor/pdfjs/pdf.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdfjs/pdf.worker.min.mjs';
+  window.pdfjsLib = pdfjsLib;
+  window.dispatchEvent(new Event('pdfjs-ready'));
+</script>
 <script>
 /* ============================================================
    זיהוי. אותו אלגוריתם שנבדק בפייתון על ארבעה דפים, בדפדפן.
@@ -193,8 +209,32 @@ function linesIn(m, w, a, b, y0, y1, pit) {
   return out;
 }
 
-function analyse(m, w, h) {
+/* הקבועים נגזרים ממרווח השורה של הדף ולא מרוחב התמונה.
+   הסיבה נתפסה כשהסטודיו התחיל לפתוח PDF: pdftoppm ו-pdf.js מציירים
+   את אותו עמוד בקנה מידה שונה, וקבועים שנקשרו לרוחב 2539 הפכו
+   שם לצרים מדי — המרזבים החלו להבהב ודף אחד יצא בשבעה אזורים.
+   מרווח השורה הוא היחידה הטבעית של הדף ואינו תלוי ברזולוציה.
+   היחסים כאן הם בדיוק הערכים שנמדדו ביחס למרווח 33px. */
+function K(pit) {
+  return { win: Math.max(9, Math.round(pit * 2.1)) | 1,   // החלקה אנכית ~2 שורות
+           wmin: Math.max(6, Math.round(pit * 0.60)),     // רוחב מרזב מינימלי
+           cmin: Math.round(pit * 2.7),                   // רוחב טור מינימלי
+           gmin: Math.max(4, Math.round(pit * 0.30)) };   // מרזב גלובלי
+}
+
+function analyse(m, w, h, pit0) {
   var sc = w / REF_W;
+  /* מעבר ראשון נותן את מרווח השורה, והשני משתמש בו. שני מעברים
+     של 200ms זולים מזיהוי שנשען על רזולוציה מקרית. */
+  if (!pit0) {
+    var first = analyse(m, w, h, 33 * sc);
+    if (first && Math.abs(first.gpitch - 33 * sc) > 2) {
+      var second = analyse(m, w, h, first.gpitch);
+      if (second) return second;
+    }
+    return first;
+  }
+  var C = K(pit0);
   /* --- גבולות הכתב --- */
   var rs = [], cs = [];
   for (var y = 0; y < h; y++) { var s=0,o=y*w; for (var x=0;x<w;x++) s+=m[o+x]; rs.push(s); }
@@ -208,7 +248,7 @@ function analyse(m, w, h) {
   /* --- מרזבים: עמודה ריקה לאורך חלון של ~3 שורות ---
      ההחלקה היא הלב. רווח בין מילים מזיז את מקומו משורה לשורה
      ונמחק; מרזב בין טורים יושב באותו x לאורך שורות רבות ושורד. */
-  var win = Math.round(70 * sc) | 1, half = win >> 1;
+  var win = C.win, half = win >> 1;
   var emptyCnt = new Int32Array(w);
   var empt = new Uint8Array(w * h);
   for (var x = x0; x <= x1; x++) {
@@ -229,12 +269,12 @@ function analyse(m, w, h) {
   /* --- טורים --- */
   var gcand = new Uint8Array(w);
   for (var x = x0; x <= x1; x++) gcand[x] = emptyCnt[x] > (y1-y0)*.25 ? 1 : 0;
-  var guts = runs(gcand, Math.round(10*sc));
+  var guts = runs(gcand, C.gmin);
   var edges = [[x0,x0]].concat(guts).concat([[x1,x1]]);
   var cols = [];
   for (var i = 0; i < edges.length-1; i++) {
     var a = edges[i][1], b = edges[i+1][0];
-    if (b - a < 90*sc) continue;
+    if (b - a < C.cmin) continue;
     var pt = pitchOf(m, w, a, b, y0, y1);
     if (pt) cols.push({a:a, b:b, pitch:pt});
   }
@@ -260,7 +300,7 @@ function analyse(m, w, h) {
   if (gB - gA > cw*.55) { gA = Math.max(gA, nomA); gB = Math.min(gB, nomB); }
 
   /* --- נוכחות שני המרזבים, שורה אחר שורה --- */
-  var wmin = Math.round(20*sc);
+  var wmin = C.wmin;
   var L = new Uint8Array(h), R = new Uint8Array(h);
   for (var y = y0; y <= y1; y++) {
     var row = [];
@@ -279,10 +319,16 @@ function analyse(m, w, h) {
   var gpit = spine.pitch;
   var mm = Math.round(gpit*1.2);
   function sm(v) {
-    var o = new Uint8Array(h), acc = 0;
-    for (var y = 0; y < h; y++) {
-      acc += v[y]; if (y >= mm) acc -= v[y-mm];
-      o[Math.max(0, y - (mm>>1))] = (acc/Math.min(mm, y+1)) > .45 ? 1 : 0;
+    /* ממוצע נע ממורכז. גרסה מוטה קודמת הזיזה את הגבולות והבהבה. */
+    var o = new Uint8Array(h), acc = 0, half = mm >> 1;
+    for (var y = 0; y < h + half; y++) {
+      if (y < h) acc += v[y];
+      if (y - mm >= 0) acc -= v[y - mm];
+      var c = y - half;
+      if (c >= 0 && c < h) {
+        var n = Math.min(y + 1, mm, h - c + half);
+        o[c] = (acc / n) > .45 ? 1 : 0;
+      }
     }
     return o;
   }
@@ -320,6 +366,34 @@ function analyse(m, w, h) {
 
   return { w:w, h:h, sc:sc, bbox:[x0,y0,x1,y1], core:[bx0,bx1], spine:[gA,gB],
            gpitch:gpit, cpitch:cpit, zones:zones, grid:[bx0, gA, gB, bx1] };
+}
+
+/* חברותא אינו דף וילנא אלא A4 בטור אחד עם פסקאות. אין בו מרזבים
+   ואין מה לחפש — הטור כולו הוא התוכן, והפסקאות הן היחידה הטבעית.
+   רווח גדול משורה וחצי נחשב גבול פסקה, וכל פסקה היא אזור. */
+function analyseSimple(m, w, h) {
+  var rs = [], cs = [];
+  for (var y = 0; y < h; y++) { var s=0,o=y*w; for (var x=0;x<w;x++) s+=m[o+x]; rs.push(s); }
+  for (var x = 0; x < w; x++) cs.push(colSum(m, w, h, x));
+  var y0=0,y1=h-1,x0=0,x1=w-1;
+  while (y0 < h && rs[y0] <= w*.003) y0++;
+  while (y1 > y0 && rs[y1] <= w*.003) y1--;
+  while (x0 < w && cs[x0] <= h*.003) x0++;
+  while (x1 > x0 && cs[x1] <= h*.003) x1--;
+  if (y1 - y0 < 40) return null;
+
+  var pit = pitchOf(m, w, x0, x1, y0, y1) || 30;
+  var ln = linesIn(m, w, x0, x1, y0, y1, pit);
+  if (!ln.length) return null;
+
+  var zones = [], cur = null;
+  ln.forEach(function (l) {
+    if (cur && l[0] - cur.last <= pit * 1.55) { cur.y1 = l[1]; cur.last = l[1]; }
+    else { cur = { y0:l[0], y1:l[1], last:l[1], k:3, a:x0, b:x1, pitch:pit }; zones.push(cur); }
+  });
+  zones.forEach(function (z) { delete z.last; });
+  return { w:w, h:h, sc:w/REF_W, bbox:[x0,y0,x1,y1], core:[x0,x1], spine:[x0,x1],
+           gpitch:pit, cpitch:pit, zones:zones, grid:[x0,x1], simple:true };
 }
 
 function relines() {
@@ -371,7 +445,8 @@ function panel() {
 
   document.getElementById('zones').innerHTML = S.zones.map(function (z, i) {
     var k = (z.k & 2 ? 1 : 0) + (z.k & 1 ? 1 : 0);
-    var name = k === 2 ? 'טור צר' : k === 0 ? 'רוחב מלא'
+    var name = S.simple ? 'פסקה'
+             : k === 2 ? 'טור צר' : k === 0 ? 'רוחב מלא'
              : (z.k & 1) ? 'התרחב שמאלה' : 'התרחב ימינה';
     return '<div class="zone'+(i===sel?' on':'')+'" data-i="'+i+'">' +
       (S.zones.length > 1 ? '<span class="rm" data-rm="'+i+'">✕</span>' : '') +
@@ -453,12 +528,156 @@ document.getElementById('save').onclick = function () {
     S.zones.reduce(function(t,z){return t+(z.lines||[]).length;},0) + ' שורות</span>';
 };
 
+/* ============================================================
+   פתיחת PDF ישירות.
+   מה שיושב בדרייב של הרכז הוא PDF, וזו הצורה שהוא כבר עובד איתה.
+   המרה מראש הייתה מחייבת לארח עמודים של פירוש מסחרי במאגר
+   ציבורי; כאן הקובץ נפתח מהמחשב, מצויר לקנבס, ואינו עוזב את
+   המכשיר. pdf.js מצורף ב-vendor/ ולא נטען מרשת חיצונית, כדי
+   שהסטודיו יעבוד גם בלי חיבור.
+   ============================================================ */
+var TARGET_W = 2000;    // הרוחב שאליו מצוירים עמודי PDF
+var PDF = null;
+
+function pdfReady() {
+  if (window.pdfjsLib) return Promise.resolve();
+  return new Promise(function (ok) {
+    window.addEventListener('pdfjs-ready', function () { ok(); }, { once:true });
+  });
+}
+
+function openPdf(file) {
+  say('טוען את הקובץ…');
+  return pdfReady().then(function () {
+    return file.arrayBuffer();
+  }).then(function (buf) {
+    return pdfjsLib.getDocument({ data: buf }).promise;
+  }).then(function (doc) {
+    PDF = doc;
+    LIB = null;
+    var pages = [];
+    for (var i = 1; i <= doc.numPages; i++) {
+      /* צורת הדף באה בשני עמודים, חברותא בעשרה. אין צורך לנחש —
+         כשיש בדיוק שניים אלה שני העמודים של הדף. */
+      pages.push([String(i), doc.numPages === 2
+        ? 'צורת הדף · עמוד ' + (i === 1 ? 'א׳' : 'ב׳')
+        : 'עמוד ' + i]);
+    }
+    fillSel(document.getElementById('pg'), pages);
+    document.getElementById('pg').style.display = '';
+    document.getElementById('mas').style.display = 'none';
+    document.getElementById('daf').style.display = 'none';
+    return showPdfPage(1);
+  }).catch(function (e) {
+    say('לא הצלחתי לפתוח את הקובץ.', 1);
+  });
+}
+
+function showPdfPage(n) {
+  if (!PDF) return Promise.resolve();
+  say('מצייר עמוד ' + n + '…');
+  return PDF.getPage(n).then(function (pg) {
+    var base = pg.getViewport({ scale: 1 });
+    var vp = pg.getViewport({ scale: TARGET_W / base.width });
+    var c = document.createElement('canvas');
+    c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    return pg.render({ canvasContext: c.getContext('2d', {willReadFrequently:true}),
+                       viewport: vp }).promise.then(function () { return c; });
+  }).then(useCanvas);
+}
+
+function useCanvas(c) {
+  var px = c.getContext('2d', {willReadFrequently:true})
+            .getImageData(0, 0, c.width, c.height).data;
+  D = { m: ink(px, c.width, c.height), w: c.width, h: c.height };
+  document.getElementById('page').src = c.toDataURL('image/webp', 0.85);
+  run();
+}
+function say(t, bad) {
+  document.getElementById('msg').innerHTML =
+    '<span style="color:' + (bad ? 'var(--stop)' : 'var(--ink-3)') + '">' + t + '</span>';
+}
+
 document.getElementById('file').onchange = function (e) {
   var f = e.target.files[0]; if (!f) return;
+  if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) return openPdf(f);
+  PDF = null;
   var img = new Image();
   img.onload = function () { IMG = img; load(img); };
   img.src = URL.createObjectURL(f);
 };
+
+/* ============================================================
+   המאגר.
+   הדפים נמשכים מהדרייב של הרכז, מומרים על ידי tools/build-daf.py
+   ומוגשים מכאן. הם חייבים לשבת על אותו דומיין: הסטודיו קורא
+   פיקסלים, ודפדפן חוסם קריאת פיקסלים מתמונה חוצת-דומיין.
+   ============================================================ */
+var LIB = null;
+var MAS_NAMES = { taanit:'תענית', megila:'מגילה' };
+
+function fillSel(el, items, label) {
+  el.innerHTML = items.map(function (v) {
+    return '<option value="' + v[0] + '">' + v[1] + '</option>';
+  }).join('');
+  el.disabled = items.length < 2;
+  if (label) el.title = label;
+}
+function pageList(rec) {
+  var out = [];
+  (rec.gemara || []).forEach(function (f, i) {
+    out.push([f, 'צורת הדף · עמוד ' + (i ? 'ב׳' : 'א׳')]);
+  });
+  (rec.chavruta || []).forEach(function (f, i) {
+    out.push([f, 'חברותא · ' + (i + 1)]);
+  });
+  return out;
+}
+function onMas() {
+  var m = document.getElementById('mas').value;
+  var dapim = Object.keys(LIB[m] || {});
+  fillSel(document.getElementById('daf'), dapim.map(function (d) {
+    return [d, 'דף ' + d]; }));
+  onDaf();
+}
+function onDaf() {
+  var m = document.getElementById('mas').value, d = document.getElementById('daf').value;
+  var rec = (LIB[m] || {})[d];
+  if (!rec) return;
+  fillSel(document.getElementById('pg'), pageList(rec));
+  onPage();
+}
+function onPage() {
+  if (PDF) return showPdfPage(+document.getElementById('pg').value);
+  var m = document.getElementById('mas').value;
+  var f = document.getElementById('pg').value;
+  if (!f || !LIB) return;
+  var img = new Image();
+  img.onload = function () { IMG = img; load(img); };
+  img.onerror = function () {
+    document.getElementById('msg').innerHTML =
+      '<span style="color:var(--stop)">לא הצלחתי לטעון את העמוד.</span>';
+  };
+  document.getElementById('msg').textContent = 'טוען…';
+  img.src = 'daf/' + m + '/' + f;
+}
+['mas','daf','pg'].forEach(function (id, i) {
+  document.getElementById(id).onchange = [onMas, onDaf, onPage][i];
+});
+
+fetch('daf/index.json').then(function (r) { return r.json(); }).then(function (j) {
+  LIB = j;
+  var ms = Object.keys(j);
+  if (!ms.length) throw new Error('empty');
+  fillSel(document.getElementById('mas'),
+          ms.map(function (m) { return [m, MAS_NAMES[m] || m]; }));
+  onMas();
+}).catch(function () {
+  ['mas','daf','pg'].forEach(function (id) {
+    document.getElementById(id).style.display = 'none';
+  });
+  say('פתחו קובץ PDF של דף — צורת הדף או חברותא.');
+});
 
 function load(img) {
   var c = document.createElement('canvas');
@@ -471,8 +690,8 @@ function load(img) {
 }
 function run() {
   var t = performance.now();
-  S = analyse(D.m, D.w, D.h);
-  if (!S) { document.getElementById('msg').textContent = 'לא זיהיתי מבנה של דף גמרא.'; return; }
+  S = analyse(D.m, D.w, D.h) || analyseSimple(D.m, D.w, D.h);
+  if (!S) { document.getElementById('msg').textContent = 'לא זיהיתי טקסט בעמוד הזה.'; return; }
   relines(); sel = 0; draw();
   document.getElementById('msg').innerHTML =
     '<span style="color:var(--ink-3)">הזיהוי ארך ' + Math.round(performance.now()-t) + 'ms</span>';
