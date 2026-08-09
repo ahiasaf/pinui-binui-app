@@ -89,15 +89,19 @@ button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
 
 /* הפס התחתון: כל מה שנחוץ תוך כדי סימון, במקום אחד ונגיש לאגודל */
 .bar{position:fixed;inset-inline:0;bottom:0;z-index:60;display:none;
-  align-items:center;gap:10px;padding:9px 12px;
+  flex-direction:column;gap:7px;padding:8px 12px;
   background:linear-gradient(150deg,var(--blue-d),var(--blue));
   box-shadow:0 -6px 22px rgba(0,0,0,.22)}
 body.mark .bar{display:flex}
+.brow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#gfine{display:none;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:7px}
+body.mark.gsel #gfine{display:flex}
 .bar .gap{flex:1}
-.bar button{padding:11px 13px;font-size:.83rem}
+.bar button{padding:10px 12px;font-size:.82rem}
 .bar .add{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff}
-.bar .sl{background:rgba(255,255,255,.16);color:#fff;font-weight:800}
 .bar .gh{color:#fff;font-size:.76rem;font-weight:800;opacity:.85;line-height:1.3}
+.fg{display:flex;align-items:center;gap:4px;color:#fff;font-size:.76rem;font-weight:800}
+.fg button{padding:8px 12px;min-width:42px}
 
 /* פסקאות החברותא נבחרות בהקשה. בלי גרירה — גרירה באצבע נלחמת
    בגלילה, וזו הייתה הסיבה שאי אפשר היה לסמן כלום בנייד. */
@@ -127,6 +131,9 @@ body.mark .bar{display:flex}
 body.mark .chav{display:flex}
 body.mark #marker{display:block}
 body.mark aside:not(#marker){display:none}
+/* במצב סימון המסך נקי: הבוררים אינם נחוצים, ויציאה מחזירה אליהם */
+body.mark #mas,body.mark #daf,body.mark #src,body.mark #pg,
+body.mark #pick,body.mark #reset{display:none}
 body.mark .wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) 290px;
   padding-bottom:70px}
 body.mark .stage,body.mark .chav{height:calc(100vh - 168px)}
@@ -213,14 +220,22 @@ body.mark.solo:not(.on-chav) .chav{display:none}
 </div>
 
 <div class="bar">
-  <button id="undo">◂ ביטול אחרון</button>
-  <button class="sl" id="slide">שקף 1</button>
-  <button id="slnext">▸</button>
-  <span class="gap"></span>
-  <span class="gh" id="ghint"></span>
-  <button id="swap" title="החלפת צדדים">⇄</button>
-  <button id="layout">מסך מלא</button>
-  <button class="add" id="addstep2">הוספת הקטע</button>
+  <div class="brow" id="gfine">
+    <span class="gh">גמרא · כוונון במילים</span>
+    <span class="fg">התחלה
+      <button data-nudge="start,-1">◂</button><button data-nudge="start,1">▸</button></span>
+    <span class="fg">סוף
+      <button data-nudge="end,-1">◂</button><button data-nudge="end,1">▸</button></span>
+    <button id="clearsel">✕ ניקוי הסימון</button>
+  </div>
+  <div class="brow">
+    <button id="undo">◂ ביטול הקטע האחרון</button>
+    <span class="gap"></span>
+    <span class="gh" id="ghint"></span>
+    <button id="swap" title="החלפת צדדים">⇄</button>
+    <button id="layout">מסך מלא</button>
+    <button class="add" id="addstep2">הוספת הקטע</button>
+  </div>
 </div>
 
 <!-- לוח השנה וקישורי הדפים — אותם קבצים שהאפליקציה משתמשת בהם.
@@ -1311,22 +1326,21 @@ function markPanel() {
   var c = CSEL_P ? (CSEL_P.a + 1) + (CSEL_P.b > CSEL_P.a ? '–' + (CSEL_P.b + 1) : '') : null;
   var ready = !!(GSEL && CSEL_P);
 
+  document.body.classList.toggle('gsel', !!GSEL);
   var hint = document.getElementById('ghint');
   if (hint) hint.innerHTML = ready ? 'מוכן להוספה'
     : (g ? 'נותר לסמן בחברותא' : c ? 'נותר לסמן בגמרא' : 'סמנו בשני הצדדים');
   ['addstep','addstep2'].forEach(function (id) {
     var b = document.getElementById(id); if (b) b.disabled = !ready;
   });
-  var sl = document.getElementById('slide');
-  if (sl) sl.textContent = 'שקף ' + SLIDE;
-
   var mc = document.getElementById('mcur');
   if (mc) mc.innerHTML =
     '<div class="' + (g ? 'ok' : 'no') + '">גמרא: ' + (g ? 'שורות ' + g : 'טרם נבחר') + '</div>' +
     '<div class="' + (c ? 'ok' : 'no') + '">חברותא: ' + (c ? 'פסקה ' + c : 'טרם נבחר') + '</div>';
   var mh = document.getElementById('mhelp');
-  if (mh) mh.innerHTML = 'הקשה על שורה בגמרא ועל פסקה בחברותא — ' +
-    'הקטע ממשיך מהמקום שהקודם נגמר. הקשה ארוכה מתחילה מחדש.';
+  if (mh) mh.innerHTML = 'הקשה על שורה בגמרא ועל פסקה בחברותא — הקטע ממשיך ' +
+    'מהמקום שהקודם נגמר. <b>הקשה על שורה אחרת מזיזה את הסוף</b>, ולכן ' +
+    'סימנתם שורה אחת יותר מדי — הקישו על הקודמת. הקשה ארוכה מתחילה מחדש.';
 
   var cnt = document.getElementById('mcount');
   if (cnt) cnt.textContent = STEPS.length ? '· ' + STEPS.length : '';
@@ -1336,7 +1350,6 @@ function markPanel() {
       return '<div class="step"><span class="x" data-x="' + i + '">✕</span>' +
         '<b>' + (i + 1) + '.</b> שורות ' + (st.g.from.line + 1) + '–' + (st.g.to.line + 1) +
         ' · פסקה ' + (st.c.from + 1) + (st.c.to > st.c.from ? '–' + (st.c.to + 1) : '') +
-        ' · שקף ' + st.slide +
         '<span class="q">' + esc((st.c.text || '').slice(0, 55)) + '…</span></div>';
     }).join('') || '<div class="hint">עדיין אין קטעים.</div>';
     [].forEach.call(document.querySelectorAll('[data-x]'), function (b) {
@@ -1354,8 +1367,7 @@ function addStep() {
   var xb = GSEL.a.i <= GSEL.b.i ? GSEL.b.x : GSEL.a.x;
   STEPS.push({ g: { from: { line: i0, x: +xa.toFixed(3) },
                     to:   { line: i1, x: +xb.toFixed(3) } },
-               c: { from: CSEL_P.a, to: CSEL_P.b, text: chavText() },
-               slide: SLIDE });
+               c: { from: CSEL_P.a, to: CSEL_P.b, text: chavText() } });
   USED_G = i1; USED_C = CSEL_P.b;
   GSEL = null; CSEL_P = null;
   paintChav(); markDraw();
@@ -1372,7 +1384,7 @@ function setMode(m) {
   MODE = m;
   document.body.classList.toggle('mark', m === 'mark');
   document.getElementById('mode').textContent =
-    m === 'mark' ? '→ כיול הדף' : 'סימון קטעים ←';
+    m === 'mark' ? '→ חזרה לכיול' : 'סימון קטעים ←';
   if (m === 'mark') { loadChav(); markDraw(); } else if (S) draw();
   markPanel();
 }
@@ -1570,8 +1582,6 @@ function nudge(which, dir) {
   markDraw();
 }
 
-var SLIDE = 1;
-
 document.getElementById('mode').onclick = function () {
   setMode(MODE === 'mark' ? 'cal' : 'mark');
 };
@@ -1581,10 +1591,14 @@ document.getElementById('mode').onclick = function () {
 document.getElementById('undo').onclick = function () {
   if (STEPS.length) removeStep(STEPS.length - 1);
 };
-document.getElementById('slnext').onclick = function () { SLIDE++; markPanel(); };
-document.getElementById('slide').onclick = function () {
-  var v = prompt('מספר השקף', SLIDE);
-  if (v && +v > 0) { SLIDE = +v; markPanel(); }
+[].forEach.call(document.querySelectorAll('[data-nudge]'), function (b) {
+  b.onclick = function () {
+    var a = b.dataset.nudge.split(',');
+    nudge(a[0], +a[1]);
+  };
+});
+document.getElementById('clearsel').onclick = function () {
+  GSEL = null; markDraw();
 };
 document.getElementById('swap').onclick = function () {
   if (document.body.classList.contains('solo'))
