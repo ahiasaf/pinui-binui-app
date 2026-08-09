@@ -825,18 +825,23 @@ function bindHandles() {
 document.getElementById('reset').onclick = function () { if (D) run(); };
 
 document.getElementById('save').onclick = function () {
-  var out = { w:S.w, h:S.h, steps:STEPS,
-    core:[S.core[0]/S.w, S.core[1]/S.w],
-    zones: S.zones.map(function (z) {
-      return { y0:z.y0/S.h, y1:z.y1/S.h, a:z.a/S.w, b:z.b/S.w,
-               lines:(z.lines||[]).map(function(l){ return [l[0]/S.h, l[1]/S.h]; }) };
-    })};
+  keepPageState();
+  var mas = selVal('mas') || 'file', daf = selVal('daf') || '';
+  var out = { masechet: mas, daf: daf, savedAt: new Date().toISOString(),
+              pages: BOOK };
+  var n = 0;
+  for (var k in BOOK) n += (BOOK[k].steps || []).length;
+  var pages = Object.keys(BOOK).length;
+
   var blob = new Blob([JSON.stringify(out, null, 1)], {type:'application/json'});
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'daf.json'; a.click();
-  document.getElementById('msg').innerHTML =
-    '<span style="color:var(--ok)">נשמר · ' + S.zones.length + ' אזורים, ' +
-    S.zones.reduce(function(t,z){return t+(z.lines||[]).length;},0) + ' שורות</span>';
+  a.href = URL.createObjectURL(blob);
+  a.download = ('daf-' + mas + '-' + daf).replace(/["'\u05f3\u05f4\s]/g,'') + '.json';
+  a.click();
+  /* ההודעה נוקבת בקטעים, כי זה מה שמעניין אחרי שעה של סימון —
+     וקודם היא דיווחה רק על אזורים ושורות, והמשתמש לא ידע אם
+     הסימונים בכלל נשמרו. */
+  say('נשמר · ' + n + ' קטעים ב-' + pages + ' עמודים · ' + a.download);
 };
 
 /* ============================================================
@@ -1177,6 +1182,8 @@ function load(img) {
 }
 function run() {
   var t = performance.now();
+  keepPageState();
+  loadPageState();
   S = analyse(D.m, D.w, D.h) || analyseSimple(D.m, D.w, D.h);
   if (!S) { say('לא זיהיתי טקסט בעמוד הזה.', 1); return; }
   relines(); sel = 0;
@@ -1200,6 +1207,44 @@ function run() {
 var MODE = 'cal';
 var CHV = null;          // פסקאות החברותא
 var STEPS = [];
+
+/* ============================================================
+   הקטעים נשמרים לפי עמוד.
+   מספרי השורות הם ביחס לעמוד שעליו סומנו, ולכן רשימה אחת
+   משותפת לשני עמודי הדף היא נתון שבור: מעבר מעמוד א׳ לעמוד ב׳
+   השאיר את הקטעים הקודמים ואת נקודת ההמשך שלהם, ושורה 5 של
+   עמוד אחד נראתה כשורה 5 של השני.
+   ============================================================ */
+var BOOK = {};
+var PKEY = '';
+
+function pageKey() {
+  if (PDF && !LIB_OK()) return 'file|' + (selVal('pg') || 1);
+  return [selVal('mas'), selVal('daf'), selVal('src'), selVal('pg')].join('|');
+}
+function LIB_OK() { return !!(window.DAF_LINKS && document.getElementById('mas').options.length); }
+
+function loadPageState() {
+  var k = pageKey();
+  if (k === PKEY) return;
+  PKEY = k;
+  var rec = BOOK[k];
+  STEPS = rec ? rec.steps : [];
+  var last = STEPS[STEPS.length - 1];
+  USED_G = last ? { line: last.g.to.line, x: last.g.to.x } : null;
+  USED_C = last ? last.c.to : -1;
+  GSEL = null; CSEL_P = null;
+}
+function keepPageState() {
+  if (!PKEY || !S) return;
+  BOOK[PKEY] = { w:S.w, h:S.h, label: shown,
+    core:[S.core[0]/S.w, S.core[1]/S.w],
+    zones: S.zones.map(function (z) {
+      return { y0:z.y0/S.h, y1:z.y1/S.h, a:z.a/S.w, b:z.b/S.w,
+               lines:(z.lines||[]).map(function(l){ return [l[0]/S.h, l[1]/S.h]; }) };
+    }),
+    steps: STEPS };
+}
 var GSEL = null;         // { a:{i,x}, b:{i,x} } לפי אינדקס שורה
 function flatLines() {
   var out = [];
@@ -1373,6 +1418,7 @@ function addStep() {
                c: { from: CSEL_P.a, to: CSEL_P.b, text: chavText() } });
   USED_G = { line: i1, x: +xb.toFixed(3) };
   USED_C = CSEL_P.b;
+  keepPageState();
   GSEL = null; CSEL_P = null;
   paintChav(); markDraw();
 }
@@ -1381,6 +1427,7 @@ function removeStep(i) {
   var last = STEPS[STEPS.length - 1];
   USED_G = last ? { line: last.g.to.line, x: last.g.to.x } : null;
   USED_C = last ? last.c.to : -1;
+  keepPageState();
   paintChav(); markDraw();
 }
 
