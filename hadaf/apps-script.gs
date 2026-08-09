@@ -13,7 +13,10 @@
    אותה לבד. לשונית חדשה? הוא ייצור אותה לבד. כל שינוי עתידי קורה
    בקוד האפליקציה בלבד.
 
-   *** זו הפריסה האחרונה שנדרשת ממך. ***
+   *** לגבי הגיליון — זו הפריסה האחרונה שנדרשת ממך. ***
+   (גרסה 4 כן דרשה פריסה נוספת, כי היא פותחת יכולת חדשה ולא
+   משנה נתונים: קריאת קבצים מהדרייב בשביל הסטודיו. הכלל נשאר
+   בתוקף לכל מה שנוגע לכתיבה לגיליון.)
 
    מה זה עושה
    ----------
@@ -37,6 +40,10 @@
         Execute as:      Me
         Who has access:  Anyone            ← חייב "Anyone", אחרת ייחסם
       Deploy, ואשר את ההרשאות.
+
+   *** גרסה 4 מוסיפה קריאת קבצים מהדרייב, בשביל הסטודיו. ***
+   בפריסה הזו גוגל תבקש הרשאה נוספת לדרייב — זה מה שמאפשר
+   לסטודיו לקבל את קובץ הדף. הקבצים נשארים פרטיים.
 
    4. בדיקה. מסך הניהול אינו כתובת נפרדת: לוקחים את הקישור שבו
       פותחים את האפליקציה ומוסיפים לו /admin בסוף. למשל
@@ -64,7 +71,7 @@
 /* מספר שמוצג ב"בדיקת חיבור". אם מה שרואים במסך הניהול נמוך מזה —
    הפריסה בגוגל ישנה, ויש ללחוץ Deploy ← Manage deployments ←
    עריכה ← New version. */
-var SCRIPT_VERSION = 3;
+var SCRIPT_VERSION = 4;
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -115,6 +122,24 @@ function doPost(e) {
    מפנה את /exec לדומיין אחר, ודפדפנים חוסמים לעיתים את הקריאה
    הרגילה בגלל CORS. טעינה כתגית <script> עוקפת את זה תמיד. */
 function doGet(e) {
+  /* ---- קובץ מהדרייב ----
+     הסטודיו צריך את קובץ הדף כדי לצייר אותו ולזהות בו שורות,
+     והדפדפן אינו מרשה לקוד שלנו למשוך בייטים מ-drive.google.com:
+     גוגל אינה שולחת שם את כותרת ה-CORS. הסקריפט הזה רץ בחשבון
+     שלך, ולכן הוא יכול לקרוא מהדרייב שלך ולהעביר הלאה. הקבצים
+     נשארים פרטיים; רק מי שיודע את המזהה מקבל אותם. */
+  if (e && e.parameter && e.parameter.file) {
+    var res;
+    try {
+      var f = DriveApp.getFileById(String(e.parameter.file));
+      res = { status: 'ok', name: f.getName(), mime: f.getMimeType(),
+              data: Utilities.base64Encode(f.getBlob().getBytes()) };
+    } catch (err) {
+      res = { status: 'error', message: String(err) };
+    }
+    return reply_(e, res);
+  }
+
   var out = { status: 'ok', version: SCRIPT_VERSION, tabs: [] };
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -124,6 +149,13 @@ function doGet(e) {
     });
   } catch (err) { out.status = 'no-sheet'; out.message = String(err); }
 
+  return reply_(e, out);
+}
+
+/* JSON רגיל, או JavaScript כשהתבקש callback. הסיבה: Apps Script
+   מפנה את /exec לדומיין אחר, ודפדפנים חוסמים לעיתים את הקריאה
+   הרגילה בגלל CORS. טעינה כתגית <script> עוקפת את זה תמיד. */
+function reply_(e, out) {
   var cb = e && e.parameter && e.parameter.callback;
   if (cb && /^[A-Za-z_$][\w$]*$/.test(cb)) {
     return ContentService.createTextOutput(cb + '(' + JSON.stringify(out) + ')')
