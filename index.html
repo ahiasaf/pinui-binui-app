@@ -320,6 +320,12 @@
       <div class="seg c3" id="d-missing"></div>
       <input type="text" id="d-missing-new" placeholder="חוסר נוסף — הקלד ואישור">
 
+      <div class="label">סימונים שמשפיעים על סדר הפנייה</div>
+      <div class="seg c3" id="d-flags"></div>
+
+      <div class="label">מקום חתימה</div>
+      <input type="text" id="d-place" placeholder="לאן באים להחתים" onchange="savePlace()">
+
       <div class="card" id="d-info"></div>
       <div class="card" id="d-hist"></div>
     </div>
@@ -1439,9 +1445,8 @@ function openDetail() {
 
   var info = document.getElementById('d-info');
   info.innerHTML = '<h3>פרטים</h3>';
-  [['מצב', STATUS_HE[a.status] || a.status], ['חוסרים', a.missing.join(', ') || '—'],
-   ['מקום חתימה', a.signingPlace || '—'], ['מגע הבא', a.nextAt || '—'],
-   ['מס׳ מגעים', a.contactCount]].forEach(function (pair) {
+  [['מגע הבא', a.nextAt || '—'], ['קצב בימים', a.cadence || '—'],
+   ['מס׳ מגעים', a.contactCount], ['חלקה', a.plot + '/' + a.subplot]].forEach(function (pair) {
     var row = document.createElement('div');
     row.className = 'kv';
     var label = document.createElement('span');
@@ -1469,6 +1474,8 @@ function openDetail() {
   }
 
   drawMissing(a);
+  drawFlags(a);
+  document.getElementById('d-place').value = a.signingPlace || '';
 
   var hist = document.getElementById('d-hist');
   hist.innerHTML = '<h3>מה נרשם</h3>';
@@ -1653,6 +1660,41 @@ function toggleMissing(item) {
 }
 
 var MISSING_COMMON = ['תעודת זהות', 'נסח טאבו', 'ייפוי כוח', 'חתימת בן/בת זוג', 'אישור ירושה', 'כתובת'];
+
+// הדגלים אינם תיאור — הם מה שמזיז את הדייר בתור. focus מוסיף 40
+// נקודות, influencer 25, ו-awaits_majority צף כשמתקרבים ליעד.
+function toggleFlag(flag) {
+  var a = current.apt;
+  var at = a.flags.indexOf(flag);
+  if (at === -1) a.flags.push(flag); else a.flags.splice(at, 1);
+  queue({ pin: pinCode, action: 'set_state', apartment: a.id, flags: a.flags });
+  localStorage.setItem('pbData', JSON.stringify(db));
+  render();
+  openDetail();
+}
+
+function drawFlags(a) {
+  var box = document.getElementById('d-flags');
+  box.innerHTML = '';
+  for (var flag in TAGS) {
+    (function (key) {
+      var button = document.createElement('button');
+      button.textContent = TAGS[key];
+      if (a.flags.indexOf(key) !== -1) button.className = 'on';
+      button.onclick = function () { toggleFlag(key); };
+      box.appendChild(button);
+    })(flag);
+  }
+}
+
+function savePlace() {
+  var a = current.apt;
+  var value = document.getElementById('d-place').value.trim();
+  if (value === a.signingPlace) return;
+  a.signingPlace = value;
+  queue({ pin: pinCode, action: 'set_state', apartment: a.id, signingPlace: value });
+  localStorage.setItem('pbData', JSON.stringify(db));
+}
 
 function drawMissing(a) {
   var box = document.getElementById('d-missing');

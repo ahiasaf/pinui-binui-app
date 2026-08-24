@@ -1,5 +1,5 @@
 // גרסת הקאש — יש להעלות את המספר בכל עדכון שמעלים לאוויר
-const CACHE = 'pinui-binui-v5';
+const CACHE = 'pinui-binui-v6';
 const CORE = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', event => {
