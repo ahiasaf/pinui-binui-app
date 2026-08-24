@@ -97,6 +97,7 @@
   .label { font-size:.78rem; color:var(--ink-3); font-weight:700; }
   .seg { display:grid; gap:6px; }
   .seg.c4 { grid-template-columns:repeat(4,1fr); }
+  .seg.c3 { grid-template-columns:repeat(3,1fr); }
   .seg button { background:var(--surface-2); border:1px solid var(--rule); border-radius:8px;
                 padding:12px 2px; font-size:.8rem; font-weight:700; color:var(--ink-2); cursor:pointer; }
   .seg button.on { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
@@ -203,6 +204,7 @@
         <div class="cell" onclick="startDeck('trace')"><b id="c-trace">0</b><span>לאיתור</span></div>
       </div>
 
+      <button class="btn g" onclick="openAll()">כל הדיירים</button>
       <button class="btn g" id="r-open" onclick="openReplies()"></button>
       <button class="btn g" id="s-open" onclick="openSends()" style="display:none"></button>
 
@@ -298,11 +300,62 @@
       <div class="top"><button onclick="show(backTo)">›</button><span>כרטיס דייר</span></div>
       <div class="name" id="d-name"></div>
       <div class="where" id="d-where"></div>
+
+      <button class="btn p" onclick="logFromCard()">רשום מה קרה</button>
+
+      <div class="label">מצב הדירה</div>
+      <div class="seg c3" id="d-status">
+        <button onclick="setStatus('open',this)">פתוח</button>
+        <button onclick="setStatus('signed',this)">חתם</button>
+        <button onclick="setStatus('trace',this)">לאיתור</button>
+        <button onclick="setStatus('objector',this)">מתנגד</button>
+        <button onclick="setStatus('not_relevant',this)">עמידר</button>
+        <button onclick="clearSnooze()" id="d-wake">בטל השהיה</button>
+      </div>
+
       <div class="card" id="d-contacts"></div>
       <button class="btn g" onclick="editContact(null)">+ הוסף איש קשר</button>
+
+      <div class="label">מה חסר כדי לסגור</div>
+      <div class="seg c3" id="d-missing"></div>
+      <input type="text" id="d-missing-new" placeholder="חוסר נוסף — הקלד ואישור">
+
       <div class="card" id="d-info"></div>
       <div class="card" id="d-hist"></div>
-      <button class="btn g" onclick="markObjector()">סמן כמתנגד</button>
+    </div>
+
+    <!-- כל הדיירים -->
+    <div id="v-all" class="view">
+      <div class="top"><button onclick="show('v-home')">›</button><span id="all-count"></span></div>
+      <div class="seg c3" id="all-filter">
+        <button onclick="filterAll('',this)">הכל</button>
+        <button onclick="filterAll('open',this)">פתוח</button>
+        <button onclick="filterAll('signed',this)">חתם</button>
+        <button onclick="filterAll('trace',this)">לאיתור</button>
+        <button onclick="filterAll('objector',this)">מתנגד</button>
+        <button onclick="filterAll('not_relevant',this)">עמידר</button>
+      </div>
+      <input type="text" id="all-q" placeholder="סינון לפי שם, טלפון, בניין או דירה" oninput="drawAll()">
+      <div id="all-list"></div>
+      <button class="btn g" onclick="show('v-new')">+ דירה שאינה ברשימה</button>
+    </div>
+
+    <!-- דירה חדשה -->
+    <div id="v-new" class="view">
+      <div class="top"><button onclick="show('v-all')">›</button><span>דירה חדשה</span></div>
+      <div class="label">מזהה הדירה — חייב להיות ייחודי</div>
+      <input type="text" id="n-id" placeholder="למשל 66-14">
+      <div class="label">בניין</div>
+      <input type="text" id="n-building" placeholder="הרצוג 12">
+      <div class="label">מספר דירה</div>
+      <input type="text" id="n-apt">
+      <div class="label">שם איש הקשר</div>
+      <input type="text" id="n-name">
+      <div class="label">טלפון</div>
+      <input type="text" id="n-phone" inputmode="tel">
+      <div class="label">הערה</div>
+      <textarea id="n-notes" rows="2" placeholder="מאיפה הוא הגיע ולמה הוא לא היה ברשימה"></textarea>
+      <button class="btn p" onclick="saveApartment()">הוסף</button>
     </div>
 
     <!-- עריכת איש קשר -->
@@ -926,7 +979,11 @@ function saveAfter() {
 
   localStorage.setItem('pbData', JSON.stringify(db));
   render();
-  nextCard();
+
+  // תיעוד שנפתח מכרטיס דייר אינו חלק מסבב, וקריאה ל-nextCard הייתה
+  // זורקת אותך לתוך סבב שלא התחלת. אותה מלכודת כמו בסימון מתנגד.
+  if (roundMode === 'call') { nextCard(); return; }
+  openDetail();
 }
 
 // ============================================================
@@ -1341,6 +1398,19 @@ function retrySend(s) {
 // ============================================================
 // כרטיס דייר מלא
 // ============================================================
+// חוסר שאינו ברשימה המוכנה — נוסף בהקלדה ואישור
+document.addEventListener('DOMContentLoaded', function () {
+  var field = document.getElementById('d-missing-new');
+  if (!field) return;
+  field.addEventListener('keydown', function (event) {
+    if (event.key !== 'Enter') return;
+    var value = field.value.trim();
+    if (!value) return;
+    field.value = '';
+    if (current && current.apt && current.apt.missing.indexOf(value) === -1) toggleMissing(value);
+  });
+});
+
 function openDetail() {
   backTo = roundMode === 'update' ? 'v-update'
          : roundMode === 'replies' ? 'v-replies'
@@ -1382,6 +1452,23 @@ function openDetail() {
     row.appendChild(value);
     info.appendChild(row);
   });
+
+  // המצב הנוכחי מסומן, וכפתור ההשהיה מופיע רק כשיש מה לבטל
+  clearSeg('d-status');
+  var buttons = document.querySelectorAll('#d-status button');
+  var order = ['open', 'signed', 'trace', 'objector', 'not_relevant'];
+  for (var b = 0; b < order.length; b++) {
+    if (order[b] === a.status && buttons[b]) buttons[b].classList.add('on');
+  }
+  var wake = document.getElementById('d-wake');
+  if (a.snoozedUntil && a.snoozedUntil > today()) {
+    wake.style.display = 'block';
+    wake.textContent = 'בטל השהיה · ' + a.snoozedUntil;
+  } else {
+    wake.style.display = 'none';
+  }
+
+  drawMissing(a);
 
   var hist = document.getElementById('d-hist');
   hist.innerHTML = '<h3>מה נרשם</h3>';
@@ -1509,19 +1596,180 @@ function saveContact() {
   openDetail();
 }
 
-function markObjector() {
-  if (!confirm('לסמן את הדירה כמתנגדת? היא תצא מהחפיסה.')) return;
-  current.apt.status = 'objector';
-  queue({ pin: pinCode, action: 'set_state', apartment: current.apt.id, status: 'objector' });
+// ============================================================
+// פעולות מתוך כרטיס הדייר
+//
+// עד כאן הכרטיס היה כמעט לקריאה בלבד: אפשר היה רק לסמן מתנגד, וכל
+// שאר השינויים היו זמינים רק בתוך סבב. דייר שהמנוע לא הציף — למשל
+// מי שדחית ואז חתם מעצמו — לא היה שום מקום לעדכן אותו.
+// ============================================================
+var STATUS_WARN = {
+  objector: 'לסמן כמתנגד? הדירה תצא מכל החפיסות.',
+  not_relevant: 'לסמן כעמידר? הדירה תצא מכל החפיסות.'
+};
+
+function setStatus(status, el) {
+  var a = current.apt;
+  if (a.status === status) return;
+  if (STATUS_WARN[status] && !confirm(STATUS_WARN[status])) return;
+
+  a.status = status;
+  queue({ pin: pinCode, action: 'set_state', apartment: a.id, status: status });
   localStorage.setItem('pbData', JSON.stringify(db));
   render();
 
-  // המשך התנועה תלוי במסלול שממנו נפתח הכרטיס. nextCard מציג את מסך
-  // הסבב, ולכן קריאה לו אחרי חיפוש זרקה אותך לסבב שלא התחלת.
-  if (roundMode === 'update') { nextUpdate(); return; }
-  if (roundMode === 'call') { nextCard(); return; }
-  if (roundMode === 'replies') { drawReplies(); show('v-replies'); return; }
-  show('v-home');
+  // סימון שמוציא דירה מהחפיסה בתוך סבב ממשיך לדייר הבא, כי זו
+  // הייתה הכוונה. בכל מקום אחר נשארים על הכרטיס.
+  var leaves = status === 'objector' || status === 'not_relevant';
+  if (leaves && roundMode === 'update') { nextUpdate(); return; }
+  if (leaves && roundMode === 'call') { nextCard(); return; }
+  openDetail();
+}
+
+function clearSnooze() {
+  var a = current.apt;
+  if (!a.snoozedUntil) return;
+  a.snoozedUntil = '';
+  queue({ pin: pinCode, action: 'set_state', apartment: a.id, snoozedUntil: '' });
+  localStorage.setItem('pbData', JSON.stringify(db));
+  render();
+  openDetail();
+}
+
+// פותח את מסך "מה קרה" לדייר שעל המסך, בלי קשר לסבב
+function logFromCard() {
+  backTo = 'v-detail';
+  openAfter();
+}
+
+function toggleMissing(item) {
+  var a = current.apt;
+  var at = a.missing.indexOf(item);
+  if (at === -1) a.missing.push(item); else a.missing.splice(at, 1);
+  queue({ pin: pinCode, action: 'set_missing', apartment: a.id, missing: a.missing });
+  localStorage.setItem('pbData', JSON.stringify(db));
+  render();
+  openDetail();
+}
+
+var MISSING_COMMON = ['תעודת זהות', 'נסח טאבו', 'ייפוי כוח', 'חתימת בן/בת זוג', 'אישור ירושה', 'כתובת'];
+
+function drawMissing(a) {
+  var box = document.getElementById('d-missing');
+  box.innerHTML = '';
+  var seen = {};
+  var items = [];
+  a.missing.concat(MISSING_COMMON).forEach(function (item) {
+    if (!item || seen[item]) return;
+    seen[item] = true;
+    items.push(item);
+  });
+  items.forEach(function (item) {
+    var button = document.createElement('button');
+    button.textContent = item;
+    if (a.missing.indexOf(item) !== -1) button.className = 'on';
+    button.onclick = function () { toggleMissing(item); };
+    box.appendChild(button);
+  });
+}
+
+// ============================================================
+// כל הדיירים — כי מנוע שמחליט מה להציג חייב דלת אחורית
+// ============================================================
+var allFilter = '';
+
+function openAll() { drawAll(); show('v-all'); }
+
+function filterAll(status, el) {
+  allFilter = status;
+  clearSeg('all-filter');
+  el.classList.add('on');
+  drawAll();
+}
+
+function drawAll() {
+  var term = document.getElementById('all-q').value.trim();
+  var digits = term.replace(/\D/g, '');
+  var hits = db.apartments.filter(function (a) {
+    if (allFilter && a.status !== allFilter) return false;
+    if (!term) return true;
+    if (a.building.indexOf(term) !== -1) return true;
+    if (String(a.apartment) === term || a.id.indexOf(term) !== -1) return true;
+    return a.contacts.some(function (c) {
+      return c.name.indexOf(term) !== -1 || (digits.length >= 3 && c.phone.indexOf(digits) !== -1);
+    });
+  });
+
+  document.getElementById('all-count').textContent = hits.length + ' מתוך ' + db.apartments.length;
+
+  var list = document.getElementById('all-list');
+  list.innerHTML = '';
+  if (!hits.length) {
+    var empty = document.createElement('div');
+    empty.className = 'msg';
+    empty.textContent = 'אין דירה שמתאימה לסינון.';
+    list.appendChild(empty);
+    return;
+  }
+  hits.slice(0, 120).forEach(function (a) {
+    var c = dominant(a);
+    var row = document.createElement('div');
+    row.className = 'kv';
+    row.style.cursor = 'pointer';
+    row.onclick = function () {
+      current = { apt: a, why: 'נפתח מהרשימה' };
+      roundMode = 'all';
+      backTo = 'v-all';
+      openDetail();
+    };
+    var who = document.createElement('b');
+    who.textContent = c.name;
+    var where = document.createElement('span');
+    where.textContent = a.building + (a.apartment ? ' · ' + a.apartment : '') + ' · ' + (STATUS_HE[a.status] || a.status);
+    row.appendChild(who);
+    row.appendChild(where);
+    list.appendChild(row);
+  });
+}
+
+function saveApartment() {
+  var id = document.getElementById('n-id').value.trim();
+  var name = document.getElementById('n-name').value.trim();
+  if (!id) { alert('צריך מזהה לדירה.'); return; }
+  if (!name) { alert('צריך שם לאיש הקשר.'); return; }
+  for (var i = 0; i < db.apartments.length; i++) {
+    if (db.apartments[i].id === id) { alert('דירה ' + id + ' כבר קיימת.'); return; }
+  }
+
+  var phone = document.getElementById('n-phone').value.replace(/\D/g, '');
+  var payload = {
+    pin: pinCode, action: 'add_apartment', apartment: id,
+    building: document.getElementById('n-building').value.trim(),
+    apartmentNumber: document.getElementById('n-apt').value.trim(),
+    name: name, phone: phone,
+    notes: document.getElementById('n-notes').value.trim()
+  };
+  queue(payload);
+
+  var added = {
+    id: id, plot: '', subplot: '', building: payload.building, floor: '',
+    apartment: payload.apartmentNumber, status: 'open', flags: [], missing: [],
+    signingPlace: '', nextAt: '', cadence: 0, snoozedUntil: '', lastAt: '',
+    lastNote: '', lastOutcome: '', contactCount: 0, noAnswerStreak: 0, answerHours: [],
+    contacts: [{ name: name, phone: phone, email: '', address: '',
+                 dominant: true, hourWindow: '', notes: payload.notes }]
+  };
+  db.apartments.push(added);
+  localStorage.setItem('pbData', JSON.stringify(db));
+
+  ['n-id', 'n-building', 'n-apt', 'n-name', 'n-phone', 'n-notes'].forEach(function (field) {
+    document.getElementById(field).value = '';
+  });
+  render();
+  current = { apt: added, why: 'נוספה כעת' };
+  roundMode = 'all';
+  backTo = 'v-all';
+  openDetail();
 }
 
 // ============================================================
