@@ -1,0 +1,2879 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>הדף השבועי של בני עקיבא</title>
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+  /* שתי אפליקציות מאותו קוד: הרגילה, ומסך הניהול עם אייקון זהב
+     משלו. ה-manifest נבחר כאן ולא בהמשך — הדפדפן קורא אותו פעם
+     אחת בטעינה, והחלפה מאוחרת יותר לא נקלטת. שני הקבצים נבדלים
+     ב-id, ולכן המערכת רואה בהם שתי אפליקציות שאפשר להתקין זו
+     לצד זו, ולא אחת שמחליפה את השנייה.
+
+     ספארי מתעלם מהאייקונים שב-manifest, ולכן apple-touch-icon
+     נכתב כאן גם הוא — בלעדיו "הוספה למסך הבית" באייפון יוצרת
+     אייקון של צילום מסך. */
+  (function () {
+    var adm = /\/admin\/?$/.test(location.pathname) || location.hash === '#admin';
+    var icon = adm ? 'icon-admin-192.png' : 'icon-192.png';
+    document.write(
+      '<link rel="manifest" href="' + (adm ? 'admin-manifest.json' : 'manifest.json') + '">' +
+      '<link rel="apple-touch-icon" href="' + icon + '">' +
+      '<link rel="apple-touch-icon" sizes="180x180" href="' + icon + '">' +
+      '<meta name="apple-mobile-web-app-title" content="' +
+        (adm ? 'ניהול' : 'הדף השבועי') + '">' +
+      '<meta name="theme-color" content="' + (adm ? '#7A5610' : '#0E2E63') + '">');
+  })();
+</script>
+<noscript><link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png"></noscript>
+<meta property="og:title" content="הדף השבועי של בני עקיבא">
+<meta property="og:description" content="דף אחד בשבוע. מסכת שלמה בשנה. תשפ״ז — מסכת תענית ומסכת מגילה.">
+<meta property="og:type" content="website">
+<style>
+/* ============================================================
+   שפת העיצוב לקוחה מהמצגות ומהסימנייה המודפסת:
+   קלף חם, כחול וירוק של בני עקיבא, זהב לרגעים חשובים.
+   ============================================================ */
+:root{
+  --blue:#17468F; --blue-d:#0B2550; --blue-l:#3574CE; --cyan:#29ABE2;
+  --green:#6FA83B; --green-d:#4A821C; --gold:#C08F2B; --gold-l:#E3B44A;
+
+  --paper:#F6F1E6; --surface:#FFFDF8; --surface-2:#F7F1E4; --sunk:#EFE6D3;
+  --ink:#1B2A45; --ink-2:#5A6780; --ink-3:#96A0B2;
+  --rule:#E5DAC3; --rule-2:#EFE7D7;
+
+  --ok:#3B7D57; --warn:#A87A1C; --stop:#A5382D;
+  --r:14px; --r-m:14px; --r-s:10px;
+  --sh-1:0 1px 2px rgba(37,29,12,.05), 0 2px 8px rgba(37,29,12,.05);
+  --sh-2:0 2px 4px rgba(37,29,12,.06), 0 10px 26px rgba(37,29,12,.08);
+  --sh-3:0 10px 40px rgba(11,37,80,.20);
+  --pat:rgba(23,70,143,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;
+  font-family:"Assistant","Segoe UI","Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif}
+html,body{overflow-x:hidden}
+img{max-width:100%}
+body{background:var(--paper);
+     background-image:radial-gradient(120% 60% at 50% 0%,#FBF7EF 0%,transparent 60%);
+     background-attachment:fixed;
+     color:var(--ink);min-height:100vh;line-height:1.55;
+     -webkit-font-smoothing:antialiased}
+.app{display:block;width:100%;max-width:580px;margin:0 auto;min-height:100vh;
+     position:relative;background:transparent}
+
+/* ---------- כותרת העמוד הראשי ----------
+   מופיעה רק בבית. בעמודי המשנה יש כפתור חזרה, וזה מספיק. */
+.masthead{display:flex;align-items:center;gap:13px;padding:18px 14px 20px}
+.masthead .m{width:58px;height:58px;border-radius:50%;background:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 5px rgba(37,29,12,.07),0 8px 22px rgba(37,29,12,.09)}
+.masthead .m img{width:38px;height:38px;display:block;object-fit:contain}
+.masthead h1{font-size:1.24rem;font-weight:800;letter-spacing:-.035em;line-height:1.2;
+  color:var(--blue-d)}
+.masthead .yr{font-size:.76rem;font-weight:800;color:var(--gold);letter-spacing:.05em;
+  margin-top:3px}
+
+.content{padding:0 14px 26px}
+.view{display:none;gap:12px}
+.view.on > *{min-width:0}
+.view.on{display:grid;grid-template-columns:minmax(0,1fr);animation:rise .26s cubic-bezier(.34,1.4,.5,1)}
+@keyframes rise{from{opacity:0;transform:translateY(9px) scale(.995)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+#splash{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;gap:10px;
+  align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;
+  background:linear-gradient(165deg,var(--blue) 0%,var(--blue-d) 100%);
+  transition:opacity .4s,visibility .4s}
+#splash.off{opacity:0;visibility:hidden}
+#splash b{font-size:1.28rem;font-weight:800;letter-spacing:-.03em}
+#splash .slogo{background:#fff;border-radius:18px;padding:16px 20px;margin-bottom:6px;
+  box-shadow:0 10px 34px rgba(0,0,0,.22)}
+#splash .slogo img{width:172px;display:block}
+#splash i{width:44px;height:2px;background:var(--gold-l);border-radius:2px;display:block}
+/* מופיע רק אם הטעינה מתמשכת — כדי שלא בוהים בלוגו קפוא */
+#splash small{opacity:0;font-size:.79rem;font-weight:700;margin-top:4px;
+  transition:opacity .5s}
+#splash.slow small{opacity:.72}
+
+/* ---------- גיבור ---------- */
+.hero{position:relative;overflow:hidden;border-radius:var(--r);padding:26px 22px 24px;
+  color:#fff;box-shadow:var(--sh-3);
+  background:linear-gradient(150deg,var(--blue-d) 0%,var(--blue) 45%,var(--blue-l) 115%)}
+.hero .glow{position:absolute;border-radius:50%;filter:blur(2px)}
+.hero .g1{left:-54px;bottom:-72px;width:190px;height:190px;background:var(--green);opacity:.24}
+.hero .g2{left:44px;bottom:-96px;width:170px;height:170px;background:var(--cyan);opacity:.18}
+.hero .g3{right:-40px;top:-56px;width:130px;height:130px;background:var(--gold);opacity:.16}
+.hero>*{position:relative}
+.hero .yr{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.2);border-radius:30px;padding:4px 13px;
+  font-size:.7rem;font-weight:800;letter-spacing:.05em;margin-bottom:12px}
+.hero h2{font-size:1.72rem;font-weight:800;line-height:1.14;letter-spacing:-.035em}
+.hero .rule{width:46px;height:3px;background:var(--gold-l);border-radius:3px;margin:14px 0 11px}
+.hero .sub{font-size:.93rem;opacity:.88;max-width:33ch;line-height:1.6}
+
+/* ---------- מונים ---------- */
+.counts{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.count{background:var(--surface);border-radius:var(--r-m);padding:17px 12px 15px;
+  text-align:center;box-shadow:var(--sh-1);position:relative;overflow:hidden}
+.count:after{content:"";position:absolute;inset:auto 0 0 0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:.5}
+.count.g:after{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.count b{display:block;font-size:2.1rem;font-weight:800;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--blue)}
+.count.g b{color:var(--green-d)}
+.count span{font-size:.73rem;color:var(--ink-3);font-weight:700;margin-top:5px;display:block}
+
+/* ============================================================
+   מסך הבית — במה, לא רשימה.
+   הדבר הראשון שרואים הוא החומר עצמו, לא תיאור שלו.
+   ============================================================ */
+.stage{position:relative;overflow:hidden;border-radius:18px;padding:16px 16px 18px;
+  color:#fff;box-shadow:var(--sh-3);
+  background:radial-gradient(130% 105% at 78% -10%,#2C63B6 0%,var(--blue) 34%,var(--blue-d) 78%)}
+.stage .g{position:absolute;border-radius:50%}
+.stage .g1{left:-70px;bottom:-90px;width:210px;height:210px;background:var(--green);opacity:.22}
+.stage .g2{left:52px;bottom:-120px;width:190px;height:190px;background:var(--cyan);opacity:.14}
+.stage>*{position:relative}
+.stage .eyebrow{display:flex;align-items:center;gap:9px;font-size:.7rem;font-weight:800;
+  letter-spacing:.13em;color:var(--gold-l);margin-bottom:12px}
+.stage .eyebrow s{flex:1;height:1px;background:rgba(255,255,255,.16);text-decoration:none}
+.stage h2{font-size:1.42rem;font-weight:800;line-height:1.15;letter-spacing:-.04em;
+  text-wrap:balance}
+.stage .meta{font-size:.85rem;opacity:.72;font-weight:700;margin-top:7px}
+
+/* בחירת שכבה — שני מתגים, לא שני כרטיסים זהים */
+.picker{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:13px;
+  background:rgba(0,0,0,.2);padding:4px;border-radius:13px}
+.pick{border:none;background:none;color:rgba(255,255,255,.62);cursor:pointer;
+  padding:13px 6px;border-radius:11px;font-weight:800;font-size:.9rem;
+  transition:background .2s,color .2s;line-height:1.3}
+.pick.on{background:rgba(255,255,255,.16);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+
+/* הכרטיס המרחף — השקף הראשון של השבוע, בפרספקטיבה */
+.showcase{margin:13px -2px 0;perspective:1100px}
+.showcase .frame{border-radius:14px;overflow:hidden;box-shadow:0 22px 50px rgba(0,0,0,.42);
+  transform:rotateX(7deg) scale(.97);transform-origin:50% 0;cursor:pointer;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);
+  transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.showcase .frame:active{transform:rotateX(0deg) scale(.99)}
+.showcase img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.showcase .empty{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:7px;color:rgba(255,255,255,.6);font-weight:800;font-size:.86rem;
+  background:rgba(255,255,255,.06)}
+.stage .acts{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:16px}
+.stage .acts button{border:none;border-radius:13px;padding:15px;font-weight:800;
+  font-size:.97rem;cursor:pointer}
+.stage .acts .go{background:#fff;color:var(--blue-d);box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.stage .acts .alt{background:rgba(255,255,255,.14);color:#fff;
+  border:1px solid rgba(255,255,255,.18)!important;padding-inline:18px}
+.stage .acts button:active{transform:scale(.98)}
+
+/* ---------- מערכת המשטחים ----------
+   קרקע אחת חמה; לוח קריר אחד באמצע — עולם התלמידים; וחזרה לקרקע.
+   סטייה אחת בלבד, כדי שהעין תבנה היררכיה ולא תתעייף.       */
+.sec-b{margin:0 -14px;padding:30px 14px 24px;position:relative;min-width:0}
+.band{background:linear-gradient(180deg,#E9EEF6 0%,#E3E9F3 55%,#E7ECF4 100%);
+  border-block:1px solid rgba(11,37,80,.09);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65)}
+.zlabel{margin-bottom:15px}
+/* התווית רוכבת על התפר — חצי מעל הגבול וחצי מתחתיו */
+.zlabel .tag{position:absolute;top:0;right:14px;transform:translateY(-50%);
+  font-size:.66rem;font-weight:800;letter-spacing:.08em;padding:7px 14px;
+  border-radius:99px;background:var(--blue);color:#fff;white-space:nowrap;
+  box-shadow:0 3px 10px rgba(11,37,80,.22),0 0 0 4px var(--paper)}
+.band .zlabel .tag{box-shadow:0 3px 10px rgba(11,37,80,.22),0 0 0 4px #EDF1F7}
+.zlabel .tag.a{background:var(--gold);
+  box-shadow:0 3px 10px rgba(160,120,30,.28),0 0 0 4px var(--paper)}
+.zlabel span{display:block;font-size:.81rem;font-weight:700;color:var(--ink-2);
+  line-height:1.45;padding-top:2px}
+
+/* ---------- לוח שלבי השנה ---------- */
+.steps{display:flex;align-items:flex-start;margin-top:4px;min-width:0}
+.st{flex:1 1 0;position:relative;text-align:center;padding-top:18px;
+  min-width:0;overflow-wrap:anywhere}
+.st:before{content:"";position:absolute;top:5px;right:50%;left:-50%;height:2px;
+  background:#DFD5C0}
+.st:last-child:before{display:none}
+.st.done:before{background:var(--gold)}
+.st i{position:absolute;top:0;right:50%;transform:translateX(50%);width:12px;height:12px;
+  border-radius:50%;background:var(--paper);box-shadow:inset 0 0 0 2px #DFD5C0}
+.st.done i{background:var(--gold);box-shadow:none}
+.st.now i{background:var(--gold);box-shadow:0 0 0 5px rgba(192,143,43,.2);
+  width:14px;height:14px;top:-1px}
+.st b{display:block;font-size:.74rem;font-weight:800;line-height:1.25;color:var(--ink-3);padding:0 3px}
+.st small{display:block;font-size:.64rem;color:var(--ink-3);opacity:.7;font-weight:700;margin-top:2px}
+.st.now b{color:var(--ink);font-size:.78rem}
+.st.done b{color:var(--ink-2)}
+.here{display:flex;align-items:flex-start;gap:9px;margin-top:16px}
+.here em{font-style:normal;font-size:.62rem;font-weight:800;letter-spacing:.07em;
+  background:var(--gold);color:#fff;border-radius:99px;padding:4px 10px;flex:none;margin-top:1px}
+.here span{font-size:.84rem;font-weight:700;color:var(--ink-2);line-height:1.5}
+
+
+/* ---------- עיגולי סטטיסטיקה ---------- */
+.rings{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.ring{position:relative;width:136px;height:136px;border-radius:50%;flex:none;
+  display:flex;align-items:center;justify-content:center;background:conic-gradient(from 210deg,var(--gold-l),var(--gold) 55%,var(--gold-l))}
+.ring.b{background:conic-gradient(from 210deg,var(--blue-l),var(--blue) 55%,var(--blue-l))}
+.ring:before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--paper)}
+.ring .in{position:relative;text-align:center;padding:0 14px}
+.ring .n{font-size:2.05rem;font-weight:800;line-height:1;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;color:var(--gold)}
+.ring.b .n{color:var(--blue)}
+.ring .t{font-size:.75rem;font-weight:800;color:var(--ink-3);margin-top:6px;line-height:1.35}
+
+/* ---------- מי כבר בפנים ---------- */
+.inbox{background:var(--surface);border-radius:var(--r);padding:16px;
+  box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.9)}
+.inbox .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.inbox .hd b{font-size:1.04rem;font-weight:800;letter-spacing:-.02em}
+.inbox .hd span{font-size:.74rem;color:var(--ink-3);font-weight:800}
+.joined{display:flex;flex-wrap:wrap;gap:7px}
+.jp{display:inline-flex;align-items:center;gap:6px;background:rgba(111,168,59,.12);
+  color:var(--green-d);border-radius:30px;padding:7px 13px;font-size:.83rem;font-weight:800}
+.jp:before{content:"✓";font-size:.7rem}
+.jp.open{background:var(--sunk);color:var(--ink-3)}
+.jp.open:before{content:"";display:none}
+.inbox .note{font-size:.82rem;color:var(--ink-2);font-weight:700;margin-top:14px;
+  padding-top:14px;border-top:1px solid var(--rule-2);line-height:1.55}
+
+/* ---------- מסלול הרשמה ---------- */
+.step-n{display:flex;align-items:center;gap:9px;margin:16px 0 8px}
+.step-n i{width:27px;height:27px;border-radius:50%;background:var(--blue);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex:none}
+.step-n b{font-size:1.02rem;font-weight:800;letter-spacing:-.02em}
+.num{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
+  background:var(--surface);border-radius:var(--r-s);padding:12px 14px;box-shadow:var(--sh-1)}
+.num .lbl{font-size:.92rem;font-weight:800}
+.num .lbl small{display:block;font-size:.72rem;color:var(--ink-3);font-weight:700}
+.num .ctl{display:flex;align-items:center;gap:6px;justify-self:end}
+.num .ctl button{width:38px;height:38px;border-radius:11px;border:none;background:var(--sunk);
+  color:var(--blue);font-size:1.2rem;font-weight:800;cursor:pointer}
+.num .ctl button:active{transform:scale(.92)}
+.num .ctl input{width:58px;text-align:center;font-size:1.1rem;font-weight:800;
+  padding:8px 2px;border-radius:10px}
+.total{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff;
+  border-radius:var(--r-m);padding:17px;text-align:center;box-shadow:var(--sh-2)}
+.total .n{font-size:1.9rem;font-weight:800;letter-spacing:-.04em;line-height:1.1}
+.total .t{font-size:.84rem;opacity:.9;font-weight:700;margin-top:4px}
+
+/* המסלול בזעיר אנפין — כל השנה במבט אחד */
+.mini{background:var(--surface);border-radius:var(--r);padding:13px 15px;
+  box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.9)}
+.mini .cap{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:13px}
+.mini .cap b{font-size:.95rem;font-weight:800;letter-spacing:-.02em}
+.mini .cap span{font-size:.74rem;color:var(--ink-3);font-weight:700}
+.mini .rail{display:flex;gap:5px;align-items:center;overflow-x:auto;
+  scrollbar-width:none;padding:5px 0}
+.mini .rail::-webkit-scrollbar{display:none}
+.mini .rail i{flex:none;width:9px;height:9px;border-radius:50%;background:var(--sunk)}
+.mini .rail i.done{background:var(--ink-3)}
+.mini .rail i.off{background:transparent;box-shadow:inset 0 0 0 1.5px var(--rule);
+  width:7px;height:7px}
+.mini .rail i.now{width:26px;border-radius:6px;
+  background:linear-gradient(90deg,var(--gold-l),var(--gold));
+  box-shadow:0 2px 8px rgba(192,143,43,.4)}
+.mini .rail i.fin{width:9px;height:9px;background:var(--gold);opacity:.55}
+
+/* בנטו — גדלים משתנים במקום ערימה אחידה */
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.bx{background:var(--surface);border-radius:var(--r-m);padding:16px;box-shadow:var(--sh-1);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.bx.w{grid-column:span 2}
+.bx.tap{cursor:pointer}
+.bx.tap:active{transform:scale(.99)}
+.bx .n{font-size:2.15rem;font-weight:800;line-height:1;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums}
+.bx .lb{font-size:.75rem;color:var(--ink-3);font-weight:700;margin-top:5px}
+.bx .ti{font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.bx .ds{font-size:.83rem;color:var(--ink-2);font-weight:600;margin-top:5px;line-height:1.55}
+.bx.blue{background:linear-gradient(150deg,var(--blue),var(--blue-d));color:#fff}
+.bx.blue .lb,.bx.blue .ds{color:rgba(255,255,255,.75)}
+.bx.gold{background:linear-gradient(150deg,var(--gold-l),var(--gold));color:#fff}
+.bx.gold .lb,.bx.gold .ds{color:rgba(255,255,255,.85)}
+.bx .n.g{color:var(--green-d)}
+.bx .arrow{position:absolute;left:14px;bottom:13px;font-size:1rem;opacity:.35}
+
+/* חשיפה בגלילה */
+.rv{opacity:0;transform:translateY(13px)}
+.rv.in{opacity:1;transform:none;transition:opacity .34s ease,transform .42s cubic-bezier(.34,1.36,.52,1)}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
+/* ---------- כותרות מקטע ---------- */
+.sec{display:flex;align-items:center;gap:11px;margin:6px 2px -2px}
+.sec b{font-size:.76rem;font-weight:800;color:var(--ink-3);letter-spacing:.1em;white-space:nowrap}
+.sec i{flex:1;height:1px;background:linear-gradient(90deg,var(--rule),transparent)}
+
+/* ---------- כרטיסי מסלול ---------- */
+.track{position:relative;border-radius:var(--r);overflow:hidden;cursor:pointer;
+  background:var(--surface);box-shadow:var(--sh-2);
+  transition:transform .18s cubic-bezier(.22,1,.36,1),box-shadow .18s}
+.track:hover{transform:translateY(-2px)}
+.track:active{transform:scale(.988)}
+.track .stripe{position:absolute;inset:0 auto 0 0;width:6px}
+.track.t-b .stripe{background:linear-gradient(180deg,var(--blue-l),var(--blue))}
+.track.t-g .stripe{background:linear-gradient(180deg,var(--green),var(--green-d))}
+.track .in{padding:18px 18px 16px}
+.track .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.track h3{font-size:1.32rem;font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.track .now{font-size:.9rem;color:var(--ink-2);margin-top:7px}
+.track .now b{color:var(--ink);font-weight:800}
+.track .foot{display:flex;align-items:center;gap:12px;margin-top:16px}
+.track .prog{flex:1;height:8px;background:var(--sunk);border-radius:20px;overflow:hidden}
+.track .prog i{display:block;height:100%;border-radius:20px;transition:width .5s ease}
+.track.t-b .prog i{background:linear-gradient(90deg,var(--blue),var(--blue-l))}
+.track.t-g .prog i{background:linear-gradient(90deg,var(--green-d),var(--green))}
+.track .pn{font-size:.74rem;font-weight:800;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;flex:none}
+
+/* ---------- מסלול כמסע ---------- */
+.bm{border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh-2)}
+.bm .head{padding:20px 16px;color:#fff;text-align:center;position:relative;overflow:hidden}
+.bm.t-b .head{background:linear-gradient(150deg,var(--blue-d),var(--blue) 70%,var(--blue-l))}
+.bm.t-g .head{background:linear-gradient(150deg,#2F5A12,var(--green-d) 65%,var(--green))}
+.bm .head b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.03em}
+.bm .head i{display:block;width:38px;height:2px;background:var(--gold-l);
+  border-radius:2px;margin:9px auto 8px}
+.bm .head span{font-size:.78rem;opacity:.85;font-weight:600}
+.trail{padding:8px 16px 18px}
+
+.step{position:relative;display:grid;grid-template-columns:44px 1fr;gap:14px;
+  align-items:center;padding:7px 0;cursor:pointer}
+/* קו המסע — עובר מאחורי העיגולים */
+.step:before{content:"";position:absolute;top:0;bottom:0;right:21px;width:2px;
+  background:var(--rule);z-index:0}
+.step:first-of-type:before{top:50%}
+.step.last:before{bottom:50%}
+.step.done:before,.step.cur:before{background:var(--rule)}
+.step .dot{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.98rem;
+  background:var(--surface);border:2px solid var(--rule);color:var(--ink-3);
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.step:active .dot{transform:scale(.9)}
+.step.done .dot{background:var(--sunk);border-color:var(--rule);color:var(--ink-3)}
+.bm.t-b .step.cur .dot{background:linear-gradient(150deg,var(--blue-l),var(--blue));
+  border-color:var(--blue);color:#fff;box-shadow:0 0 0 5px rgba(23,70,143,.14),var(--sh-2);
+  width:52px;height:52px;font-size:1.15rem}
+.bm.t-g .step.cur .dot{background:linear-gradient(150deg,var(--green),var(--green-d));
+  border-color:var(--green-d);color:#fff;box-shadow:0 0 0 5px rgba(111,168,59,.18),var(--sh-2);
+  width:52px;height:52px;font-size:1.15rem}
+.step.cur{grid-template-columns:52px 1fr;padding:12px 0}
+.step.cur:before{right:25px}
+.step.off{cursor:default;opacity:.6}
+.step.off .dot{border-style:dashed;font-size:.62rem;font-weight:700;
+  width:34px;height:34px;margin-inline-start:5px}
+.step.siyum .dot{border-color:var(--gold);color:var(--gold);font-size:.6rem;
+  background:rgba(192,143,43,.08)}
+.step .txt{min-width:0}
+.step .p{font-weight:800;font-size:1rem;letter-spacing:-.01em}
+.step.done .p,.step.off .p{font-weight:700;color:var(--ink-2)}
+.step .d{font-size:.75rem;color:var(--ink-3);font-weight:600;margin-top:1px}
+.step.cur .p{font-size:1.12rem}
+.badge{display:inline-block;font-size:.6rem;font-weight:800;letter-spacing:.05em;
+  background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#fff;
+  border-radius:20px;padding:3px 9px;margin-inline-start:7px;vertical-align:middle;
+  box-shadow:0 2px 6px rgba(192,143,43,.35)}
+.chap{display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding-inline-start:2px}
+.chap b{font-size:.7rem;font-weight:800;color:var(--gold);letter-spacing:.12em;white-space:nowrap}
+.chap i{flex:1;height:1px;background:linear-gradient(90deg,var(--rule),transparent)}
+.chap:before{content:"◆";color:var(--gold);font-size:.55rem;opacity:.7}
+
+/* ---------- כללי ---------- */
+.card{background:var(--surface);border-radius:var(--r-m);padding:15px;
+  box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.9)}
+.card h3{font-size:1.05rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em}
+.card p{font-size:.91rem;color:var(--ink-2);line-height:1.68}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  border:none;border-radius:var(--r-s);padding:14px;font-size:1rem;font-weight:800;
+  cursor:pointer;letter-spacing:-.01em;transition:transform .14s,filter .15s;color:#fff}
+.btn:active{transform:scale(.982)}
+.btn.p{background:linear-gradient(140deg,var(--blue-l),var(--blue));box-shadow:var(--sh-2)}
+.btn.gr{background:linear-gradient(140deg,var(--green),var(--green-d));box-shadow:var(--sh-2)}
+.btn.gd{background:linear-gradient(140deg,var(--gold-l),var(--gold));box-shadow:var(--sh-2)}
+.btn.g{background:var(--surface);color:var(--ink-2);box-shadow:var(--sh-1);
+  font-size:.93rem;padding:14px;font-weight:700}
+.btn:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.4;filter:none}
+.back{background:none;border:none;color:var(--ink-3);font-size:.87rem;font-weight:800;
+  cursor:pointer;padding:3px 0;text-align:start;align-self:flex-start}
+.links{display:grid;gap:9px}
+.lnk{display:flex;align-items:center;gap:11px;background:var(--surface);
+  border-radius:var(--r-s);padding:12px;text-decoration:none;color:var(--ink);
+  font-weight:800;font-size:.94rem;box-shadow:var(--sh-1);transition:transform .15s}
+.lnk:active{transform:scale(.99)}
+.lnk small{color:var(--ink-3);font-weight:600;font-size:.75rem;display:block;margin-top:1px}
+.lnk .ic{width:38px;height:38px;border-radius:11px;flex:none;font-weight:800;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(23,70,143,.09);color:var(--blue)}
+.lnk.dim{opacity:.5}
+.lnk.sug .ic{background:linear-gradient(140deg,#8FBF4A,#4F8A1E);color:#fff}
+.lnk.sug{border-inline-start:3px solid var(--green)}
+.msg{text-align:center;color:var(--ink-3);font-size:.9rem;padding:34px 12px;font-weight:600}
+
+/* ---------- מסך שבוע ---------- */
+.wtop{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  background:var(--surface);border-radius:var(--r);padding:15px;box-shadow:var(--sh-2)}
+.wtop .k{font-size:.73rem;font-weight:800;color:var(--ink-3);letter-spacing:.06em}
+.wtop h2{font-size:1.3rem;font-weight:800;letter-spacing:-.032em;line-height:1.2;margin:3px 0}
+.dafbig{width:58px;height:58px;border-radius:50%;color:#fff;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;
+  box-shadow:var(--sh-2)}
+.t-b .dafbig{background:linear-gradient(150deg,var(--blue-l),var(--blue))}
+.t-g .dafbig{background:linear-gradient(150deg,var(--green),var(--green-d))}
+
+.thumbs{display:grid;gap:10px}
+.thumb{width:100%;display:block;border-radius:var(--r-s);cursor:pointer;
+  background:var(--sunk);aspect-ratio:16/9;object-fit:cover;box-shadow:var(--sh-1);
+  transition:transform .16s}
+.thumb:active{transform:scale(.99)}
+.slides{display:grid;gap:10px}
+.slide{background:var(--surface);border-radius:var(--r-m);padding:17px;box-shadow:var(--sh-1);
+  cursor:pointer;border-inline-start:3px solid var(--rule-2)}
+.slide .k{font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:6px}
+.slide h4{font-size:1.05rem;font-weight:800;line-height:1.32;margin-bottom:7px;letter-spacing:-.02em}
+.slide p{font-size:.92rem;color:var(--ink-2);white-space:pre-wrap;line-height:1.7}
+
+/* ---------- הקרנה ---------- */
+#deck{position:fixed;inset:0;z-index:80;display:none;flex-direction:column;padding:20px;
+  background:radial-gradient(120% 90% at 50% 0%,var(--blue) 0%,var(--blue-d) 70%);color:#fff}
+#deck.on{display:flex}
+#deck .dtop{display:flex;justify-content:space-between;align-items:center;
+  font-size:.8rem;opacity:.6;flex:none;font-weight:700}
+#deck .dbody{flex:1;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;gap:18px;text-align:center;padding:14px 0;min-height:0}
+#deck #d-img{display:none;max-width:100%;max-height:100%;object-fit:contain;
+  border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#deck #d-text{display:flex;flex-direction:column;justify-content:center;gap:18px;width:100%}
+#deck .dk{font-size:clamp(.72rem,1.7vw,1rem);font-weight:800;letter-spacing:.14em;color:var(--gold-l)}
+#deck .dh{font-size:clamp(1.5rem,5.1vw,3.5rem);font-weight:800;line-height:1.16;letter-spacing:-.035em}
+#deck .dt{font-size:clamp(1rem,2.7vw,1.85rem);opacity:.9;white-space:pre-wrap;
+  line-height:1.62;max-width:36ch;margin:0 auto}
+#deck .dots{display:flex;gap:5px;justify-content:center;flex:none;
+  margin-bottom:14px;flex-wrap:wrap}
+#deck .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);
+  transition:width .25s,background .25s}
+#deck .dots i.on{background:var(--gold-l);width:20px;border-radius:3px}
+#deck .dnav{display:flex;gap:11px;flex:none}
+#deck .dnav button{flex:1;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.14);
+  color:#fff;padding:16px;border-radius:13px;font-size:1rem;font-weight:800;cursor:pointer}
+#deck .dnav button:active{transform:scale(.98)}
+#deck .dnav button:disabled{opacity:.28}
+
+/* ---------- חידה ---------- */
+.qq{font-size:1.15rem;font-weight:800;line-height:1.42;letter-spacing:-.02em;
+  background:var(--surface);border-radius:var(--r-m);padding:18px;box-shadow:var(--sh-1);
+  border-inline-start:3px solid var(--gold)}
+.opts{display:grid;gap:10px}
+.opt{background:var(--surface);border:2px solid transparent;border-radius:var(--r-s);
+  padding:15px;font-size:.96rem;font-weight:600;cursor:pointer;text-align:start;
+  display:flex;gap:12px;align-items:center;color:inherit;width:100%;
+  box-shadow:var(--sh-1);transition:transform .14s,border-color .15s}
+.opt:active{transform:scale(.99)}
+.opt .n{width:26px;height:26px;border-radius:9px;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:.76rem;font-weight:800;
+  background:var(--sunk);color:var(--ink-3)}
+.opt.sel{border-color:var(--blue)}
+.opt.sel .n{background:var(--blue);color:#fff}
+.opt.right{border-color:var(--ok);background:rgba(59,125,87,.08)}
+.opt.right .n{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--stop);background:rgba(165,56,45,.07)}
+/* ---------- בוחר מותאם ----------
+   ה-select המקורי נראה כמו רכיב של המערכת ולא כמו האתר.
+   כאן: שדה בעיצוב שלנו, ותפריט שנפתח כגלולה מלמטה.        */
+.pk{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  background:var(--surface);border:1.5px solid var(--rule);border-radius:var(--r-s);
+  padding:13px 14px;font-size:.95rem;font-weight:700;color:inherit;cursor:pointer;
+  text-align:start;transition:border-color .15s}
+.pk.empty{color:var(--ink-3);font-weight:600}
+.pk:active{transform:scale(.995)}
+.pk .cv{width:9px;height:9px;border-inline-end:2px solid var(--ink-3);
+  border-block-end:2px solid var(--ink-3);transform:rotate(45deg);
+  margin-block-end:3px;flex:none}
+#sheet{position:fixed;inset:0;z-index:90;display:none}
+#sheet.on{display:block}
+#sheet .veil{position:absolute;inset:0;background:rgba(11,37,80,.42);
+  animation:vin .2s ease}
+@keyframes vin{from{opacity:0}to{opacity:1}}
+#sheet .panel{position:absolute;inset:auto 0 0 0;background:var(--surface);
+  border-radius:20px 20px 0 0;max-height:78vh;display:flex;flex-direction:column;
+  box-shadow:0 -12px 40px rgba(11,37,80,.28);animation:sup .3s cubic-bezier(.24,1.3,.5,1)}
+@keyframes sup{from{transform:translateY(100%)}to{transform:none}}
+#sheet .hd{padding:16px 18px 12px;flex:none;text-align:center;position:relative}
+#sheet .hd i{display:block;width:38px;height:4px;border-radius:3px;background:var(--rule);
+  margin:0 auto 12px}
+#sheet .hd b{font-size:1.02rem;font-weight:800;letter-spacing:-.02em}
+#sheet .list{overflow-y:auto;padding:0 12px 14px;-webkit-overflow-scrolling:touch}
+#sheet .it{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;
+  padding:14px;border-radius:var(--r-s);font-size:.96rem;font-weight:700;color:inherit;
+  cursor:pointer;text-align:start}
+#sheet .it:active{background:var(--sunk)}
+#sheet .it.on{background:var(--accent-soft);color:var(--blue)}
+#sheet .it .tick{width:18px;flex:none;font-size:.85rem;color:var(--blue);opacity:0}
+#sheet .it.on .tick{opacity:1}
+
+select,input[type=text],input[type=tel],textarea{width:100%;background:var(--surface);
+  border:1.5px solid var(--rule);border-radius:var(--r-s);padding:14px;font-size:.96rem;
+  color:inherit;outline:none;font-weight:600;transition:border-color .15s}
+select:focus,input:focus,textarea:focus{border-color:var(--blue)}
+.label{font-size:.75rem;color:var(--ink-3);font-weight:800;margin-bottom:6px;letter-spacing:.03em}
+.fld{margin-bottom:11px}
+.done-box{background:linear-gradient(140deg,rgba(59,125,87,.14),rgba(111,168,59,.1));
+  border:1.5px solid var(--ok);color:var(--ok);border-radius:var(--r-m);padding:16px;
+  font-weight:800;font-size:.96rem;text-align:center}
+
+/* ---------- מי יכול להינות מהתוכנית — בראש מסך ההרשמה ----------
+   רצועה, לא פאנל. שלושה סמלים בשורה אחת נסרקים במבט; שלוש שורות
+   זו מתחת לזו נקראות כרשימה, וזה בדיוק מה שלא רצינו כאן.
+
+   הכניסה מדורגת ולא מתחלפת בלולאה: קרוסלה מסתירה שני שלישים
+   מהמסר בכל רגע, וראש חטיבה פותח את המסך הזה פעם אחת בלבד.
+   בלי איור — באפליקציה כולה אין אחד, ואחד בודד היה נראה מודבק. */
+.fit{background:linear-gradient(160deg,var(--surface) 0%,var(--surface-2) 100%);
+  border-radius:var(--r);padding:16px 12px 14px;box-shadow:var(--sh-2);
+  border-top:3px solid var(--gold);margin-bottom:20px}
+.fit>b{display:block;font-size:1rem;font-weight:800;letter-spacing:-.02em;
+  line-height:1.35;text-align:center}
+.fit ul{list-style:none;margin:14px 0 0;padding:0;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.fit li{display:flex;flex-direction:column;align-items:center;text-align:center;
+  gap:7px;padding:2px 2px 0;
+  opacity:0;animation:fitIn .5s cubic-bezier(.34,1.4,.5,1) forwards}
+.fit li:nth-child(1){animation-delay:.10s}
+.fit li:nth-child(2){animation-delay:.22s}
+.fit li:nth-child(3){animation-delay:.34s}
+@keyframes fitIn{from{opacity:0;transform:translateY(11px) scale(.9)}
+  to{opacity:1;transform:none}}
+.fit li i{display:flex;align-items:center;justify-content:center;
+  width:46px;height:46px;border-radius:50%;background:var(--surface);
+  box-shadow:var(--sh-1);border:1px solid var(--rule-2)}
+.fit li svg{width:27px;height:27px;stroke:var(--gold);
+  stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.fit li span{font-size:.75rem;font-weight:800;line-height:1.35;color:var(--ink-2)}
+/* השורה שנושאת את המסר בפועל — היקף, לא רשימת אפשרויות */
+.fit>p{font-size:.85rem;color:var(--ink);font-weight:700;line-height:1.55;
+  text-align:center;margin:15px auto 0;padding-top:13px;max-width:34ch;
+  border-top:1px solid var(--rule-2)}
+@media (min-width:480px){.fit li span{font-size:.83rem}
+  .fit li i{width:52px;height:52px}.fit li svg{width:31px;height:31px}}
+/* בלי אנימציות — עדיין חייבים להיראות */
+@media (prefers-reduced-motion:reduce){.fit li{opacity:1}}
+/* קיצור לעדכון הרשמה קיימת, בלי לגלול את כל המסך */
+.jump{font-size:.82rem;color:var(--ink-3);font-weight:700;text-align:center;
+  margin-bottom:14px}
+.jump a{color:var(--blue);font-weight:800}
+/* השורה שמסבירה למה שתי מסכתות — שקטה, בדיוק במקום שהשאלה עולה */
+.two-m{font-size:.82rem;color:var(--ink-3);font-weight:700;margin-bottom:12px}
+
+/* ---------- ההמלצה ---------- */
+/* משפט בגוף שני, ומתחתיו הספר: כריכה, ואז הפריסה הפתוחה. */
+.rec{background:var(--surface);border-radius:var(--r);padding:16px;
+  box-shadow:var(--sh-2);border-inline-start:4px solid transparent}
+.rec.blue{border-inline-start-color:var(--blue)}
+.rec.green{border-inline-start-color:var(--green)}
+.rec p{font-size:.95rem;color:var(--ink-2);line-height:1.7;margin-bottom:13px}
+.rec p b{color:var(--ink);font-weight:800}
+.rec .pr{margin-top:11px;text-align:center;font-size:.8rem;
+  color:var(--ink-3);font-weight:700}
+.rec .pr b{font-size:1.35rem;letter-spacing:-.03em;margin-inline-end:3px}
+.rec.blue .pr b{color:var(--blue-d)}
+.rec.green .pr b{color:var(--green-d)}
+.rec .pr s{color:var(--ink-3);font-weight:700}
+/* הפריסה הפתוחה ברוחב מלא — ממנה מתרשמים. הכריכה מעליה בגודלה
+   הטבעי: מתיחה מעבר לו רק מרככת אותה. לחיצה מגדילה כל תמונה. */
+.pics{display:grid;gap:10px;justify-items:center}
+.pics img{width:100%;height:auto;display:block;cursor:zoom-in;
+  border-radius:var(--r-s);background:var(--sunk);box-shadow:0 3px 14px rgba(11,37,80,.16)}
+.pics img.sm{width:auto;max-width:100%;max-height:240px}
+/* שכבת ההגדלה. התמונה נפתחת בגודלה המקורי ולא מוקטנת למסך —
+   בנייד "התאמה למסך" הייתה מחזירה אותה כמעט לגודל שבכרטיס, ואז
+   ההגדלה לא מוסיפה כלום. גדולה מהמסך → גוללים אליה. */
+#zoom{position:fixed;inset:0;z-index:120;display:none;overflow:auto;
+  background:rgba(11,22,45,.93);cursor:zoom-out;-webkit-overflow-scrolling:touch}
+#zoom.on{display:block;animation:fade .18s ease}
+/* margin:auto ולא justify/align center — מרכוז ב-flex חותך את הקצה
+   ההתחלתי כשהתוכן גדול מהמכל, ואז חלק מהתמונה בלתי נגיש בגלילה. */
+#zoom .zin{min-height:100%;display:flex;padding:18px}
+#zoom img{margin:auto;flex:none;max-width:none;border-radius:6px;
+  box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#zoom button{position:fixed;top:14px;inset-inline-end:14px;background:none;
+  border:none;color:#fff;font-size:1.5rem;cursor:pointer;opacity:.7;line-height:1;z-index:1}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+/* כותרת המסכת בטופס ההזמנה */
+.mtitle{font-size:1rem;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;
+  padding-inline-start:11px;border-inline-start:3px solid var(--gold)}
+/* תנאי ההנחה — נוכח אך שקט, ואף פעם לא רחוק מהמחיר */
+.cond{background:var(--sunk);border-radius:var(--r-s);padding:11px 13px;
+  font-size:.78rem;color:var(--ink-2);font-weight:600;line-height:1.62;margin-top:9px}
+.cond b{font-weight:800;color:var(--ink)}
+.cond em{font-style:normal;color:var(--ok);font-weight:800}
+
+/* ---------- מוסדות ---------- */
+.inst{display:flex;align-items:center;gap:11px;padding:12px 0;font-size:.93rem;font-weight:700}
+.inst+.inst{border-top:1px solid var(--rule-2)}
+.inst .v{width:24px;height:24px;border-radius:50%;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:.68rem;font-weight:800}
+.inst .v.y{background:linear-gradient(140deg,var(--green),var(--green-d));color:#fff}
+.inst .v.n{background:var(--sunk);color:var(--ink-3)}
+.inst .nm{flex:1;min-width:0}
+.inst .tg{font-size:.61rem;font-weight:800;color:var(--gold);flex:none;letter-spacing:.05em}
+
+/* ---------- מוקד שיחות ---------- */
+.callbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cb{background:var(--surface);border-radius:var(--r-s);padding:12px 6px;text-align:center;
+  box-shadow:var(--sh-1);cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.cb.on{border-color:var(--blue)}
+.cb b{display:block;font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums;
+  line-height:1;letter-spacing:-.03em}
+.cb span{font-size:.66rem;color:var(--ink-3);font-weight:700;display:block;margin-top:4px}
+.ct{background:var(--surface);border-radius:var(--r-m);padding:15px;box-shadow:var(--sh-1);
+  border-inline-start:4px solid var(--rule)}
+.ct.s-joined{border-inline-start-color:var(--green)}
+.ct.s-warm{border-inline-start-color:var(--gold)}
+.ct.s-talked{border-inline-start-color:var(--blue-l)}
+.ct.s-no{border-inline-start-color:var(--stop)}
+.ct .h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ct .nm{font-size:1.05rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+.ct .who{font-size:.83rem;color:var(--ink-2);font-weight:700;margin-top:3px}
+.ct .last{font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.05em;flex:none}
+.ct .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.ct .acts a{display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:12px;border-radius:10px;text-decoration:none;font-weight:800;font-size:.9rem;color:#fff}
+.ct .acts .call{background:linear-gradient(140deg,var(--blue-l),var(--blue))}
+.ct .acts .wa{background:linear-gradient(140deg,#3FC152,#1FA637)}
+.ct .acts a:active{transform:scale(.98)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+.chip{border:1.5px solid var(--rule);background:var(--surface);border-radius:30px;
+  padding:6px 12px;font-size:.74rem;font-weight:800;cursor:pointer;color:var(--ink-2)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip.on.j{background:var(--green-d);border-color:var(--green-d)}
+.chip.on.w{background:var(--gold);border-color:var(--gold)}
+.chip.on.x{background:var(--stop);border-color:var(--stop)}
+.ct textarea{margin-top:10px;min-height:44px;font-size:.88rem;padding:11px;font-weight:600}
+
+/* ---------- קוד ---------- */
+.pins{display:flex;justify-content:center;gap:14px;margin:20px 0}
+.pins i{width:15px;height:15px;border-radius:50%;border:2px solid var(--blue);
+  transition:background .15s,transform .15s}
+.pins i.f{background:var(--blue);transform:scale(1.12)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;max-width:290px;
+  margin:0 auto;direction:ltr}
+.pad button{background:var(--surface);border:none;border-radius:var(--r-s);padding:17px 0;
+  font-size:1.3rem;font-weight:800;color:var(--blue);cursor:pointer;box-shadow:var(--sh-1)}
+.pad button:active{transform:scale(.94)}
+
+/* ---------- ניהול ---------- */
+/* שש לשוניות לא נכנסות בשורה אחת בטלפון. גלילה אופקית מסתירה
+   מקטעים שלמים, ולכן הן נשברות לשתי שורות — הכול גלוי תמיד. */
+.tabs{display:flex;flex-wrap:wrap;gap:5px;background:var(--sunk);padding:4px;
+  border-radius:12px}
+.tabs button{flex:1 1 96px;border:none;background:none;color:var(--ink-3);
+  padding:10px 8px;border-radius:9px;font-size:.83rem;font-weight:800;cursor:pointer;
+  white-space:nowrap;transition:background .15s,color .15s}
+.tabs button.on{background:var(--surface);color:var(--blue);box-shadow:var(--sh-1)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 0;border-bottom:1px solid var(--rule-2);font-size:.92rem;font-weight:700}
+.row:last-child{border-bottom:0}
+.row .sub{font-size:.76rem;color:var(--ink-3);font-weight:700;margin-top:2px}
+.sw{width:46px;height:27px;border-radius:20px;background:var(--rule);border:none;
+  position:relative;cursor:pointer;flex:none;transition:background .2s}
+.sw:after{content:"";position:absolute;top:3px;inset-inline-end:3px;width:21px;height:21px;
+  border-radius:50%;background:#fff;transition:transform .22s cubic-bezier(.34,1.4,.5,1);
+  box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--green)}
+.sw.on:after{transform:translateX(-19px)}
+.adm-card{background:var(--surface);border-radius:var(--r-m);padding:15px;box-shadow:var(--sh-1)}
+.adm-card h4{font-size:.98rem;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
+.adm-card p.h{font-size:.79rem;color:var(--ink-3);font-weight:600;line-height:1.55;margin-bottom:11px}
+.pill-n{background:var(--blue);color:#fff;border-radius:20px;padding:2px 9px;
+  font-size:.7rem;font-weight:800;margin-inline-start:6px}
+
+/* ---------- פסים ---------- */
+.strip{text-align:center;font-size:.79rem;font-weight:800;padding:9px;display:none}
+.strip.on{display:block}
+#queued{background:linear-gradient(90deg,var(--gold),var(--gold-l));color:#fff}
+#offline{background:var(--ink-3);color:#fff}
+#upd{position:fixed;bottom:0;left:0;right:0;z-index:70;display:none;cursor:pointer;
+  text-align:center;padding:15px;font-weight:800;font-size:.94rem;color:#fff;
+  background:linear-gradient(140deg,var(--green),var(--green-d));
+  box-shadow:0 -6px 24px rgba(0,0,0,.2)}
+#upd.on{display:block}
+
+/* ---------- הזמנה להתקין את האפליקציה ----------
+   צפה מעל הכול, בכניסה הראשונה בלבד. לא מופיעה כשהאפליקציה
+   כבר מותקנת. באנדרואיד יש כפתור אמיתי; באייפון רק הוראה,
+   כי ספארי אינה מאפשרת התקנה בלחיצה מדף. */
+#inst{position:fixed;inset-inline:12px;bottom:12px;z-index:80;
+  background:var(--surface);border-radius:var(--r);padding:15px 16px;
+  box-shadow:0 10px 40px rgba(11,37,80,.28);border:1px solid var(--rule);
+  display:none;animation:rise .3s cubic-bezier(.34,1.4,.5,1);
+  max-width:440px;margin-inline:auto}
+#inst.on{display:block}
+#inst .hd{display:flex;align-items:center;gap:11px}
+#inst .hd img{width:38px;height:38px;border-radius:9px;flex:none}
+#inst .hd b{font-size:.97rem;font-weight:800;letter-spacing:-.02em;line-height:1.35}
+#inst p{font-size:.84rem;color:var(--ink-2);font-weight:600;
+  line-height:1.6;margin-top:9px}
+#inst .ios{display:inline-flex;align-items:center;justify-content:center;
+  width:19px;height:19px;vertical-align:-4px;margin:0 1px}
+#inst .ios svg{width:15px;height:15px;stroke:var(--blue);stroke-width:1.7;
+  fill:none;stroke-linecap:round;stroke-linejoin:round}
+#inst .row{display:flex;gap:9px;margin-top:13px}
+#inst button{flex:1;border:0;border-radius:var(--r-s);padding:11px 10px;
+  font-family:inherit;font-weight:800;font-size:.89rem;cursor:pointer}
+#inst .yes{background:linear-gradient(140deg,var(--blue-l),var(--blue));color:#fff}
+#inst .no{flex:0 0 auto;background:transparent;color:var(--ink-3);padding-inline:14px}
+
+/* חזרה לניהול מתוך אפליקציית הניהול המותקנת, שאין בה שורת כתובת */
+#adm-chip{position:fixed;inset-inline-end:14px;bottom:16px;z-index:75;display:none;
+  border:0;border-radius:22px;padding:11px 17px;cursor:pointer;font-family:inherit;
+  font-weight:800;font-size:.86rem;color:#fff;
+  background:linear-gradient(140deg,var(--gold-l),var(--gold));
+  box-shadow:0 6px 22px rgba(122,86,16,.42)}
+#adm-chip.on{display:block}
+footer{padding:24px 16px 32px;text-align:center;color:var(--ink-3);font-size:.75rem;
+  line-height:1.85;font-weight:600}
+footer b{color:var(--ink-2);font-weight:800}
+footer i{display:block;width:34px;height:1px;background:var(--rule);margin:0 auto 12px}
+</style>
+</head>
+<body>
+
+<script>
+  /* המסמך עשוי להיטען בתוך מעטפת חיצונית שאין בה dir="rtl".
+     נקבע אותו מיד, לפני הציור, כדי שלא יהיה הבזק של פריסה הפוכה. */
+  document.documentElement.lang = 'he';
+  document.documentElement.dir  = 'rtl';
+</script>
+
+<div id="splash">
+  <span class="slogo"><img id="splash-logo" alt="מרכז ישיבות ואולפנות בני עקיבא"></span>
+  <b>הדף השבועי</b><i></i>
+  <span style="opacity:.62;font-size:.82rem;font-weight:700">שנת תשפ"ז</span>
+  <small id="splash-slow">החיבור איטי — טוען מהמכשיר…</small>
+</div>
+
+<div id="inst">
+  <div class="hd"><img id="inst-icon" src="icon-192.png" alt=""><b>להוסיף את הדף השבועי למסך הבית?</b></div>
+  <p id="inst-txt"></p>
+  <div class="row" id="inst-row"></div>
+</div>
+
+<button id="adm-chip" onclick="admBack()">ניהול →</button>
+
+<script>
+  /* רץ לפני שהסקריפטים הכבדים מתחילים להיטען, ולכן הוא היחיד
+     שיכול לדווח על טעינה איטית. אם הקוד הגיע — boot() מסיר את
+     מסך הכניסה, והשעון הזה לעולם לא נראה. */
+  setTimeout(function () {
+    var s = document.getElementById('splash');
+    if (s && s.className !== 'off') s.className = 'slow';
+  }, 4000);
+</script>
+
+<div class="app">
+
+  <div class="strip" id="offline">אין חיבור — מוצג המידע השמור</div>
+  <div class="strip" id="queued"></div>
+
+  <div class="content">
+
+    <!-- ===== בית ===== -->
+    <div id="v-home" class="view">
+
+      <div class="masthead">
+        <span class="m"><img id="hdr-mark" alt=""></span>
+        <div><h1>הדף השבועי<br>של בני עקיבא</h1>
+          <div class="yr">שנת תשפ"ז</div></div>
+      </div>
+
+      <!-- שלב א׳ · לוח השנה — על הקרקע -->
+      <section class="sec-b">
+        <div class="zlabel"><span class="tag a">לוח התוכנית</span>
+          <span>תשפ"ז — מההרשמה ועד חגיגת הסיום.</span></div>
+        <div id="plan"></div>
+      </section>
+
+      <!-- שלב ב׳ · עולם התלמידים — הלוח הקריר, הסטייה היחידה -->
+      <section class="sec-b band rv">
+        <div class="zlabel"><span class="tag">מה התלמידים יראו</span>
+          <span>המסך שנפתח אצל התלמיד ואצל מעביר השיעור, בכל שבוע.</span></div>
+        <div id="stage"></div>
+        <div id="mini" style="margin-top:14px"></div>
+      </section>
+
+      <!-- שלב ג׳ · ראשי החטיבות — חזרה לקרקע -->
+      <section class="sec-b rv">
+        <div class="zlabel"><span class="tag a">לראשי החטיבות</span>
+          <span>הצטרפות לתוכנית והזמנת הגמרות.</span></div>
+        <div id="rings"></div>
+        <div id="inbox"></div>
+        <div id="cta" style="margin-top:16px"></div>
+      </section>
+
+    </div>
+
+    <!-- ===== מסלול הרשמה ===== -->
+    <div id="v-reg" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div id="reg-body"></div>
+    </div>
+
+    <!-- ===== מסלול ===== -->
+    <div id="v-track" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div class="bm" id="bm"></div>
+    </div>
+
+    <!-- ===== שבוע ===== -->
+    <div id="v-week" class="view">
+      <button class="back" onclick="backToTrack()">→ חזרה למסלול</button>
+      <div id="week-body"></div>
+    </div>
+
+    <!-- ===== חידה ===== -->
+    <div id="v-quiz" class="view">
+      <button class="back" onclick="backToWeek()">→ חזרה לדף</button>
+      <div id="quiz-body"></div>
+    </div>
+
+        <!-- ===== מוסדות ===== -->
+    <div id="v-insts" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div class="sec"><b>ישיבות בתוכנית · תשפ"ז</b><i></i></div>
+      <div class="card" style="padding:6px 18px" id="inst-list"></div>
+      <p style="font-size:.78rem;color:var(--ink-3);text-align:center;font-weight:600">
+        סימון זהב — ישיבות שלמדו כבר בתשפ"ו.</p>
+    </div>
+
+    <!-- ===== שער ===== -->
+    <div id="v-gate" class="view">
+      <button class="back" onclick="show('home')">→ חזרה</button>
+      <div style="text-align:center;font-weight:800;font-size:1.15rem;letter-spacing:-.02em">
+        כניסת צוות</div>
+      <p style="text-align:center;font-size:.87rem;color:var(--ink-3);font-weight:600">
+        הלימוד השבועי פתוח לכולם גם בלי קוד.</p>
+      <div class="pins" id="pins"><i></i><i></i><i></i><i></i></div>
+      <div class="pad" id="pad"></div>
+      <div id="gate-msg" style="text-align:center;font-size:.86rem;color:var(--stop);
+           font-weight:800;min-height:24px"></div>
+    </div>
+
+    <!-- ===== ניהול (נסתר; נגיש רק דרך /admin) ===== -->
+    <div id="v-admin" class="view">
+      <div id="admin-body"></div>
+    </div>
+
+    <!-- ===== מוקד שיחות ===== -->
+    <div id="v-calls" class="view">
+      <button class="back" onclick="show('home')">→ יציאה</button>
+      <div id="calls-body"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- הגדלת תמונת ספר. שכבה נפרדת מנגן המצגות: אין כאן ניווט,
+     רק תמונה אחת, וסגירה בלחיצה בכל מקום. -->
+<div id="zoom" onclick="zoomClose()">
+  <button aria-label="סגירה" onclick="zoomClose()">✕</button>
+  <div class="zin"><img alt=""></div>
+</div>
+
+<div id="deck">
+  <div class="dtop">
+    <span id="d-where"></span>
+    <button onclick="deckClose()" style="background:none;border:none;color:#fff;
+            font-size:1.35rem;cursor:pointer;opacity:.65">✕</button>
+  </div>
+  <div class="dbody">
+    <img id="d-img" alt="">
+    <div id="d-text">
+      <div class="dk" id="d-k"></div>
+      <div class="dh" id="d-h"></div>
+      <div class="dt" id="d-t"></div>
+    </div>
+  </div>
+  <div class="dots" id="d-dots"></div>
+  <div class="dnav">
+    <button id="d-prev" onclick="deckGo(-1)">→ הקודם</button>
+    <button id="d-next" onclick="deckGo(1)">הבא ←</button>
+  </div>
+</div>
+
+<div id="sheet" onclick="if(event.target.id==='sheet'||event.target.className==='veil')sheetClose()">
+  <div class="veil"></div>
+  <div class="panel"><div class="hd"><i></i><b id="sheet-t"></b></div>
+  <div class="list" id="sheet-l"></div></div>
+</div>
+
+<div id="upd" onclick="applyUpdate()">גרסה חדשה זמינה — לחצו לעדכון</div>
+
+<script src="logo.js"></script>
+<script src="data.js"></script>
+<script src="links.js"></script>
+<script>
+var APP_VERSION = '6.3.1';
+
+var API    = localStorage.getItem('dfApi') || APPS_SCRIPT_URL || '';
+var myInst = localStorage.getItem('dfInst') || '';
+var myName = localStorage.getItem('dfName') || '';
+var teamCode = '';
+(function () {
+  var h = document.getElementById('hdr-mark');   if (h) h.src = LOGO_MARK;
+  var l = document.getElementById('splash-logo'); if (l) l.src = LOGO_FULL;
+})();
+
+var state = { track:null, week:null, deck:[], di:0, ans:-1, filter:'all' };
+
+(function () {
+  var m = new URLSearchParams(location.search).get('m');
+  if (m && INSTITUTIONS.some(function (i) { return i.code === m; })) {
+    myInst = m; localStorage.setItem('dfInst', m);
+  }
+})();
+
+/* ---------- לוח זמנים ---------- */
+function weekIndex() {
+  var start = new Date(PROGRAM.startDate + 'T00:00:00');
+  var now = new Date(); now.setHours(0, 0, 0, 0);
+  var days = Math.floor((now - start) / 86400000);
+  if (days < 0) return -1;
+  return Math.min(Math.floor(days / 7), CAL_TAANIT.length - 1);
+}
+function trackById(id) {
+  for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].id === id) return TRACKS[i];
+  return null;
+}
+function dafDone(tr) {
+  var wi = weekIndex(), n = 0;
+  if (wi < 0) return 0;
+  for (var i = 0; i <= wi && i < tr.cal.length; i++)
+    if (tr.cal[i][2] && tr.cal[i][2] !== 'סיום') n++;
+  return n;
+}
+var HEBV = {'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,'י':10,'כ':20,'ל':30};
+function dafKey(d) { return String(d).replace(/["'׳״\s]/g, ''); }
+function dafToNum(d) {
+  var s = dafKey(d), n = 0;
+  for (var i = 0; i < s.length; i++) n += (HEBV[s[i]] || 0);
+  return n;
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
+
+/* ---------- ניווט ---------- */
+function show(v) {
+  var all = document.querySelectorAll('.view');
+  for (var i = 0; i < all.length; i++) all[i].className = 'view';
+  var el = document.getElementById('v-' + v);
+  if (el) el.className = 'view on';
+  window.scrollTo(0, 0);
+  if (v === 'home')   renderHome();
+  if (v === 'insts')  renderInsts();
+  if (v === 'calls')  renderCalls();
+  if (v === 'reg')    renderReg();
+  if (v === 'gate')   { teamCode = ''; paintPins();
+                        document.getElementById('gate-msg').textContent = ''; }
+  paintAdmChip();
+}
+function backToTrack() { openTrack(state.track.id); }
+function backToWeek()  { openWeek(state.track.id, state.week); }
+
+/* ============================================================
+   מסך הבית.
+   הכלל שמנחה אותו: מנהל שנוחת כאן צריך לראות את החומר עצמו
+   בשלוש השניות הראשונות — לא תיאור שלו, ולא שני כפתורים
+   שמאחוריהם מסתתר הכול.
+   ============================================================ */
+var homeTrack = localStorage.getItem('dfHomeTrack') || 'megila';
+
+function weekOf(tr) { var wi = weekIndex(); return wi < 0 ? 0 : wi; }
+function contentFor(id) {
+  var tr = trackById(id), i = weekOf(tr);
+  return { tr:tr, i:i, row:tr.cal[i], c:CONTENT[id + '-' + (i + 1)] };
+}
+/* הבנאי היחיד של נתיב שקף. בגרסה העצמאית השקפים מוטמעים תחת
+   אותו מפתח בדיוק, ולכן אין כאן שני מסלולים שיכולים להיפרד. */
+function slideSrc(c, n) {
+  var p = c.deck.dir + '/' + (n < 10 ? '0' + n : n) + '.jpg';
+  return (typeof SLIDE_DATA !== 'undefined' && SLIDE_DATA[p]) || p;
+}
+
+function pickTrack(id) {
+  homeTrack = id;
+  localStorage.setItem('dfHomeTrack', id);
+  renderHome();
+}
+
+function renderHome() {
+  var w = contentFor(homeTrack), tr = w.tr, row = w.row, c = w.c;
+  var wi = weekIndex();
+  var when = wi < 0 ? 'נפתח בפרשת בראשית' : 'שבוע ' + (wi + 1) + ' מתוך ' + tr.cal.length;
+
+  /* ---- הבמה ---- */
+  var s = '<div class="stage"><span class="g g1"></span><span class="g g2"></span>' +
+          '<div class="picker">';
+  TRACKS.forEach(function (t) {
+    s += '<button class="pick' + (t.id === homeTrack ? ' on' : '') +
+         '" onclick="pickTrack(\'' + t.id + '\')">מסכת ' + esc(t.masechet) + '</button>';
+  });
+  s += '</div><div class="eyebrow">' + esc(when) + '<s></s>' +
+       (row[2] && row[2] !== 'סיום' ? 'דף ' + esc(row[2]) : '') + '</div>' +
+       '<h2>' + esc(c ? c.title : (row[2] ? 'דף ' + row[2] : row[1])) + '</h2>' +
+       '<div class="meta">' + esc(row[1]) + ' · ' + esc(row[0]) + '</div>';
+
+  if (c && c.deck) {
+    s += '<div class="showcase"><div class="frame" onclick="openFromHome(0)">' +
+         '<img src="' + slideSrc(c, 1) + '" alt="השקף הראשון"></div></div>' +
+         '<div class="acts">' +
+         '<button class="go" onclick="openFromHome(0)">▶ הצגה על המסך</button>' +
+         '<button class="alt" onclick="openWeek(\'' + homeTrack + '\',' + w.i + ')">הדף</button>' +
+         '</div>';
+  } else {
+    s += '<div class="showcase"><div class="frame"><div class="empty">' +
+         '<span>המצגת לשבוע זה בהכנה</span></div></div></div>' +
+         '<div class="acts"><button class="go" onclick="openWeek(\'' +
+         homeTrack + '\',' + w.i + ')">לדף ולחומרי הלימוד</button>' +
+         '<button class="alt" onclick="openTrack(\'' + homeTrack + '\')">המסלול</button></div>';
+  }
+  document.getElementById('stage').innerHTML = s + '</div>';
+
+  /* ---- המסלול בזעיר אנפין ---- */
+  var done = dafDone(tr), pct = Math.round(done / tr.dapim * 100);
+  var rail = '';
+  // לפני שהתוכנית יוצאת לדרך מסמנים את שבוע הפתיחה — כדי שרואים מאיפה מתחילים
+  var mark = wi < 0 ? 0 : wi;
+  tr.cal.forEach(function (r, i) {
+    var cls = !r[2] ? 'off' : r[2] === 'סיום' ? 'fin'
+            : i === mark ? 'now' : (wi >= 0 && i < wi) ? 'done' : '';
+    rail += '<i class="' + cls + '"></i>';
+  });
+  document.getElementById('mini').innerHTML =
+    '<div class="mini" onclick="openTrack(\'' + homeTrack + '\')" style="cursor:pointer">' +
+    '<div class="cap"><b>המסלול השנתי — מסכת ' + esc(tr.masechet) + '</b>' +
+    '<span>' + done + '/' + tr.dapim + ' · ' + pct + '%</span></div>' +
+    '<div class="rail">' + rail + '</div>' +
+    '<div style="font-size:.79rem;color:var(--ink-3);font-weight:700;margin-top:10px">' +
+    'דף בשבוע — וסיום המסכת בא׳ סיוון ←</div></div>';
+
+  /* ---- לוח שלבי השנה ---- */
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var nowIdx = 0;
+  PHASES.forEach(function (ph, i) {
+    if (today >= new Date(ph.from + 'T00:00:00')) nowIdx = i;
+  });
+  document.getElementById('plan').innerHTML =
+    '<div class="steps">' +
+    PHASES.map(function (ph, i) {
+      var cls = i < nowIdx ? 'done' : i === nowIdx ? 'now' : '';
+      return '<div class="st ' + cls + '"><i></i><b>' + esc(ph.t) + '</b>' +
+             '<small>' + esc(ph.sub) + '</small></div>';
+    }).join('') + '</div>' +
+    // שם השלב כבר מודגש בסטפר שמעליו, ולכן כאן רק מה שעושים בו בפועל
+    '<div class="here"><em>עכשיו</em><span>' +
+    (nowIdx === 0 ? 'נרשמים, מעריכים כמה תלמידים, ומזמינים גמרות במחיר מוזל.'
+                  : esc(PHASES[nowIdx].t) + ' · ' + esc(PHASES[nowIdx].sub)) + '</span></div>';
+
+  /* ---- פס ההרשמה ---- */
+  var joined = INSTITUTIONS.filter(function (i) { return i.joined; }).length;
+  var mine = regSaved();
+
+  /* ---- עיגולי הסטטיסטיקה ---- */
+  document.getElementById('rings').innerHTML =
+    '<div class="rings">' +
+      '<div class="ring"><div class="in"><div class="n">' + PROGRAM.lastYear.students +
+        '</div><div class="t">תלמידים למדו<br>מסכת ' + PROGRAM.lastYear.masechet +
+        ' בתשפ"ו</div></div></div>' +
+      '<div class="ring b"><div class="in"><div class="n">' + joined + '</div>' +
+        '<div class="t">ישיבות כבר<br>בתוכנית תשפ"ז</div></div></div>' +
+    '</div>';
+
+  /* ---- מי כבר בפנים — גלוי, כדי לעודד למלא את השורות ---- */
+  var inList = INSTITUTIONS.filter(function (i) { return i.joined; });
+  var openN  = INSTITUTIONS.length - inList.length;
+  document.getElementById('inbox').innerHTML =
+    '<div class="inbox"><div class="hd"><b>מי כבר בפנים</b>' +
+    '<span>' + joined + ' מתוך ' + INSTITUTIONS.length + '</span></div><div class="joined">' +
+    inList.map(function (i) { return '<span class="jp">' + esc(i.name) + '</span>'; }).join('') +
+    (openN ? '<span class="jp open">ועוד ' + openN + ' מקומות פתוחים</span>' : '') +
+    '</div><div class="note">הרשימה מתעדכנת בכל הרשת — כל ישיבה שנרשמת מופיעה כאן.</div></div>';
+
+  /* ---- קריאה לפעולה, אחרי ההוכחה ולא לפניה ---- */
+  /* מחיר אחיד לכולן → מספר אחד; מחירים שונים → החל מהזול שבהם;
+     אם ההנחה חלה רק על חלקן → נוקבים בשם המהדורה המוזלת. */
+  var u = uniformPrice();
+  var disc = SFARIM.filter(function (s) { return priceOf(s.id).off; });
+  var offer;
+  if (u) offer = 'הגמרות במחיר מוזל, ' + shek(u.price) + ' במקום ' + shek(u.list);
+  else if (disc.length > 1)
+    offer = 'הגמרות במחיר מוזל, החל מ־' + shek(priceRange().min) +
+            ' במקום ' + shek(priceOf(disc[0].id).list);
+  else if (disc.length === 1)
+    offer = esc(disc[0].name) + ' במחיר מוזל, ' + shek(priceOf(disc[0].id).price) +
+            ' במקום ' + shek(priceOf(disc[0].id).list);
+  else offer = 'הזמנה מרוכזת לכל הישיבה';
+  document.getElementById('cta').innerHTML =
+    '<button class="btn gd" onclick="show(\'reg\')">להרשמה ולהזמנת גמרות</button>' +
+    '<p style="font-size:.8rem;color:var(--ink-3);font-weight:700;text-align:center;' +
+    'margin-top:9px;line-height:1.5">' +
+    (mine ? 'אם כבר שלחתם הרשמה — אפשר לעדכן אותה'
+          : 'דקה אחת · ' + offer) + '</p>';
+
+  reveal();
+}
+
+function openFromHome(i) {
+  var w = contentFor(homeTrack);
+  openWeek(homeTrack, w.i);
+  deckOpen(i);
+}
+
+/* ============================================================
+   מסלול הרשמה.
+   בשפה מדוברת, במסך אחד, בלי אשף רב־שלבי — פחות נשירה.
+   ============================================================ */
+/* qty — כמות לכל צירוף של מסכת ומהדורה, במפתח 'מסכת-מהדורה'.
+   זו גם התשובה ל"כמה תלמידים", ולכן אין שאלה נפרדת. */
+var reg = { inst:'', instOther:'', who:'', phone:'', qty:{} };
+
+function regSaved() {
+  try { return JSON.parse(localStorage.getItem('dfReg') || 'null'); } catch (e) { return null; }
+}
+/* ניקוי ההרשמה שנשמרה במכשיר — הטופס חוזר להיות ריק */
+function regReset() {
+  localStorage.removeItem('dfReg');
+  reg = { inst:'', instOther:'', who:'', phone:'', qty:{} };
+  renderReg();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+/* סך העותקים של מהדורה אחת, בשתי המסכתות — זה המספר שנספר מול
+   סף ההנחה, כי ההוצאה סופרת עותקים ולא כרכים. */
+function sefTotal(sefer, q) {
+  q = q || reg.qty;
+  return TRACKS.reduce(function (a, t) { return a + (q[qk(t.id, sefer)] || 0); }, 0);
+}
+function regTotalQty(q) {
+  return SFARIM.reduce(function (a, s) { return a + sefTotal(s.id, q); }, 0);
+}
+
+/* שתי צורות ישנות של הרשמה שמורה:
+   1. z/ch + מהדורה אחת — z היה תענית ו-ch מגילה, ולכן ההעברה מדויקת.
+   2. qty לפי מהדורה בלבד, בלי מסכת — צורה שחיה שעות ספורות לפני
+      שהמסכתות הופרדו. אין בה מידע על המסכת, ולכן היא נכנסת לתענית
+      וצריך לוודא אותה בשיחה. */
+function regMigrate(saved) {
+  var q = {};
+  if (saved.qty) {
+    var flat = false;
+    for (var k in saved.qty) { if (k.indexOf('-') < 0) flat = true; }
+    if (!flat) return saved.qty;
+    SFARIM.forEach(function (s) {
+      if (saved.qty[s.id]) q[qk(TRACKS[0].id, s.id)] = saved.qty[s.id];
+    });
+    return q;
+  }
+  if (saved.sefer && saved.sefer !== 'later') {
+    if (saved.z)  q[qk('taanit', saved.sefer)] = saved.z;
+    if (saved.ch) q[qk('megila', saved.sefer)] = saved.ch;
+  }
+  return q;
+}
+
+function renderReg() {
+  var saved = regSaved();
+  if (saved && !reg.inst) {
+    reg.inst = saved.code || ''; reg.who = saved.who || ''; reg.phone = saved.phone || '';
+    reg.qty = regMigrate(saved);
+    reg.instOther = saved.instOther || '';
+  }
+  var instName = reg.inst === 'other' ? 'ישיבה אחרת'
+    : (INSTITUTIONS.filter(function (i) { return i.code === reg.inst; })[0] || {}).name || '';
+
+  /* הרצועה בראש: לא הסבר אלא הרחבת אופק, שנייה לפני שמקלידים מספר.
+     זה הרגע היחיד שבו היא שווה משהו — ההבדל בין "כמה לשיעור שלי"
+     לבין "כמה לישיבה שלי". בעמוד הראשי היא הייתה הגוש הרביעי
+     ונסרקה בלי להשאיר רושם.
+     אחריה ישר לעניין: במה בוחרים, כמה זה עולה, ובסוף שם וטלפון. */
+  var h = fitBlock() +
+    /* הרשמה שכבר במכשיר ממלאת את הטופס מראש. אומרים את זה במפורש,
+       אחרת המספרים נראים כמו ברירת מחדל שהאפליקציה המציאה. */
+    (saved ? '<p class="jump">' + esc(UI.savedNote) + ' · ' +
+             '<a href="#" onclick="jumpTo(\'r-who-step\');return false">' +
+             esc(UI.savedGo) + '</a> · ' +
+             '<a href="#" onclick="regReset();return false">' +
+             esc(UI.savedNew) + '</a></p>' : '') +
+
+    '<div class="step-n"><i>1</i><b>' + esc(UI.s2) + '</b></div>' +
+    recBlocks() +
+
+    '<div class="step-n"><i>2</i><b>' + esc(UI.s3) + '</b></div>' +
+    '<p style="font-size:.85rem;color:var(--ink-2);font-weight:600;margin-bottom:11px;' +
+    'line-height:1.6">' + esc(UI.hint) + '</p>' +
+    '<p class="two-m">' + esc(UI.twoM) + '</p>' +
+    orderRows() +
+
+    regTotal() +
+
+    '<div class="step-n" id="r-who-step"><i>3</i><b>' + esc(UI.s4) + '</b></div>' +
+    pkField('', instName, UI.instLabel, 'pickInst()') +
+    '<div class="fld" id="r-other" style="display:' + (reg.inst === 'other' ? 'block' : 'none') + '">' +
+    '<input type="text" id="r-otherName" placeholder="שם הישיבה" value="' + esc(reg.instOther) +
+    '" onchange="regSet(\'instOther\',this.value)"></div>' +
+    '<div class="fld"><div class="label">' + esc(UI.whoLabel) + '</div>' +
+    '<input type="text" id="r-who" placeholder="שם" value="' + esc(reg.who) +
+    '" onchange="regSet(\'who\',this.value)"></div>' +
+    '<div class="fld"><div class="label">' + esc(UI.phoneLabel) + '</div>' +
+    '<input type="tel" id="r-phone" placeholder="05X-XXXXXXX" value="' + esc(reg.phone) +
+    '" onchange="regSet(\'phone\',this.value)"></div>' +
+
+    '<button class="btn gr" style="margin-top:20px" onclick="sendReg()">' +
+    esc(saved ? UI.update : UI.send) + '</button>' +
+    '<div id="r-done"></div>';
+
+  document.getElementById('reg-body').innerHTML = h;
+}
+/* למי מתאימה התוכנית — בעמוד הראשי, ממש מעל כפתור ההרשמה.
+   הסמלים מצוירים כאן ולא בקובץ נפרד: שלושה קווים כל אחד, קלים
+   מכל תמונה, ומקבלים את צבע הזהב מהעיצוב. */
+var FIT_ICONS = {
+  /* חבורה — שלושה לומדים בשורה */
+  group:'<circle cx="5" cy="8.4" r="2.2"/><circle cx="12" cy="8.4" r="2.2"/>' +
+        '<circle cx="19" cy="8.4" r="2.2"/>' +
+        '<path d="M1.7 19.2c0-2.4 1.5-4 3.3-4s3.3 1.6 3.3 4"/>' +
+        '<path d="M8.7 19.2c0-2.4 1.5-4 3.3-4s3.3 1.6 3.3 4"/>' +
+        '<path d="M15.7 19.2c0-2.4 1.5-4 3.3-4s3.3 1.6 3.3 4"/>',
+  /* אב ובן — גבוה ונמוך זה מול זה */
+  pair: '<circle cx="7.5" cy="6.2" r="2.6"/><circle cx="16.8" cy="10.4" r="2.1"/>' +
+        '<path d="M3.4 19.6c0-2.9 1.8-4.8 4.1-4.8s4.1 1.9 4.1 4.8"/>' +
+        '<path d="M13.4 19.6c0-2.2 1.5-3.6 3.4-3.6s3.4 1.4 3.4 3.6"/>',
+  /* לומד לבד — דמות מעל ספר פתוח */
+  solo: '<circle cx="12" cy="5.6" r="2.5"/>' +
+        '<path d="M8.4 12.4c.5-1.7 1.9-2.7 3.6-2.7s3.1 1 3.6 2.7"/>' +
+        '<path d="M3.6 15.2h6.2c1.2 0 2.2.7 2.2 1.6 0-.9 1-1.6 2.2-1.6h6.2v4.4h-6.2' +
+        'c-1.2 0-2.2.7-2.2 1.6 0-.9-1-1.6-2.2-1.6H3.6z"/>'
+};
+function fitBlock() {
+  return '<div class="fit"><b>' + esc(FIT.title) + '</b>' +
+    '<ul>' + FIT.items.map(function (f) {
+      return '<li><i><svg viewBox="0 0 24 24" aria-hidden="true">' +
+        (FIT_ICONS[f.icon] || '') + '</svg></i><span>' + esc(f.t) + '</span></li>';
+    }).join('') + '</ul>' +
+    /* אחרונה בכוונה: קודם רואים את שלוש הדרכים, ואז מקבלים את
+       המשמעות שלהן ביחד — שאפשר להריץ את זה בכל הישיבה. */
+    (FIT.sub ? '<p>' + esc(FIT.sub) + '</p>' : '') +
+    '</div>';
+}
+
+/* ההמלצה: משפט בגוף שני, ומתחתיו הספר. אין תיאור — התמונות עושות
+   את העבודה, ולכן הפריסה הפתוחה מוצגת ברוחב מלא: זו התמונה שצריך
+   להתרשם ממנה. הכריכה בגודלה הטבעי מעליה, רק כדי לזהות את הספר.
+   תנאי ההנחה יושב כאן, צמוד למחיר של המהדורה שלו. */
+function recBlocks() {
+  return '<div style="display:grid;gap:13px">' + SFARIM.map(function (s) {
+    var p = priceOf(s.id);
+    return '<div class="rec ' + s.tone + '"><p>' + s.rec + '</p>' +
+      (s.pics && s.pics.length
+        ? '<div class="pics">' + s.pics.map(function (pic) {
+            return '<img loading="lazy"' + (pic.small ? ' class="sm"' : '') +
+                   ' src="' + esc(pic.src) + '" alt="' + esc(s.name) +
+                   '" onclick="zoom(\'' + esc(pic.src) + '\',\'' +
+                   esc(pic.hi || '') + '\')">';
+          }).join('') + '</div>'
+        : '') +
+      '<div class="pr"><b>' + shek(p.price) + '</b> לחוברת' +
+      (p.off ? ' <s>' + shek(p.list) + '</s>' : '') + '</div>' +
+      (p.off ? condNote(s.name, p.min) : '') +
+      '</div>';
+  }).join('') + '</div>';
+}
+
+/* הגדלת תמונה. הפריסה צפופה בכוונה — מי שרוצה באמת לקרוא אותה
+   לפני שהוא מחליט, לוחץ.
+
+   מציגים מיד את התמונה שכבר נטענה בכרטיס, ורק אחר כך מחליפים
+   לגרסה החדה. כך אין רגע של מסך ריק, ואם הגרסה החדה חסרה או
+   נכשלת — נשארים עם מה שיש במקום מסך כחול. */
+function zoom(base, hi) {
+  var o = document.getElementById('zoom'), im = o.querySelector('img');
+  im.src = base;
+  o.scrollTop = 0; o.scrollLeft = 0;
+  o.classList.add('on');
+  if (hi && hi !== base) {
+    var pre = new Image();
+    pre.onload = function () { if (o.classList.contains('on')) im.src = hi; };
+    pre.src = hi;
+  }
+}
+function zoomClose() { document.getElementById('zoom').classList.remove('on'); }
+
+function jumpTo(id) {
+  var el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ההזמנה לפי מסכת ואז לפי מהדורה. הישיבה בוחרת מסכת אחת או שתיהן,
+   ולכל אחת אפשר לפצל בין המהדורות. */
+function qk(track, sefer) { return track + '-' + sefer; }
+/* "מסכת תענית: 80 ושננתם, 40 הסוגיה היומית · מסכת מגילה: 60 ושננתם" */
+function orderSummary(q) {
+  return TRACKS.map(function (t) {
+    var parts = SFARIM.filter(function (s) { return q[qk(t.id, s.id)] > 0; })
+      .map(function (s) { return q[qk(t.id, s.id)] + ' ' + s.name; });
+    return parts.length ? 'מסכת ' + t.masechet + ': ' + parts.join(', ') : '';
+  }).filter(Boolean).join(' · ');
+}
+function orderRows() {
+  return '<div style="display:grid;gap:16px">' + TRACKS.map(function (t) {
+    return '<div><div class="mtitle">מסכת ' + esc(t.masechet) + '</div>' +
+      '<div style="display:grid;gap:9px">' +
+      SFARIM.map(function (s) {
+        return numRow(qk(t.id, s.id), s.name,
+                      s.fit + ' · ' + shek(priceOf(s.id).price) + ' לחוברת');
+      }).join('') + '</div></div>';
+  }).join('') + '</div>';
+}
+
+/* קופסת הסיכום: הסכום, ומתחתיו רק החיסכון. הפירוט של הכמויות
+   נמצא בשורות שממש מעליה, ולכן חזרה עליו רק מעמיסה. */
+function regTotal() {
+  var picked = SFARIM.filter(function (s) { return sefTotal(s.id) > 0; });
+  if (!picked.length) return '';
+  var sum = 0, save = 0;
+  picked.forEach(function (s) {
+    var n = sefTotal(s.id), p = priceOf(s.id);
+    sum += n * p.price; save += n * (p.list - p.price);
+  });
+  return '<div class="total" style="margin-top:14px"><div class="n">' + shek(sum) +
+         '</div>' +
+         (save ? '<div class="t">' + fill(UI.saving, { sum:shek(save) }) + '</div>' : '') +
+         '</div>';
+}
+function numRow(id, label, sub) {
+  return '<div class="num"><div class="lbl">' + esc(label) +
+    '<small>' + esc(sub) + '</small></div><span></span>' +
+    '<div class="ctl"><button onclick="qtyStep(\'' + id + '\',-5)">−</button>' +
+    '<input type="tel" id="r-' + id + '" value="' + (reg.qty[id] || 0) +
+    '" onchange="qtySet(\'' + id + '\',this.value)">' +
+    '<button onclick="qtyStep(\'' + id + '\',5)">+</button></div></div>';
+}
+function qtySet(id, v) {
+  reg.qty[id] = Math.max(0, parseInt(v, 10) || 0);
+  renderReg();
+}
+function qtyStep(id, d) { qtySet(id, (reg.qty[id] || 0) + d); }
+function regSet(k, v) {
+  reg[k] = v;
+  if (k === 'inst') renderReg();
+}
+function pickInst() {
+  var items = INSTITUTIONS.map(function (i) { return { v:i.code, t:i.name }; });
+  items.push({ v:'other', t:'ישיבה אחרת…' });
+  pick('הישיבה שלנו', items, reg.inst, function (v) { regSet('inst', v); });
+}
+
+function sendReg() {
+  var name = reg.inst === 'other' ? reg.instOther
+           : (INSTITUTIONS.filter(function (i) { return i.code === reg.inst; })[0] || {}).name;
+  if (!name)      { alert('נא לבחור ישיבה.'); return; }
+  if (!reg.who)   { alert('נא למלא שם איש קשר.'); return; }
+  if (!reg.phone) { alert('נא למלא טלפון.'); return; }
+
+  var total = regTotalQty();
+  if (!total) { alert('נא למלא כמה גמרות להזמין.'); return; }
+
+  /* עמודה לכל צירוף מסכת-מהדורה בגיליון, ולצידה שורת סיכום
+     קריאה לאדם — כדי שההזמנה תהיה ברורה גם בלי לפענח מפתחות. */
+  var payload = { action:'register', inst:name, code:reg.inst, who:reg.who, phone:reg.phone,
+                  total:total, at:new Date().toISOString() };
+  TRACKS.forEach(function (t) {
+    SFARIM.forEach(function (s) { payload[qk(t.id, s.id)] = reg.qty[qk(t.id, s.id)] || 0; });
+  });
+  payload.qty = reg.qty;
+  payload.seferName = orderSummary(reg.qty) || 'לא נבחר';
+
+  localStorage.setItem('dfReg', JSON.stringify(payload));
+  var all = Store.get('registrations', []) || [];
+  all = all.filter(function (r) { return r.code !== payload.code; });
+  all.unshift(payload);
+  Store.set('registrations', all);
+
+  var txt = 'הרשמה לדף השבועי תשפ"ז\n\n' +
+    'ישיבה: ' + name + '\n' +
+    'איש קשר: ' + reg.who + '\n' +
+    'טלפון: ' + reg.phone + '\n' +
+    TRACKS.map(function (t) {
+      return 'מסכת ' + t.masechet + ':\n' + SFARIM.map(function (s) {
+        return '  ' + s.name + ': ' + (reg.qty[qk(t.id, s.id)] || 0);
+      }).join('\n');
+    }).join('\n') + '\n' +
+    'סה"כ גמרות: ' + total;
+
+  if (API) {
+    /* `cols` הוא מה שהסקריפט בגוגל כותב בפועל: כותרת וערך, לפי הסדר.
+       הכותרות נקבעות כאן ולא שם, ולכן מסכת או מהדורה חדשה מייצרות
+       עמודה חדשה בגיליון בלי לגעת בסקריפט שוב. השדות השטוחים שמעל
+       נשארים, כדי שגם פריסה ישנה של הסקריפט עדיין תקלוט הרשמה. */
+    var sent = {};
+    for (var f in payload) sent[f] = payload[f];
+    sent.cols = JSON.stringify(regCols(name, total, payload.seferName));
+
+    queue(sent);                          // יש שרת — נשלח, וגם נשמר בתור אם אין רשת
+    regDone(txt, false);
+  } else {
+    regDone(txt, true);                   // אין שרת — הודעת וואטסאפ מוכנה לשליחה
+  }
+}
+/* העמודות בגיליון ההרשמות, לפי הסדר. מקור האמת היחיד לשמות שלהן. */
+function regCols(name, total, summary) {
+  var cols = [['ישיבה', name], ['קוד', reg.inst],
+              ['איש קשר', reg.who], ['טלפון', reg.phone]];
+  TRACKS.forEach(function (t) {
+    SFARIM.forEach(function (s) {
+      cols.push([t.masechet + ' · ' + s.name, reg.qty[qk(t.id, s.id)] || 0]);
+    });
+  });
+  cols.push(['סה"כ גמרות', total], ['פירוט', summary]);
+  return cols;
+}
+
+function regDone(txt, viaWa) {
+  document.getElementById('r-done').innerHTML =
+    '<div class="done-box" style="margin-top:14px">' +
+    esc(UI.done) + '</div>' +
+    (viaWa ? '<div style="text-align:center;margin-top:11px">' +
+             '<a style="font-size:.79rem;color:var(--ink-3);font-weight:700" ' +
+             'href="https://wa.me/' + COORD_WA + '?text=' + encodeURIComponent(txt) +
+             '" target="_blank" rel="noopener">לא קיבלתם אישור? שלחו לנו הודעה</a></div>' : '');
+  renderHome();
+  document.getElementById('r-done').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+/* חשיפה עדינה בגלילה — נותנת קצב לעמוד בלי להסיח */
+function reveal() {
+  var els = document.querySelectorAll('#v-home .rv');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < els.length; i++) els[i].className += ' in';
+    return;
+  }
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e, k) {
+      if (!e.isIntersecting) return;
+      var el = e.target;
+      setTimeout(function () { el.classList.add('in'); }, k * 55);
+      io.unobserve(el);
+    });
+  }, { rootMargin:'0px 0px -8% 0px' });
+  for (var j = 0; j < els.length; j++) { els[j].classList.remove('in'); io.observe(els[j]); }
+
+  // רשת ביטחון: אם המשקיף לא ירה מסיבה כלשהי, לא נשאיר תוכן נסתר.
+  clearTimeout(reveal.t);
+  reveal.t = setTimeout(function () {
+    for (var k = 0; k < els.length; k++) els[k].classList.add('in');
+  }, 1200);
+}
+
+/* ---------- מסלול כמסע ---------- */
+function openTrack(id) {
+  var tr = trackById(id); state.track = tr;
+  var wi = weekIndex(), chaps = CHAPTERS[id], shown = {};
+
+  var h = '<div class="head"><b>מסכת ' + esc(tr.masechet) + '</b><i></i><span>' +
+          tr.dapim + ' דפים · תשפ"ז</span></div><div class="trail">';
+
+  tr.cal.forEach(function (row, i) {
+    var daf = row[2];
+    if (daf && daf !== 'סיום') {
+      var num = dafToNum(daf);
+      chaps.forEach(function (c, ci) {
+        if (!shown[ci] && num >= c.from) {
+          shown[ci] = 1;
+          h += '<div class="chap"><b>' + esc(c.n) + '</b><i></i></div>';
+        }
+      });
+    }
+    var cls = 'step';
+    if (!daf) cls += ' off';
+    else if (daf === 'סיום') cls += ' siyum';
+    if (i === wi) cls += ' cur';
+    if (wi >= 0 && i < wi) cls += ' done';
+    if (i === tr.cal.length - 1) cls += ' last';
+
+    var open = daf && daf !== 'סיום';
+    h += '<div class="' + cls + '"' +
+         (open ? ' onclick="openWeek(\'' + id + '\',' + i + ')"' : '') + '>' +
+         '<span class="dot">' + (daf ? (daf === 'סיום' ? 'סיום' : esc(daf)) : 'חופשה') + '</span>' +
+         '<div class="txt"><div class="p">' + esc(row[1]) +
+         (i === wi ? '<span class="badge">השבוע</span>' : '') + '</div>' +
+         '<div class="d">' + esc(row[0]) + '</div></div></div>';
+  });
+
+  var bm = document.getElementById('bm');
+  bm.className = 'bm ' + (id === 'taanit' ? 't-b' : 't-g');
+  bm.innerHTML = h + '</div>';
+  show('track');
+  if (wi > 2) {
+    var cur = bm.querySelector('.step.cur');
+    if (cur) setTimeout(function () { cur.scrollIntoView({ block:'center' }); }, 70);
+  }
+}
+
+/* ---------- שבוע ---------- */
+function openWeek(id, i) {
+  var tr = trackById(id); state.track = tr; state.week = i;
+  var row = tr.cal[i], key = id + '-' + (i + 1);
+  var c = CONTENT[key], q = QUIZ[key];
+  var tone = id === 'taanit' ? 't-b' : 't-g';
+  var lk = (DAF_LINKS[id] || {})[dafKey(row[2])] || [];
+
+  var h = '<div class="' + tone + '"><div class="wtop">' +
+          '<div><div class="k">מסכת ' + esc(tr.masechet) + ' · ' + esc(row[1]) + '</div>' +
+          '<h2>' + esc(c ? c.title : 'דף ' + row[2]) + '</h2>' +
+          '<div class="k" style="font-weight:600">' + esc(row[0]) + '</div></div>' +
+          '<span class="dafbig">' + esc(row[2]) + '</span></div></div>';
+
+  /* 1. הדף עצמו — זה העיקר, ולכן הוא ראשון */
+  var lnk = function (href, ic, t, sub, cls) {
+    return href
+      ? '<a class="lnk ' + (cls || '') + '" href="' + href + '" target="_blank" rel="noopener">' +
+        '<span class="ic">' + ic + '</span><span>' + t + '<small>' + sub + '</small></span></a>'
+      : '<a class="lnk dim" href="#" onclick="return notYet()">' +
+        '<span class="ic">' + ic + '</span><span>' + t + '<small>' + sub + '</small></span></a>';
+  };
+  var sg = SUGYA[id] || {}, sgPage = (sg.pages || {})[dafKey(row[2])];
+  var sgHref = (sg.base && sg.fmt && sgPage) ? sg.fmt.replace('{p}', sgPage)
+             : (sg.base || '');
+
+  h += '<div class="sec" style="margin-top:16px"><b>הדף עצמו</b><i></i></div><div class="links">' +
+       lnk(lk[0], '⤓', 'צורת הדף', 'הדף להדפסה') +
+       lnk(lk[1], 'פ', 'פירוש חברותא', 'ביאור על הדף') +
+       lnk(sgHref, '◆', 'הסוגיה היומית',
+           sgPage ? 'דלגו לעמוד ' + sgPage + ' בחוברת' : 'החוברת הדיגיטלית', 'sug') +
+       '</div>';
+
+  /* 2. החידה */
+  if (q) h += '<div class="sec" style="margin-top:18px"><b>החידה השבועית</b><i></i></div>' +
+              '<button class="btn gr" onclick="openQuiz()">לחידה — ולהגרלה</button>';
+
+  /* 3. המצגת — כלי עזר, ולכן אחרונה */
+  if (c && c.deck) {
+    state.deck = [];
+    for (var n = 1; n <= c.deck.n; n++)
+      state.deck.push({ img: slideSrc(c, n) });
+    h += '<div class="sec" style="margin-top:20px"><b>מצגת עזר · ' + c.deck.n +
+         ' שקפים</b><i></i></div>' +
+         '<button class="btn p" onclick="deckOpen()">▶ הצגה על המסך</button>' +
+         '<div class="thumbs">';
+    state.deck.forEach(function (s, k) {
+      h += '<img class="thumb" loading="lazy" src="' + s.img +
+           '" alt="שקף ' + (k + 1) + '" onclick="deckOpen(' + k + ')">';
+    });
+    h += '</div>';
+  } else if (c) {
+    var live = c.slides.filter(function (s) { return s.h || s.t; });
+    state.deck = live;
+    h += '<button class="btn p" style="margin-top:14px" onclick="deckOpen()">▶ הצגה על המסך</button>' +
+         '<div class="sec" style="margin-top:14px"><b>' + live.length + ' שקפים</b><i></i></div>' +
+         '<div class="slides">';
+    live.forEach(function (s, k) {
+      h += '<div class="slide" onclick="deckOpen(' + k + ')">' +
+           (s.k ? '<div class="k">' + esc(s.k) + '</div>' : '') +
+           (s.h ? '<h4>' + esc(s.h) + '</h4>' : '') +
+           (s.t ? '<p>' + esc(s.t) + '</p>' : '') + '</div>';
+    });
+    h += '</div>';
+  } else {
+    state.deck = [];
+    h += '<div class="card" style="margin-top:14px;text-align:center">' +
+         '<h3>חומרי הלימוד לדף זה בהכנה</h3>' +
+         '<p>המצגת והחידה יעלו לקראת השבוע הזה.</p></div>';
+  }
+
+  document.getElementById('week-body').innerHTML = h;
+  show('week');
+}
+function notYet() { alert('הקישור יתווסף בקרוב.'); return false; }
+
+/* ---------- הקרנה ---------- */
+function deckOpen(i) {
+  if (!state.deck.length) return;
+  state.di = i || 0;
+  document.getElementById('d-where').textContent =
+    'מסכת ' + state.track.masechet + ' · דף ' + state.track.cal[state.week][2];
+  document.getElementById('deck').className = 'on';
+  deckPaint();
+}
+function deckClose() { document.getElementById('deck').className = ''; }
+function deckGo(d) {
+  var n = state.di + d;
+  if (n < 0 || n >= state.deck.length) return;
+  state.di = n; deckPaint();
+}
+function deckPaint() {
+  var s = state.deck[state.di];
+  var img = document.getElementById('d-img'), txt = document.getElementById('d-text');
+  if (s.img) {
+    img.src = s.img; img.style.display = 'block'; txt.style.display = 'none';
+    var nx = state.deck[state.di + 1];          // טעינה מוקדמת — מעבר מיידי בכיתה
+    if (nx && nx.img) { var pre = new Image(); pre.src = nx.img; }
+  } else {
+    img.style.display = 'none'; txt.style.display = 'flex';
+    document.getElementById('d-k').textContent = s.k || '';
+    document.getElementById('d-h').textContent = s.h || '';
+    document.getElementById('d-t').textContent = s.t || '';
+  }
+  document.getElementById('d-prev').disabled = state.di === 0;
+  document.getElementById('d-next').disabled = state.di === state.deck.length - 1;
+  var d = '';
+  for (var i = 0; i < state.deck.length; i++)
+    d += '<i class="' + (i === state.di ? 'on' : '') + '"></i>';
+  document.getElementById('d-dots').innerHTML = d;
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.getElementById('zoom').classList.contains('on')) {
+    zoomClose(); return;
+  }
+  if (document.getElementById('deck').className !== 'on') return;
+  if (e.key === 'ArrowLeft')  deckGo(1);
+  if (e.key === 'ArrowRight') deckGo(-1);
+  if (e.key === ' ') { deckGo(1); e.preventDefault(); }
+  if (e.key === 'Escape') deckClose();
+});
+
+/* ---------- חידה ---------- */
+function openQuiz() {
+  var key = state.track.id + '-' + (state.week + 1), q = QUIZ[key];
+  if (!q) return;
+  var qInstName = (INSTITUTIONS.filter(function (i) { return i.code === myInst; })[0] || {}).name || '';
+
+  var h = '<div class="sec"><b>החידה השבועית · דף ' +
+          esc(state.track.cal[state.week][2]) + '</b><i></i></div>' +
+          '<div class="qq">' + esc(q.q) + '</div><div class="opts">';
+  q.a.forEach(function (t, i) {
+    h += '<button class="opt" id="opt' + i + '" onclick="pickAns(' + i + ')">' +
+         '<span class="n">' + (i + 1) + '</span><span>' + esc(t) + '</span></button>';
+  });
+  h += '</div><div style="margin-top:18px">' +
+       pkField('הישיבה שלי', qInstName, 'בחרו ישיבה', 'pickQuizInst()') +
+       '<div class="fld"><div class="label">השם שלי</div>' +
+       '<input type="text" id="q-name" placeholder="שם מלא" value="' + esc(myName) + '"></div>' +
+       '<div class="fld"><div class="label">טלפון — לשליחת הפרס</div>' +
+       '<input type="tel" id="q-phone" placeholder="05X-XXXXXXX"></div></div>' +
+       '<button class="btn p" id="q-send" onclick="sendQuiz()" disabled>שליחה</button>' +
+       '<p style="font-size:.76rem;color:var(--ink-3);text-align:center;margin-top:10px;font-weight:600">' +
+       'הפרטים נשמרים במערכת התוכנית בלבד.</p><div id="q-result"></div>';
+  document.getElementById('quiz-body').innerHTML = h;
+  state.ans = -1;
+  show('quiz');
+}
+function pickQuizInst() {
+  pick('הישיבה שלי', INSTITUTIONS.map(function (i) { return { v:i.code, t:i.name }; }),
+       myInst, function (v) {
+    myInst = v; localStorage.setItem('dfInst', v); openQuiz();
+  });
+}
+function pickAns(i) {
+  state.ans = i;
+  var q = QUIZ[state.track.id + '-' + (state.week + 1)];
+  for (var k = 0; k < q.a.length; k++) {
+    var el = document.getElementById('opt' + k);
+    if (el) el.className = 'opt' + (k === i ? ' sel' : '');
+  }
+  document.getElementById('q-send').disabled = false;
+}
+function sendQuiz() {
+  var key = state.track.id + '-' + (state.week + 1), q = QUIZ[key];
+  var inst = myInst;
+  var name = document.getElementById('q-name').value.trim();
+  var phone = document.getElementById('q-phone').value.trim();
+  if (!inst || !name) { alert('נא לבחור ישיבה ולמלא שם.'); return; }
+  myInst = inst; myName = name;
+  localStorage.setItem('dfInst', inst); localStorage.setItem('dfName', name);
+
+  var right = state.ans === q.correct;
+  for (var k = 0; k < q.a.length; k++) {
+    var el = document.getElementById('opt' + k);
+    if (!el) continue;
+    el.className = 'opt' + (k === q.correct ? ' right'
+                          : (k === state.ans && !right ? ' wrong' : ''));
+    el.onclick = null;
+  }
+  document.getElementById('q-send').disabled = true;
+  queue({ action:'quiz', week:key, inst:inst, name:name, phone:phone,
+          answer:state.ans, correct:right, at:new Date().toISOString(),
+          cols: JSON.stringify([['שבוע', key], ['ישיבה', inst], ['שם', name],
+            ['טלפון', phone], ['תשובה', state.ans + 1],
+            ['נכון', right ? 'נכון' : 'לא נכון']]) });
+  document.getElementById('q-result').innerHTML =
+    '<div class="done-box" style="margin-top:14px">' +
+    (right ? 'תשובה נכונה! נכנסת להגרלה השבועית.'
+           : 'התשובה הנכונה מסומנת. נכנסת להגרלה השבועית.') + '</div>';
+}
+
+/* ---------- מוסדות ---------- */
+function renderInsts() {
+  var h = '';
+  INSTITUTIONS.forEach(function (i) {
+    h += '<div class="inst"><span class="v ' + (i.joined ? 'y' : 'n') + '">' +
+         (i.joined ? '✓' : '') + '</span><span class="nm">' + esc(i.name) + '</span>' +
+         (i.last ? '<span class="tg">תשפ"ו</span>' : '') + '</div>';
+  });
+  document.getElementById('inst-list').innerHTML = h;
+}
+
+/* ============================================================
+   מוקד שיחות — כלי פרטי של רכז התוכנית.
+   אנשי הקשר נשמרים על המכשיר בלבד (localStorage) ואינם נמצאים
+   בקוד: הריפו ציבורי, ואסור שטלפונים של מנהלים יישבו בו.
+   ============================================================ */
+var STAGES = [
+  { k:'new',    t:'לא דיברתי', c:'' },
+  { k:'talked', t:'דיברתי',    c:'' },
+  { k:'warm',   t:'מתעניין',   c:'w' },
+  { k:'joined', t:'הצטרף',     c:'j' },
+  { k:'no',     t:'לא השנה',   c:'x' }
+];
+function contacts()      { try { return JSON.parse(localStorage.getItem('dfContacts') || '[]'); }
+                           catch (e) { return []; } }
+function saveContacts(c) { localStorage.setItem('dfContacts', JSON.stringify(c)); }
+
+// מנקה מספר לחיוג ולוואטסאפ
+function digits(p) { return String(p || '').replace(/[^0-9]/g, ''); }
+function waNum(p) {
+  var d = digits(p);
+  if (d.indexOf('972') === 0) return d;
+  return '972' + d.replace(/^0/, '');
+}
+
+// מפרסר הדבקה מגיליון גוגל: עמודות מופרדות בטאב
+function parseContacts(text) {
+  var out = [];
+  String(text).split(/\r?\n/).forEach(function (line) {
+    if (!line.trim()) return;
+    var cells = line.split('\t');
+    if (cells.length < 2) cells = line.split(/\s{2,}|,/);
+    cells = cells.map(function (c) { return c.trim().replace(/⁩|⁦/g, ''); });
+
+    var name = '', people = [], phones = [], last = false;
+    cells.forEach(function (c) {
+      if (/^(TRUE|כן|V|✓)$/i.test(c)) { last = true; return; }
+      if (/^(FALSE|לא)$/i.test(c)) return;
+      if (!c || c === 'X' || c === 'x') return;
+      if (/^[0-9\-\+\(\)\s]{9,}$/.test(c)) { phones.push(c); return; }
+      if (!name) name = c; else people.push(c);
+    });
+    if (!name) return;
+    out.push({ name:name, who:people.join(' · '), phone:phones[0] || '',
+               phone2:phones[1] || '', last:last, stage:'new', note:'' });
+  });
+  return out;
+}
+
+function renderCalls() {
+  var list = contacts();
+  var el = document.getElementById('calls-body');
+
+  if (!list.length) {
+    el.innerHTML =
+      '<div class="hero" style="padding:22px 20px"><span class="glow g1"></span>' +
+      '<span class="glow g3"></span><h2 style="font-size:1.35rem">מוקד שיחות</h2>' +
+      '<div class="rule"></div><div class="sub">כדי להתחיל, הדביקו את רשימת המוסדות ' +
+      'מגיליון הגוגל. הרשימה נשמרת על המכשיר הזה בלבד ואינה נשלחת לשום מקום.</div></div>' +
+      '<div class="card"><h3>איך מדביקים</h3><p>בגיליון — סמנו את השורות ' +
+      '(בלי שורת הכותרת), העתיקו, והדביקו כאן. כל עמודה בנפרד.</p></div>' +
+      '<textarea id="paste" rows="7" placeholder="הדביקו כאן…"></textarea>' +
+      '<button class="btn p" onclick="importContacts()">ייבוא הרשימה</button>';
+    return;
+  }
+
+  var counts = { all:list.length };
+  STAGES.forEach(function (s) {
+    counts[s.k] = list.filter(function (c) { return c.stage === s.k; }).length;
+  });
+
+  var h = '<div class="hero" style="padding:20px"><span class="glow g1"></span>' +
+          '<span class="glow g3"></span><h2 style="font-size:1.3rem">מוקד שיחות</h2>' +
+          '<div class="rule"></div><div class="sub">' + counts.joined +
+          ' מתוך ' + list.length + ' ישיבות הצטרפו · ' +
+          (list.length - counts.new) + ' שיחות בוצעו</div></div>';
+
+  h += '<div class="callbar">' +
+       '<div class="cb' + (state.filter === 'all' ? ' on' : '') +
+       '" onclick="callFilter(\'all\')"><b>' + counts.all + '</b><span>הכל</span></div>' +
+       '<div class="cb' + (state.filter === 'new' ? ' on' : '') +
+       '" onclick="callFilter(\'new\')"><b>' + counts.new + '</b><span>לא דיברתי</span></div>' +
+       '<div class="cb' + (state.filter === 'warm' ? ' on' : '') +
+       '" onclick="callFilter(\'warm\')"><b>' + counts.warm + '</b><span>מתעניין</span></div>' +
+       '<div class="cb' + (state.filter === 'joined' ? ' on' : '') +
+       '" onclick="callFilter(\'joined\')"><b>' + counts.joined + '</b><span>הצטרפו</span></div>' +
+       '</div>';
+
+  // הממשיכים מתשפ"ו קודם — הם השיחות הקלות והמשכנעות
+  var shown = list.map(function (c, i) { return { c:c, i:i }; })
+    .filter(function (o) { return state.filter === 'all' || o.c.stage === state.filter; })
+    .sort(function (a, b) { return (b.c.last ? 1 : 0) - (a.c.last ? 1 : 0); });
+
+  if (!shown.length) h += '<div class="msg">אין מוסדות בקטגוריה הזו.</div>';
+
+  shown.forEach(function (o) {
+    var c = o.c, i = o.i;
+    h += '<div class="ct s-' + c.stage + '"><div class="h"><div>' +
+         '<div class="nm">' + esc(c.name) + '</div>' +
+         (c.who ? '<div class="who">' + esc(c.who) + '</div>' : '') +
+         '</div>' + (c.last ? '<span class="last">תשפ"ו</span>' : '') + '</div>';
+
+    if (c.phone) {
+      h += '<div class="acts">' +
+           '<a class="call" href="tel:' + digits(c.phone) + '">📞 חייג</a>' +
+           '<a class="wa" href="https://wa.me/' + waNum(c.phone) +
+           '" target="_blank" rel="noopener">וואטסאפ</a></div>';
+      if (c.phone2)
+        h += '<div class="acts" style="margin-top:8px"><a class="call" style="opacity:.8" href="tel:' +
+             digits(c.phone2) + '">📞 מספר נוסף</a>' +
+             '<a class="wa" style="opacity:.8" href="https://wa.me/' + waNum(c.phone2) +
+             '" target="_blank" rel="noopener">וואטסאפ</a></div>';
+    } else {
+      h += '<div style="font-size:.83rem;color:var(--stop);font-weight:800;margin-top:10px">' +
+           'אין מספר טלפון</div>';
+    }
+
+    h += '<div class="chips">';
+    STAGES.forEach(function (s) {
+      h += '<button class="chip ' + s.c + (c.stage === s.k ? ' on' : '') +
+           '" onclick="setStage(' + i + ',\'' + s.k + '\')">' + s.t + '</button>';
+    });
+    h += '</div><textarea rows="1" placeholder="הערה מהשיחה…" ' +
+         'onchange="setNote(' + i + ',this.value)">' + esc(c.note) + '</textarea></div>';
+  });
+
+  h += '<button class="btn g" style="margin-top:8px" onclick="exportCalls()">' +
+       'העתקת סיכום לוואטסאפ</button>' +
+       '<button class="btn g" onclick="wipeContacts()">מחיקת הרשימה מהמכשיר</button>';
+  el.innerHTML = h;
+}
+function callFilter(f) { state.filter = f; renderCalls(); }
+function importContacts() {
+  var t = document.getElementById('paste').value;
+  var parsed = parseContacts(t);
+  if (!parsed.length) { alert('לא זוהו שורות. ודאו שהעתקתם מהגיליון.'); return; }
+  saveContacts(parsed);
+  renderCalls();
+}
+function setStage(i, k) {
+  var l = contacts(); if (!l[i]) return;
+  l[i].stage = k; l[i].at = new Date().toISOString();
+  saveContacts(l); renderCalls();
+}
+function setNote(i, v) {
+  var l = contacts(); if (!l[i]) return;
+  l[i].note = v; saveContacts(l);
+}
+function exportCalls() {
+  var l = contacts();
+  var by = function (k) {
+    return l.filter(function (c) { return c.stage === k; })
+            .map(function (c) { return '• ' + c.name + (c.note ? ' — ' + c.note : ''); }).join('\n');
+  };
+  var txt = 'הדף השבועי — סיכום סבב שיחות\n\n' +
+    'הצטרפו (' + l.filter(function (c) { return c.stage === 'joined'; }).length + '):\n' + by('joined') +
+    '\n\nמתעניינים:\n' + by('warm') +
+    '\n\nלא דיברתי עדיין:\n' + by('new');
+  if (navigator.clipboard) navigator.clipboard.writeText(txt);
+  alert('הסיכום הועתק. אפשר להדביק בוואטסאפ.');
+}
+function wipeContacts() {
+  if (!confirm('למחוק את רשימת אנשי הקשר מהמכשיר? הסטטוסים וההערות יימחקו גם הם.')) return;
+  localStorage.removeItem('dfContacts');
+  renderCalls();
+}
+
+
+/* ============================================================
+   שכבת אחסון.
+   כל הכתיבות עוברות דרך Store, ולכן החלפת המנוע ל-Firebase היא
+   שינוי בקובץ אחד: ממלאים firebaseAdapter ומצביעים את Store אליו.
+   כרגע: אחסון מקומי במכשיר.
+   ============================================================ */
+var Store = {
+  engine: 'local',
+  get: function (k, d) {
+    try { var v = localStorage.getItem('df:' + k);
+          return v === null ? (d === undefined ? null : d) : JSON.parse(v); }
+    catch (e) { return d === undefined ? null : d; }
+  },
+  set: function (k, v) {
+    try { localStorage.setItem('df:' + k, JSON.stringify(v)); } catch (e) {}
+    if (this.push) this.push(k, v);          // מנוע מרוחק, כשיחובר
+  },
+  del: function (k) { try { localStorage.removeItem('df:' + k); } catch (e) {} }
+};
+
+/* הגדרות שנקבעות מתוך מסך הניהול ודורסות את ברירות המחדל שב-data.js */
+var CFG = Store.get('cfg', {}) || {};
+function cfgSet(k, v) { CFG[k] = v; Store.set('cfg', CFG); applyCfg(); }
+function applyCfg() {
+  if (CFG.api) { API = CFG.api; localStorage.setItem('dfApi', CFG.api); }
+  if (CFG.coordWa)  COORD_WA = CFG.coordWa;
+  if (CFG.pin)      ADMIN_PIN = CFG.pin;
+  if (CFG.sugya)    { for (var t in CFG.sugya) SUGYA[t] = CFG.sugya[t]; }
+  if (CFG.joined)   INSTITUTIONS.forEach(function (i) {
+                      if (CFG.joined[i.code] != null) i.joined = !!CFG.joined[i.code]; });
+  /* מיזוג ולא החלפה: הגדרה ישנה שנשמרה במכשיר בלי `min` לא תמחק
+     את הכמות המינימלית שהגיעה מ-data.js. */
+  if (CFG.prices) for (var p in CFG.prices) {
+    PRICES[p] = PRICES[p] || {};
+    for (var f in CFG.prices[p])
+      if (CFG.prices[p][f] != null) PRICES[p][f] = CFG.prices[p][f];
+  }
+  relayerTexts();
+}
+
+/* ============================================================
+   עריכת מלל.
+   שלוש שכבות, כל אחת דורסת את שלפניה:
+     data.js  — ברירת המחדל שבקוד
+     הגיליון  — מה שפורסם, וזה מה שכל ראשי החטיבות רואים
+     CFG.texts — טיוטה מקומית, כדי שהרכז יראה מיד מה שערך
+
+   הערך המקורי נשמר ב-TEXT_BASE בטעינה הראשונה, כך ש"שחזור"
+   תמיד חוזר לקוד ולא לערך שנדרס קודם.
+   ============================================================ */
+var TEXT_ROOTS = { fit:FIT, ui:UI, sfarim:SFARIM };
+var TEXT_BASE = {};
+
+function textRef(k) {
+  var parts = k.split('.'), o = TEXT_ROOTS[parts[0]];
+  for (var i = 1; i < parts.length - 1 && o; i++) o = o[parts[i]];
+  return o ? { o:o, f:parts[parts.length - 1] } : null;
+}
+function textGet(k) { var r = textRef(k); return r ? r.o[r.f] : ''; }
+function textSet(k, v) { var r = textRef(k); if (r) r.o[r.f] = v; }
+
+(function snapshotTexts() {
+  TEXT_FIELDS.forEach(function (f) { if (f.k) TEXT_BASE[f.k] = textGet(f.k); });
+})();
+
+function applyTexts(map) {
+  if (!map) return;
+  TEXT_FIELDS.forEach(function (f) {
+    if (f.k && typeof map[f.k] === 'string' && map[f.k] !== '') textSet(f.k, map[f.k]);
+  });
+}
+function resetTexts() {
+  TEXT_FIELDS.forEach(function (f) { if (f.k) textSet(f.k, TEXT_BASE[f.k]); });
+}
+/* מרכיב מחדש את שלוש השכבות לפי הסדר. כל שינוי — מקומי או מהגיליון
+   — עובר דרך כאן, כדי שמחיקת ערך לא תשאיר אותו תקוע. */
+var PUBLISHED = Store.get('textCache', null) || {};
+function relayerTexts() {
+  resetTexts();
+  applyTexts(PUBLISHED);
+  applyTexts(CFG.texts);
+}
+/* תבנית פשוטה: {n}, {name}, {sum} */
+function fill(tpl, vars) {
+  return String(tpl).replace(/\{(\w+)\}/g, function (m, k) {
+    return vars[k] != null ? vars[k] : m;
+  });
+}
+
+applyCfg();
+
+/* ============================================================
+   מחירים.
+   ההנחה אינה אחידה: 15 ₪ בושננתם, 22 ₪ בהסוגיה היומית. כל מסך
+   שמציג מחיר עובר דרך הפונקציות האלה, ולכן שינוי במסך הניהול
+   מתגלגל לכל האפליקציה בלי לגעת בטקסטים.
+
+   ההנחה מותנית בכמות מינימלית (min), ולכן כל מקום שמציג מחיר
+   מוזל מציג לצידו גם את התנאי — אחרת מבטיחים מחיר שטרם הובטח.
+   ============================================================ */
+function priceOf(id) {
+  var p = PRICES[id] || { price:SFARIM_PRICE.group, list:SFARIM_PRICE.normal };
+  return { price:p.price, list:p.list, off:p.list > p.price, min:p.min || 0 };
+}
+/* ההערה למהדורה אחת */
+function condNote(name, min) {
+  if (!min) return '';
+  return '<div class="cond">' + fill(UI.cond, { n:min, name:esc(name) }) + '</div>';
+}
+/* אם כל המהדורות באותו מחיר מוזל — אפשר להציג הנחה אחת לכולם */
+function uniformPrice() {
+  var a = SFARIM.map(function (s) { return priceOf(s.id); });
+  return a.every(function (p) { return p.off && p.price === a[0].price; }) ? a[0] : null;
+}
+function priceRange() {
+  var a = SFARIM.map(function (s) { return priceOf(s.id).price; });
+  return { min:Math.min.apply(null, a), max:Math.max.apply(null, a) };
+}
+function shek(n) { return n.toLocaleString('he-IL') + ' ₪'; }
+
+
+/* ============================================================
+   קריאה מגוגל־שיטס, בלי Apps Script.
+   נקודת ה-gviz מגישה כל לשונית כ-CSV, ומאפשרת קריאה מהדפדפן
+   כשהגיליון משותף כ"כל מי שיש לו הקישור — מציג".
+   הקריאה נכשלת בשקט: אם אין רשת או הרשאה, נשארים עם הנתונים
+   המוטמעים ושום דבר לא נשבר.
+   ============================================================ */
+function sheetUrl(id, tab) {
+  return 'https://docs.google.com/spreadsheets/d/' + id +
+         '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(tab) + '&t=' + Date.now();
+}
+/* מפרסר CSV כולל שדות במירכאות ופסיקים בתוכם */
+function parseCsv(text) {
+  var rows = [], row = [], f = '', q = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { f += '"'; i++; }
+      else if (c === '"') q = false;
+      else f += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
+    else if (c !== '\r') f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(function (r) { return r.join('').trim() !== ''; });
+}
+function fetchSheet(id, tab) {
+  if (!id || !navigator.onLine) return Promise.resolve(null);
+  return fetch(sheetUrl(id, tab))
+    .then(function (r) { return r.ok ? r.text() : null; })
+    .then(function (t) { return t ? parseCsv(t) : null; })
+    .catch(function () { return null; });
+}
+var YES = /^(TRUE|כן|V|✓|1)$/i;
+
+/* מוסדות מהגיליון הציבורי: code | name | last | joined */
+function loadInstitutions() {
+  return fetchSheet(CFG.sheetId || SHEET_ID, CFG.sheetTab || SHEET_TAB)
+    .then(function (rows) {
+      if (!rows || rows.length < 2) return false;
+      var out = [];
+      rows.slice(1).forEach(function (r) {
+        var code = (r[0] || '').trim(), name = (r[1] || '').trim();
+        if (!code || !name) return;
+        out.push({ code:code, name:name, last:YES.test((r[2] || '').trim()),
+                   joined:YES.test((r[3] || '').trim()) });
+      });
+      if (!out.length) return false;
+      INSTITUTIONS.length = 0;
+      out.forEach(function (i) { INSTITUTIONS.push(i); });
+      applyCfg();                       // מתגים מהניהול דורסים את הגיליון
+      Store.set('instCache', INSTITUTIONS);
+      return true;
+    });
+}
+/* המלל שפורסם, מלשונית "טקסטים": key | value.
+   נשמר גם במטמון, כדי שפתיחה בלי רשת לא תחזיר את הנוסח הישן. */
+function loadTexts() {
+  return fetchSheet(CFG.sheetId || SHEET_ID, 'טקסטים')
+    .then(function (rows) {
+      if (!rows || rows.length < 2) return false;
+      var map = {};
+      rows.slice(1).forEach(function (r) {
+        var k = (r[0] || '').trim(), v = (r[1] || '').trim();
+        if (k && v) map[k] = v;
+      });
+      if (!Object.keys(map).length) return false;
+      Store.set('textCache', map);
+      PUBLISHED = map;
+      relayerTexts();
+      return true;
+    });
+}
+
+/* אנשי קשר מגיליון פרטי. המזהה מוזן בניהול ונשמר על המכשיר —
+   אינו בקוד, כדי שטלפונים של מנהלים לא יישבו בריפו ציבורי. */
+function loadContactsFromSheet() {
+  var id = CFG.contactsSheet;
+  if (!id) { alert('קודם הזינו את מזהה גיליון אנשי הקשר בהגדרות.'); return; }
+  fetchSheet(id, CFG.contactsTab || 'גיליון1').then(function (rows) {
+    if (!rows || rows.length < 2) {
+      alert('לא הצלחתי לקרוא מהגיליון. ודאו שהוא משותף כ"כל מי שיש לו הקישור — מציג".');
+      return;
+    }
+    var out = [];
+    rows.slice(1).forEach(function (r) {
+      var cells = r.map(function (c) { return (c || '').trim(); });
+      var name = '', people = [], phones = [], last = false;
+      cells.forEach(function (c) {
+        if (YES.test(c)) { last = true; return; }
+        if (/^(FALSE|לא)$/i.test(c) || !c || c === 'X' || c === 'x') return;
+        if (/^[0-9\-\+\(\)\s]{9,}$/.test(c)) { phones.push(c); return; }
+        if (!name) name = c; else people.push(c);
+      });
+      if (!name) return;
+      out.push({ name:name, who:people.join(' · '), phone:phones[0] || '',
+                 phone2:phones[1] || '', last:last, stage:'new', note:'' });
+    });
+    // שומרים סטטוסים והערות קיימים לפי שם
+    var old = {};
+    contacts().forEach(function (c) { old[c.name] = c; });
+    out.forEach(function (c) {
+      if (old[c.name]) { c.stage = old[c.name].stage; c.note = old[c.name].note; }
+    });
+    saveContacts(out);
+    renderCalls();
+    alert(out.length + ' מוסדות נטענו מהגיליון.');
+  });
+}
+
+/* ============================================================
+   מסך הניהול.
+   לא מקושר מאף מקום באפליקציה — נגיש רק דרך /admin או #admin.
+   ============================================================ */
+var admTab = 'reg';
+
+function renderAdmin() {
+  var TABS = [['reg','הרשמות'],['inst','מוסדות'],['calls','שיחות'],
+              ['text','טקסטים'],['price','מחירים'],['sugya','הסוגיה'],
+              ['set','הגדרות']];
+  var h = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+          '<div><div style="font-size:1.15rem;font-weight:800;letter-spacing:-.03em">ניהול התוכנית</div>' +
+          '<div style="font-size:.76rem;color:var(--ink-3);font-weight:700">' +
+          esc(PROGRAM.contact.coord) + ' · גרסה ' + APP_VERSION + '</div></div>' +
+          '<button class="back" onclick="admExit()">לאפליקציה →</button></div>' +
+          '<div class="tabs" style="margin-top:12px">' +
+          TABS.map(function (t) {
+            return '<button class="' + (admTab === t[0] ? 'on' : '') +
+                   '" onclick="admGo(\'' + t[0] + '\')">' + t[1] + '</button>';
+          }).join('') + '</div><div id="adm-pane" style="margin-top:14px"></div>';
+  document.getElementById('admin-body').innerHTML = h;
+  admPane();
+}
+function admGo(t) { admTab = t; renderAdmin(); }
+/* באפליקציית הניהול המותקנת אין שורת כתובת, ולכן יציאה לאפליקציה
+   הרגילה הייתה דרך ללא חזרה — צריך היה לסגור ולפתוח מחדש.
+   השבב הצף מחזיר, ומופיע רק שם: בדפדפן רגיל יש כתובת. */
+var launchedAsAdmin = false;
+function admExit() { location.hash = ''; show('home'); paintAdmChip(); }
+function admBack()  { show('admin'); paintAdmChip(); }
+function paintAdmChip() {
+  var el = document.getElementById('adm-chip');
+  if (!el) return;
+  var away = launchedAsAdmin && isStandalone() &&
+             !document.querySelector('#v-admin.on') &&
+             !document.querySelector('#v-gate.on');
+  el.className = away ? 'on' : '';
+}
+
+function admPane() {
+  var el = document.getElementById('adm-pane');
+  if (admTab === 'reg')   return admReg(el);
+  if (admTab === 'inst')  return admInst(el);
+  if (admTab === 'calls') {
+    el.innerHTML = '<button class="btn g" style="margin-bottom:11px" ' +
+      'onclick="loadContactsFromSheet()">טעינת אנשי הקשר מהגיליון</button>' +
+      '<div id="calls-body"></div>';
+    return renderCalls();
+  }
+  if (admTab === 'text')  return admText(el);
+  if (admTab === 'price') return admPrice(el);
+  if (admTab === 'sugya') return admSugya(el);
+  if (admTab === 'set')   { admSet(el); return admInstallBox(); }
+}
+
+/* ---- הרשמות שהתקבלו ---- */
+function admReg(el) {
+  var list = Store.get('registrations', []) || [];
+  var own = regSaved();
+  if (own && !list.some(function (r) { return r.code === own.code; })) list = [own].concat(list);
+  if (!list.length) {
+    el.innerHTML = '<div class="adm-card"><h4>אין עדיין הרשמות</h4>' +
+      '<p class="h">הרשמה שנשלחת מהאפליקציה תופיע כאן. כל עוד אין חיבור לשרת, ' +
+      'רואים כאן רק הרשמות שנשלחו מהמכשיר הזה.</p></div>';
+    return;
+  }
+  var tot = list.reduce(function (a, r) { return a + (r.total || 0); }, 0);
+  /* כמות מצטברת לכל מהדורה — זה המספר שקובע אם מגיעים לסף ההנחה */
+  /* per — כמה עותקים מכל צירוף מסכת-מהדורה; זה מה שמזמינים בפועל
+     מההוצאה. הסף להנחה נספר לפי מהדורה, בשתי המסכתות יחד. */
+  var per = {}, sum = 0;
+  list.forEach(function (r) {
+    var q = regMigrate(r);
+    TRACKS.forEach(function (t) {
+      SFARIM.forEach(function (s) {
+        var n = q[qk(t.id, s.id)] || 0;
+        per[qk(t.id, s.id)] = (per[qk(t.id, s.id)] || 0) + n;
+        sum += n * priceOf(s.id).price;
+      });
+    });
+  });
+  el.innerHTML =
+    '<div class="adm-card" style="margin-bottom:11px"><h4>' + list.length +
+    ' הרשמות · ' + tot + ' גמרות</h4>' +
+    SFARIM.map(function (s) {
+      var p = priceOf(s.id);
+      var n = TRACKS.reduce(function (a, t) { return a + (per[qk(t.id, s.id)] || 0); }, 0);
+      var gap = p.min - n;
+      return '<div class="row" style="padding:7px 0"><span>' + esc(s.name) +
+        (p.min ? ' <span style="color:var(--ink-3)">· יעד ' + p.min + '</span>' : '') +
+        '<div class="sub">' + TRACKS.map(function (t) {
+          return t.masechet + ' ' + (per[qk(t.id, s.id)] || 0);
+        }).join(' · ') + '</div></span>' +
+        '<b' + (gap <= 0 ? ' style="color:var(--ok)"' : '') + '>' + n +
+        (p.min && gap > 0
+          ? ' <span style="font-weight:600;color:var(--ink-3)">(חסרים ' + gap + ')</span>'
+          : p.min ? ' ✓' : '') + '</b></div>';
+    }).join('') +
+    '<p class="h" style="margin:9px 0 0">סה"כ להזמנה: ' + shek(sum) + '</p></div>' +
+    list.map(function (r) {
+      var q = regMigrate(r);
+      return '<div class="adm-card" style="margin-bottom:9px"><h4>' + esc(r.inst) + '</h4>' +
+        '<p class="h" style="margin-bottom:8px">' + esc(r.who || '') +
+        (r.phone ? ' · ' + esc(r.phone) : '') + '</p>' +
+        TRACKS.map(function (t) {
+          return SFARIM.map(function (s) {
+            return '<div class="row" style="padding:7px 0"><span>' +
+                   esc(t.masechet + ' · ' + s.name) + '</span>' +
+                   '<b>' + (q[qk(t.id, s.id)] || 0) + '</b></div>';
+          }).join('');
+        }).join('') +
+        (r.note ? '<div class="row" style="padding:7px 0"><span>הערה</span>' +
+                  '<b style="font-weight:600">' + esc(r.note) + '</b></div>' : '') +
+        (r.phone ? '<a class="btn gr" style="margin-top:10px;text-decoration:none" href="tel:' +
+                   digits(r.phone) + '">חייג</a>' : '') + '</div>';
+    }).join('');
+}
+
+/* ---- מוסדות: מי בפנים ---- */
+function admInst(el) {
+  el.innerHTML = '<div class="adm-card"><h4>מי מופיע כ"בפנים"</h4>' +
+    '<p class="h">המתג קובע מה נראה בעמוד הראשי ובעיגול המונה.</p>' +
+    INSTITUTIONS.map(function (i) {
+      return '<div class="row"><div>' + esc(i.name) +
+        (i.last ? '<div class="sub">למדו בתשפ"ו</div>' : '') + '</div>' +
+        '<button class="sw' + (i.joined ? ' on' : '') +
+        '" onclick="admToggle(\'' + i.code + '\')" aria-label="שיוך"></button></div>';
+    }).join('') + '</div>';
+}
+function admToggle(code) {
+  var j = CFG.joined || {};
+  var cur = INSTITUTIONS.filter(function (i) { return i.code === code; })[0];
+  j[code] = !(cur && cur.joined);
+  cfgSet('joined', j);
+  admPane();
+}
+
+/* ---- טקסטים ----
+   עריכת המלל בלי לגעת בקוד. "שמירה" משנה את המכשיר הזה בלבד;
+   "פרסום" שולח לגיליון, ומשם זה מגיע לכל מי שפותח את האפליקציה.
+   ההפרדה מכוונת: אפשר לנסח, לראות איך זה נראה, ורק אז לפרסם.  */
+function admText(el) {
+  var d = CFG.texts || {};
+  var dirty = TEXT_FIELDS.filter(function (f) {
+    return f.k && d[f.k] != null && d[f.k] !== TEXT_BASE[f.k];
+  }).length;
+
+  el.innerHTML =
+    '<div class="adm-card" style="margin-bottom:11px"><h4>עריכת המלל</h4>' +
+    '<p class="h">שינוי נשמר במכשיר הזה בלבד עד שלוחצים <b>פרסום</b>. ' +
+    'פרסום כותב לגיליון, וכל מי שפותח את האפליקציה רואה את הנוסח החדש. ' +
+    'שדה ריק חוזר לנוסח שבקוד.</p>' +
+    '<div class="row" style="padding:8px 0"><span>שינויים שטרם פורסמו</span>' +
+    '<b' + (dirty ? '' : ' style="color:var(--ink-3)"') + '>' + dirty + '</b></div>' +
+    '<button class="btn gr" onclick="admTextPublish()">פרסום לכל המשתמשים</button>' +
+    '<button class="btn" style="margin-top:8px" onclick="admTextReset()">' +
+    'שחזור כל הנוסחים שבקוד</button>' +
+    '<div id="adm-text-msg"></div></div>' +
+
+    TEXT_FIELDS.map(function (f) {
+      if (f.g) return '<div class="sec" style="margin:16px 0 8px"><b>' +
+                      esc(f.g) + '</b><i></i></div>';
+      var cur = textGet(f.k), changed = d[f.k] != null && d[f.k] !== TEXT_BASE[f.k];
+      return '<div class="fld"><div class="label">' + esc(f.lbl) +
+        (changed ? ' <span style="color:var(--gold)">•</span>' : '') + '</div>' +
+        (f.ml
+          ? '<textarea rows="3" onchange="admTextSet(\'' + f.k + '\',this.value)">' +
+            esc(cur) + '</textarea>'
+          : '<input type="text" value="' + esc(cur) +
+            '" onchange="admTextSet(\'' + f.k + '\',this.value)">') +
+        '</div>';
+    }).join('');
+}
+function admTextSet(k, v) {
+  var t = CFG.texts || {};
+  v = String(v).trim();
+  if (v === '' || v === TEXT_BASE[k]) delete t[k];   /* ריק = חזרה לקוד */
+  else t[k] = v;
+  resetTexts();                 /* קודם חזרה לבסיס, אחרת ערך שנמחק נשאר */
+  cfgSet('texts', t);
+  repaintTexts();
+  admPane();
+}
+function admTextReset() {
+  if (!confirm('להחזיר את כל הנוסחים לערך שבקוד?')) return;
+  resetTexts();
+  cfgSet('texts', {});
+  repaintTexts();
+  admPane();
+}
+/* מלל יושב גם בבית וגם בהרשמה. מציירים את שניהם, כדי שהרכז יראה
+   את מה שערך מיד ולא רק אחרי ריענון. */
+function repaintTexts() {
+  renderHome();
+  if (document.getElementById('reg-body').innerHTML) renderReg();
+}
+/* פרסום: שורה לכל מפתח שהשתנה, ללשונית "טקסטים" בגיליון.
+   ההרשמות נשלחות באותו מנגנון, ולכן אין כאן תשתית חדשה. */
+function admTextPublish() {
+  var t = CFG.texts || {}, rows = [];
+  TEXT_FIELDS.forEach(function (f) {
+    if (f.k && t[f.k] != null) rows.push({ key:f.k, value:t[f.k] });
+  });
+  var m = document.getElementById('adm-text-msg');
+  if (!API) {
+    m.innerHTML = '<div class="cond" style="margin-top:10px">אין כתובת שרת. ' +
+      'מלאו אותה בהגדרות ← כתובת שרת, אחרת אפשר לערוך רק במכשיר הזה.</div>';
+    return;
+  }
+  queue({ action:'texts', rows:JSON.stringify(rows), at:new Date().toISOString() });
+  m.innerHTML = '<div class="done-box" style="margin-top:10px">נשלח לפרסום · ' +
+    rows.length + ' נוסחים. השינוי יופיע אצל כולם בטעינה הבאה.</div>';
+}
+
+/* ---- מחירים ----
+   ההנחה אינה אחידה — 15 ₪ בושננתם, 22 ₪ בהסוגיה היומית — וכל אחת
+   מותנית בכמות מינימלית משלה. שלושת השדות הם מקור האמת היחיד, ולכן
+   אין כאן מתגים שיכולים לסתור אותם.                                */
+function admPrice(el) {
+  el.innerHTML =
+    '<div class="adm-card"><h4>מחיר לחוברת</h4>' +
+    '<p class="h">משפיע על מסך הבית, מסך ההרשמה, מסך הספרים וסיכום ההרשמות. ' +
+    'מחיר מוזל השווה למחיר המלא — לא תוצג הנחה. ' +
+    '"כמות מינימלית" היא התנאי של ההוצאה, והיא מוצגת לראשי החטיבות ' +
+    'ליד כל מחיר מוזל. אפס — ההערה לא תופיע.</p>' +
+    SFARIM.map(function (s) {
+      var p = priceOf(s.id);
+      return '<div class="fld"><div class="label">' + esc(s.name) + ' — מחיר מוזל</div>' +
+        '<input type="tel" value="' + p.price + '" onchange="admPriceSet(\'' + s.id +
+        '\',\'price\',this.value)"></div>' +
+        '<div class="fld"><div class="label">' + esc(s.name) + ' — מחיר מלא</div>' +
+        '<input type="tel" value="' + p.list + '" onchange="admPriceSet(\'' + s.id +
+        '\',\'list\',this.value)"></div>' +
+        '<div class="fld"><div class="label">' + esc(s.name) + ' — כמות מינימלית להנחה</div>' +
+        '<input type="tel" value="' + p.min + '" onchange="admPriceSet(\'' + s.id +
+        '\',\'min\',this.value)"></div>';
+    }).join('') + '</div>';
+}
+function admPriceSet(id, k, v) {
+  v = parseInt(v, 10);
+  if (k === 'min') { if (!(v >= 0)) v = 0; }
+  else if (!(v > 0)) { alert('המחיר חייב להיות מספר גדול מאפס.'); admPane(); return; }
+  var cur = priceOf(id), c = CFG.prices || {};
+  c[id] = { price:cur.price, list:cur.list, min:cur.min };   // נשמרים גם השדות שלא נגעו בהם
+  c[id][k] = v;
+  if (c[id].price > c[id].list) c[id].list = c[id].price;   // מוזל לא גבוה ממלא
+  cfgSet('prices', c);
+  admPane();
+}
+
+/* ---- הסוגיה היומית ---- */
+function admSugya(el) {
+  var t = homeTrack, sg = SUGYA[t] || { base:'', fmt:'', pages:{} };
+  el.innerHTML =
+    '<div class="adm-card"><h4>הסוגיה היומית — ' +
+    esc(trackById(t).masechet) + '</h4>' +
+    '<p class="h">כתובת הפליפבוק, ותבנית הקישור לעמוד מסוים. ' +
+    'ב-{p} ייכנס מספר העמוד. לדוגמה: ' +
+    '<span dir="ltr">https://…/book.html#p={p}</span></p>' +
+    '<div class="tabs" style="margin-bottom:12px">' +
+    TRACKS.map(function (x) {
+      return '<button class="' + (x.id === t ? 'on' : '') +
+             '" onclick="pickTrack(\'' + x.id + '\');admPane()">' + esc(x.masechet) + '</button>';
+    }).join('') + '</div>' +
+    '<div class="fld"><div class="label">כתובת הפליפבוק</div>' +
+    '<input type="text" dir="ltr" value="' + esc(sg.base) +
+    '" onchange="admSugyaSet(\'base\',this.value)"></div>' +
+    '<div class="fld"><div class="label">תבנית קישור לעמוד</div>' +
+    '<input type="text" dir="ltr" value="' + esc(sg.fmt) +
+    '" onchange="admSugyaSet(\'fmt\',this.value)"></div>' +
+    '<div class="label">עמוד בחוברת לכל דף</div>' +
+    trackById(t).cal.filter(function (r) { return r[2] && r[2] !== 'סיום'; })
+      .map(function (r) {
+        var k = dafKey(r[2]);
+        return '<div class="row"><span>דף ' + esc(r[2]) + '</span>' +
+          '<input type="tel" style="width:74px;text-align:center;padding:8px" value="' +
+          ((sg.pages || {})[k] || '') + '" onchange="admSugyaPage(\'' + k + '\',this.value)"></div>';
+      }).join('') + '</div>';
+}
+function admSugyaSet(k, v) {
+  var c = CFG.sugya || {}; c[homeTrack] = c[homeTrack] || { base:'', fmt:'', pages:{} };
+  c[homeTrack][k] = v.trim(); cfgSet('sugya', c);
+}
+function admSugyaPage(daf, v) {
+  var c = CFG.sugya || {}; c[homeTrack] = c[homeTrack] || { base:'', fmt:'', pages:{} };
+  c[homeTrack].pages = c[homeTrack].pages || {};
+  if (v.trim()) c[homeTrack].pages[daf] = parseInt(v, 10) || '';
+  else delete c[homeTrack].pages[daf];
+  cfgSet('sugya', c);
+}
+
+/* ---- הגדרות ---- */
+/* בדיקת חיבור לסקריפט. עונה איזו גרסה פרוסה בגוגל ואילו לשוניות
+   היא רואה — כדי שלא נצטרך לנחש אם הפריסה עלתה ואם היא עדכנית.
+   SCRIPT_MIN הוא מה שהאפליקציה מצפה לו; נמוך מזה = צריך לפרוס שוב. */
+var SCRIPT_MIN = 3;
+
+/* Apps Script מפנה את /exec לדומיין אחר, ויש דפדפנים שחוסמים את
+   הקריאה הרגילה בגלל CORS. מנסים קודם fetch, ואם הוא נחסם נופלים
+   לטעינה כתגית <script> — שאינה כפופה ל-CORS כלל. */
+function pingScript(url) {
+  return fetch(url, { method:'GET' }).then(function (r) { return r.json(); })
+    .catch(function () { return pingJsonp(url); });
+}
+function pingJsonp(url) {
+  return new Promise(function (ok, fail) {
+    var name = '__ping' + Date.now();
+    var s = document.createElement('script');
+    var done = function (v) {
+      try { delete window[name]; } catch (e) { window[name] = undefined; }
+      clearTimeout(t); s.remove();
+      v ? ok(v) : fail(new Error('timeout'));
+    };
+    var t = setTimeout(function () { done(null); }, 12000);
+    window[name] = function (d) { done(d); };
+    s.onerror = function () { done(null); };
+    s.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'callback=' + name;
+    document.body.appendChild(s);
+  });
+}
+
+function admPing() {
+  var box = document.getElementById('adm-ping');
+  var url = (CFG.api || API || '').trim();
+  var say = function (cls, html) {
+    box.innerHTML = '<div class="' + cls + '" style="margin-top:10px">' + html + '</div>';
+  };
+  if (!url) { say('cond', 'אין כתובת שרת. הדביקו אותה בשדה שמעל.'); return; }
+  say('cond', 'בודק…');
+
+  pingScript(url)
+    .then(function (d) {
+      var v = d.version || 0;
+      var tabs = (d.tabs || []).map(function (t) {
+        return esc(t.name) + ' (' + t.rows + ')';
+      }).join(' · ') || 'אין לשוניות';
+      if (v < SCRIPT_MIN) {
+        say('cond', 'הסקריפט מגיב, אבל הפריסה ישנה — גרסה ' + v +
+            ' במקום ' + SCRIPT_MIN + '.<br>ב-Apps Script: Deploy ← Manage ' +
+            'deployments ← עריכה ← New version.');
+      } else {
+        say('done-box', 'החיבור תקין · גרסה ' + v +
+            (d.sheet ? '<br>גיליון: ' + esc(d.sheet) : '') +
+            '<br>לשוניות: ' + tabs);
+      }
+    })
+    .catch(function () {
+      say('cond', 'לא קיבלתי תשובה. בדקו שהכתובת מסתיימת ב-/exec, ' +
+          'ושבפריסה נבחר Who has access: Anyone.');
+    });
+}
+
+/* התקנת מסך הניהול כאפליקציה נפרדת.
+
+   אין קיצור ב-manifest שמוביל לכאן, בכוונה: הוא היה מציג "ניהול"
+   לכל מי שלוחץ לחיצה ארוכה על האייקון, כלומר מכריז על קיומו של
+   המסך בפני כל ראשי החטיבות. אי-הנראות היא חלק מההגנה.
+
+   ולכן צריך לדעת: ברגע שהאפליקציה הרגילה מותקנת, כרום מפסיק
+   לירות beforeinstallprompt — גם לאפליקציה השנייה. מי שרוצה את
+   אייקון הזהב צריך להתקין אותו לפני האפליקציה הרגילה. אם זה לא
+   מסתדר, הקישור השמור עושה את אותה עבודה.
+
+   הכפתור מוצג רק אם הדפדפן באמת נתן אירוע — כפתור שלא יעשה כלום
+   גרוע מהוראה. */
+function admInstallBox() {
+  var el = document.getElementById('adm-inst');
+  if (!el) return;
+  if (isStandalone()) {
+    el.innerHTML = '<div class="done-box">הניהול כבר פתוח כאפליקציה.</div>';
+    return;
+  }
+
+  var h = deferredInstall
+    ? '<button class="btn gd" onclick="admInstall()">הוספת הניהול למסך הבית</button>' +
+      '<div class="cond" style="margin-top:10px">לחצו מכאן ולא ממסך הבית — ' +
+      'הדפדפן מתקין את מה שפתוח מולו.</div>'
+    : '<div class="cond">הדפדפן אינו מציע התקנה כרגע. כך זה עובד: ברגע ' +
+      'שהאפליקציה הרגילה מותקנת, כרום מפסיק להציע התקנה גם לאפליקציה ' +
+      'השנייה. כדי לקבל את אייקון הזהב צריך להתקין <b>אותו קודם</b>, ' +
+      'לפני האפליקציה הרגילה.<br>' +
+      'הדרך הפשוטה יותר: להעתיק את הקישור ולשמור אותו כסימנייה.</div>';
+
+  /* גיבוי שתמיד עובד: הקישור עצמו, לכל מקום שנוח לו */
+  h += '<button class="btn g" style="margin-top:8px" onclick="admCopyLink()">' +
+       'העתקת הקישור לניהול</button><div id="adm-inst-msg"></div>';
+  el.innerHTML = h;
+}
+/* רענון בכוח. מוחק את מטמון ה-Service Worker ומשחרר אותו, ואז
+   טוען מחדש — הדרך היחידה לוודא שמכשיר לא מחזיק גרסה ישנה.
+   localStorage לא נוגעים בו: שם יושבות ההגדרות וההרשמות. */
+function admRefresh() {
+  var done = function () { location.reload(true); };
+  var jobs = [];
+  if (window.caches && caches.keys) {
+    jobs.push(caches.keys().then(function (ks) {
+      return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+    }));
+  }
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+    jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+      return Promise.all(rs.map(function (r) { return r.unregister(); }));
+    }));
+  }
+  Promise.all(jobs).then(done).catch(done);
+}
+
+function admCopyLink() {
+  var url = location.origin + '/#admin';
+  var m = document.getElementById('adm-inst-msg');
+  var ok = function () {
+    m.innerHTML = '<div class="done-box" style="margin-top:8px">הועתק · ' +
+      esc(url) + '</div>';
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(ok).catch(function () {
+      m.innerHTML = '<div class="cond" style="margin-top:8px">' + esc(url) + '</div>';
+    });
+  } else {
+    m.innerHTML = '<div class="cond" style="margin-top:8px">' + esc(url) + '</div>';
+  }
+}
+function admInstall() {
+  var p = deferredInstall;
+  if (!p) { admInstallBox(); return; }
+  deferredInstall = null;
+  p.prompt();
+  p.userChoice.then(function (r) {
+    document.getElementById('adm-inst').innerHTML = (r && r.outcome === 'accepted')
+      ? '<div class="done-box">נוסף למסך הבית — חפשו את האייקון הזהוב.</div>'
+      : '<div class="cond">בוטל. אפשר לנסות שוב מתפריט הדפדפן.</div>';
+  }).catch(function () {});
+}
+
+function admSet(el) {
+  el.innerHTML =
+    '<div class="adm-card" style="margin-bottom:11px"><h4>יעדי שליחה</h4>' +
+    '<p class="h">כל עוד אין כתובת שרת, הרשמות נשלחות כהודעת וואטסאפ לרכז.</p>' +
+    '<div class="fld"><div class="label">וואטסאפ של הרכז (972…)</div>' +
+    '<input type="tel" dir="ltr" value="' + esc(CFG.coordWa || COORD_WA) +
+    '" onchange="cfgSet(\'coordWa\',this.value.replace(/[^0-9]/g,\'\'))"></div>' +
+    '<div class="fld"><div class="label">כתובת שרת (Apps Script / Firebase)</div>' +
+    '<input type="text" dir="ltr" placeholder="https://script.google.com/…/exec" value="' +
+    esc(CFG.api || API) + '" onchange="cfgSet(\'api\',this.value.trim())"></div>' +
+    '<button class="btn g" onclick="admPing()">בדיקת חיבור</button>' +
+    '<div id="adm-ping"></div></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>הניהול כאפליקציה</h4>' +
+    '<p class="h">אייקון זהב נפרד במסך הבית, שנפתח ישר כאן. הוא חי לצד ' +
+    'האפליקציה הרגילה ואינו מחליף אותה.</p>' +
+    '<div id="adm-inst"></div></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>גרסה</h4>' +
+    '<p class="h">אם משהו נראה ישן — כאן מרעננים בכוח: מוחק את המטמון ' +
+    'וטוען מחדש מהשרת. ההגדרות וההרשמות אינן נמחקות.</p>' +
+    '<div class="row" style="padding:8px 0"><span>גרסת האפליקציה</span>' +
+    '<b>' + esc(APP_VERSION) + '</b></div>' +
+    '<button class="btn g" onclick="admRefresh()">רענון מלא מהשרת</button></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>גוגל־שיטס</h4>' +
+    '<p class="h">הגיליון צריך להיות משותף כ"כל מי שיש לו הקישור — מציג". ' +
+    'גיליון אנשי הקשר נשמר על המכשיר הזה בלבד ואינו בקוד.</p>' +
+    '<div class="fld"><div class="label">מזהה גיליון המוסדות (ציבורי)</div>' +
+    '<input type="text" dir="ltr" value="' + esc(CFG.sheetId || SHEET_ID) +
+    '" onchange="cfgSet(\'sheetId\',this.value.trim())"></div>' +
+    '<div class="fld"><div class="label">שם הלשונית</div>' +
+    '<input type="text" value="' + esc(CFG.sheetTab || SHEET_TAB) +
+    '" onchange="cfgSet(\'sheetTab\',this.value.trim())"></div>' +
+    '<button class="btn g" onclick="loadInstitutions().then(function(ok){' +
+    'alert(ok?\'המוסדות עודכנו מהגיליון.\':\'לא הצלחתי לקרוא מהגיליון.\');renderHome();admPane();})">' +
+    /* לא "בדיקה וטעינה": השם הזה נבלע ב"בדיקת חיבור" שבכרטיס
+       שמעל, ואי אפשר היה לדעת איזה כפתור בודק מה. */
+    'טעינת רשימת המוסדות</button>' +
+    '<div class="fld" style="margin-top:13px"><div class="label">' +
+    'מזהה גיליון אנשי הקשר (פרטי)</div>' +
+    '<input type="text" dir="ltr" placeholder="נשמר על המכשיר בלבד" value="' +
+    esc(CFG.contactsSheet || '') +
+    '" onchange="cfgSet(\'contactsSheet\',this.value.trim())"></div>' +
+    '<div class="fld"><div class="label">שם הלשונית</div>' +
+    '<input type="text" value="' + esc(CFG.contactsTab || 'גיליון1') +
+    '" onchange="cfgSet(\'contactsTab\',this.value.trim())"></div></div>' +
+
+    '<div class="adm-card" style="margin-bottom:11px"><h4>קוד הכניסה לניהול</h4>' +
+    '<p class="h">ארבע ספרות. שמור אותו — בלעדיו אין כניסה למסך הזה.</p>' +
+    '<div class="fld"><input type="tel" dir="ltr" maxlength="4" value="' +
+    esc(CFG.pin || ADMIN_PIN) + '" onchange="admPin(this.value)"></div></div>' +
+
+    '<div class="adm-card"><h4>גיבוי</h4>' +
+    '<p class="h">כל ההגדרות וההרשמות שמורות על המכשיר הזה. שמור גיבוי לפני מחיקת היסטוריה.</p>' +
+    '<button class="btn g" onclick="admExport()">העתקת גיבוי</button>' +
+    '<button class="btn g" style="margin-top:8px" onclick="admImport()">שחזור מגיבוי</button></div>';
+}
+function admPin(v) {
+  v = String(v).replace(/[^0-9]/g, '').slice(0, 4);
+  if (v.length !== 4) { alert('הקוד חייב להיות בן ארבע ספרות.'); admPane(); return; }
+  cfgSet('pin', v);
+  alert('הקוד עודכן.');
+}
+function admExport() {
+  var dump = { cfg:CFG, contacts:contacts(), reg:regSaved(),
+               registrations:Store.get('registrations', []) };
+  var t = JSON.stringify(dump);
+  if (navigator.clipboard) navigator.clipboard.writeText(t);
+  alert('הגיבוי הועתק. שמור אותו במקום בטוח.');
+}
+function admImport() {
+  var t = prompt('הדביקו את הגיבוי:');
+  if (!t) return;
+  try {
+    var d = JSON.parse(t);
+    if (d.cfg) { CFG = d.cfg; Store.set('cfg', CFG); applyCfg(); }
+    if (d.contacts) saveContacts(d.contacts);
+    if (d.reg) localStorage.setItem('dfReg', JSON.stringify(d.reg));
+    if (d.registrations) Store.set('registrations', d.registrations);
+    alert('שוחזר.'); renderAdmin();
+  } catch (e) { alert('הגיבוי אינו תקין.'); }
+}
+
+/* ---- ניתוב נסתר ל-/admin ---- */
+function isAdminRoute() {
+  return /\/admin\/?$/.test(location.pathname) || location.hash === '#admin';
+}
+function adminEntry() {
+  if (Store.get('admOk')) { renderAdmin(); show('admin'); }
+  else show('gate');
+}
+window.addEventListener('hashchange', function () { if (isAdminRoute()) adminEntry(); });
+
+/* ---------- קוד כניסה ---------- */
+(function () {
+  var h = '';
+  [1,2,3,4,5,6,7,8,9].forEach(function (n) {
+    h += '<button onclick="pin(' + n + ')">' + n + '</button>';
+  });
+  h += '<button onclick="pinClear()">C</button><button onclick="pin(0)">0</button>' +
+       '<button onclick="pinDel()">⌫</button>';
+  document.getElementById('pad').innerHTML = h;
+})();
+function pin(n) {
+  if (teamCode.length >= 4) return;
+  teamCode += n; paintPins();
+  if (teamCode.length === 4) setTimeout(tryCode, 140);
+}
+function pinDel()   { teamCode = teamCode.slice(0, -1); paintPins(); }
+function pinClear() { teamCode = ''; paintPins(); }
+function paintPins() {
+  var p = document.getElementById('pins').children;
+  for (var i = 0; i < 4; i++) p[i].className = i < teamCode.length ? 'f' : '';
+}
+function tryCode() {
+  if (teamCode === ADMIN_PIN) {
+    teamCode = ''; paintPins();
+    Store.set('admOk', 1);
+    renderAdmin(); show('admin');
+    return;
+  }
+  document.getElementById('gate-msg').textContent = 'קוד שגוי';
+  teamCode = ''; setTimeout(paintPins, 350);
+}
+
+/* ---------- בוחר מותאם ---------- */
+var sheetCb = null;
+function pick(title, items, current, cb) {
+  sheetCb = cb;
+  document.getElementById('sheet-t').textContent = title;
+  document.getElementById('sheet-l').innerHTML = items.map(function (it) {
+    return '<button class="it' + (it.v === current ? ' on' : '') +
+           '" onclick="sheetPick(\'' + it.v + '\')">' +
+           '<span class="tick">✓</span><span>' + esc(it.t) + '</span></button>';
+  }).join('');
+  document.getElementById('sheet').className = 'on';
+}
+function sheetPick(v) { sheetClose(); if (sheetCb) sheetCb(v); }
+function sheetClose() { document.getElementById('sheet').className = ''; }
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.getElementById('sheet').className === 'on') sheetClose();
+});
+/* שדה בוחר: נראה כמו האתר, נפתח כגלולה */
+function pkField(label, value, placeholder, onOpen) {
+  return '<div class="fld">' + (label ? '<div class="label">' + label + '</div>' : '') +
+    '<button class="pk' + (value ? '' : ' empty') + '" onclick="' + onOpen + '">' +
+    '<span>' + esc(value || placeholder) + '</span><span class="cv"></span></button></div>';
+}
+
+/* ---------- תור אופליין ---------- */
+function queue(payload) {
+  var q = JSON.parse(localStorage.getItem('dfQueue') || '[]');
+  q.push(payload);
+  localStorage.setItem('dfQueue', JSON.stringify(q));
+  paintQueue(); flush();
+}
+function flush() {
+  var q = JSON.parse(localStorage.getItem('dfQueue') || '[]');
+  if (!q.length || !API || !navigator.onLine) return;
+  fetch(API, { method:'POST', mode:'no-cors', body:JSON.stringify(q[0]) })
+    .then(function () {
+      var rest = JSON.parse(localStorage.getItem('dfQueue') || '[]');
+      rest.shift();
+      localStorage.setItem('dfQueue', JSON.stringify(rest));
+      paintQueue(); flush();
+    }).catch(function () {});
+}
+function paintQueue() {
+  var n = JSON.parse(localStorage.getItem('dfQueue') || '[]').length;
+  var el = document.getElementById('queued');
+  el.className = n ? 'strip on' : 'strip';
+  el.textContent = !n ? '' :
+    (n === 1 ? 'תשובה אחת ממתינה לשליחה' : n + ' תשובות ממתינות לשליחה');
+}
+function paintNet() {
+  document.getElementById('offline').className = navigator.onLine ? 'strip' : 'strip on';
+}
+window.addEventListener('online',  function () { paintNet(); flush(); });
+window.addEventListener('offline', paintNet);
+
+/* ============================================================
+   הוספה למסך הבית.
+   בלי זה האפליקציה "צפה באוויר": היא נפתחת כחלון עצמאי, אין לה
+   אייקון, וכשסוגרים אותה צריך לחפש את הקישור מחדש.
+
+   אנדרואיד/כרום נותנים אירוע beforeinstallprompt — תופסים אותו,
+   מונעים את הבאנר של הדפדפן, ומציעים במקומו כפתור אמיתי.
+   ספארי באייפון אינה מאפשרת התקנה מתוך הדף בשום צורה, ולכן שם
+   רק מראים את ההוראה: שיתוף ← הוספה למסך הבית.
+   ============================================================ */
+var deferredInstall = null;
+var INST_DELAY = 4500;      /* נותנים לו קודם לראות מה זה */
+var INST_SNOOZE = 7 * 864e5;
+
+function isStandalone() {
+  return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) ||
+         navigator.standalone === true;
+}
+function isIOS() {
+  return /iP(hone|ad|od)/.test(navigator.platform || '') ||
+         (/Mac/.test(navigator.platform || '') && navigator.maxTouchPoints > 1);
+}
+function instHide() { document.getElementById('inst').className = ''; }
+function instLater() {
+  Store.set('instSnooze', Date.now());
+  instHide();
+}
+function instGo() {
+  if (!deferredInstall) { instHide(); return; }
+  var p = deferredInstall;
+  deferredInstall = null;
+  instHide();
+  p.prompt();
+  p.userChoice.then(function (r) {
+    /* נדחה — לא מציקים שוב לפני שבוע */
+    if (!r || r.outcome !== 'accepted') Store.set('instSnooze', Date.now());
+    else Store.set('instDone', 1);
+  }).catch(function () {});
+}
+function instShow(ios) {
+  var txt = document.getElementById('inst-txt');
+  var row = document.getElementById('inst-row');
+  if (ios) {
+    txt.innerHTML = 'פותחים את תפריט השיתוף <span class="ios"><svg viewBox="0 0 24 24">' +
+      '<path d="M12 15.5V3.4"/><path d="M8.4 6.9 12 3.3l3.6 3.6"/>' +
+      '<path d="M6.6 10.6H5.2v9.6h13.6v-9.6h-1.4"/></svg></span> ' +
+      'בתחתית המסך, ובוחרים <b>הוספה למסך הבית</b>.';
+    row.innerHTML = '<button class="yes" onclick="instLater()">הבנתי</button>';
+  } else {
+    txt.textContent = 'כך היא תישאר אצלכם עם אייקון, ותיפתח בלחיצה אחת ' +
+                      'בלי לחפש את הקישור.';
+    row.innerHTML = '<button class="yes" onclick="instGo()">הוספה למסך הבית</button>' +
+                    '<button class="no" onclick="instLater()">לא עכשיו</button>';
+  }
+  document.getElementById('inst').className = 'on';
+}
+function initInstall() {
+  /* מאזינים תמיד, גם במסך הניהול: שם האירוע נושא את
+     admin-manifest, וכפתור "הוספת הניהול למסך הבית" צריך אותו. */
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredInstall = e;
+    if (admTab === 'set') admInstallBox();
+    if (wantsBanner()) setTimeout(function () {
+      if (deferredInstall) instShow(false);
+    }, INST_DELAY);
+  });
+  window.addEventListener('appinstalled', function () {
+    Store.set(isAdminRoute() ? 'instDoneAdmin' : 'instDone', 1);
+    instHide();
+    if (admTab === 'set') admInstallBox();
+  });
+
+  /* אייפון: אין אירוע, ולכן מציגים לפי זיהוי המכשיר */
+  if (isIOS() && wantsBanner()) setTimeout(function () { instShow(true); }, INST_DELAY);
+}
+/* הבאנר הצף הוא לראשי החטיבות. במסך הניהול הוא רק מפריע — שם יש
+   כפתור מפורש בהגדרות, ולרכז לא צריך לרדוף אחרי באנר. */
+function wantsBanner() {
+  if (isAdminRoute() || isStandalone()) return false;
+  if (Store.get('instDone', 0)) return false;
+  var snooze = Store.get('instSnooze', 0);
+  return !(snooze && Date.now() - snooze < INST_SNOOZE);
+}
+
+/* ---------- עדכון גרסה (המנגנון של "יגדיל תורה") ---------- */
+var newWorker = null, refreshing = false;
+function applyUpdate() {
+  document.getElementById('upd').className = '';
+  if (newWorker) newWorker.postMessage({ type:'SKIP_WAITING' });
+  else location.reload();
+}
+function showUpdateBar(w) { newWorker = w; document.getElementById('upd').className = 'on'; }
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('sw.js').then(function (reg) {
+    reg.update();
+    setInterval(function () { reg.update(); }, 3600000);
+    if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
+    reg.addEventListener('updatefound', function () {
+      var nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', function () {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdateBar(nw);
+      });
+    });
+  }).catch(function () {});
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (refreshing) return;
+    refreshing = true;
+    location.reload();
+  });
+}
+
+(function boot() {
+  // נפתחים מיד מהמטמון, ומתרעננים מהגיליון ברקע
+  var cached = Store.get('instCache');
+  if (cached && cached.length) {
+    INSTITUTIONS.length = 0;
+    cached.forEach(function (i) { INSTITUTIONS.push(i); });
+    applyCfg();
+  }
+  renderHome(); paintQueue(); paintNet(); flush(); registerSW(); initInstall();
+  loadInstitutions().then(function (ok) { if (ok) renderHome(); }).catch(function () {});
+  /* המלל שפורסם. נכשל בשקט — נשארים עם המטמון או עם הקוד. */
+  loadTexts().then(function (ok) { if (ok) repaintTexts(); }).catch(function () {});
+  if (isAdminRoute()) { launchedAsAdmin = true; adminEntry(); } else show('home');
+  setTimeout(function () { document.getElementById('splash').className = 'off'; }, 340);
+})();
+</script>
+</body>
+</html>

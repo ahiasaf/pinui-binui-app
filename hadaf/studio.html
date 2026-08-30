@@ -1,0 +1,1783 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>סטודיו הדף — זיהוי אזורים ושורות</title>
+<style>
+/* ============================================================
+   סטודיו הדף.
+   כל הזיהוי רץ כאן בדפדפן ולא בשרת, ובכוונה: גרירת גבול חייבת
+   לחשב את השורות מחדש מיד. שליחה לשרת וחזרה הייתה הופכת עבודה
+   של שלוש שניות להמתנה.
+
+   מה שנמדד בארבעה דפים ומשמש כאן כקבוע:
+     מרווח שורה — שוליים 21-22px · רש"י ותוספות 29-30px · גמרא 33px
+     (ברוחב ייחוס 2539px). הפער שוליים↔גוש 35%, ולכן אפשר לסמוך
+     עליו; הפער גמרא↔פירוש 11% בלבד, ומשמש רק להכרעה אחת —
+     האם הגוש שבתחתית הדף הוא עדיין גמרא.
+     הגיאומטריה קבועה בסדרה: הגוש המרכזי והשדרה יצאו זהים
+     בארבעת הדפים, ולכן הגבולות נצמדים לרשת שנמצאה.
+   ============================================================ */
+:root{
+  --blue:#17468F; --blue-d:#0B2550; --gold:#C08F2B; --gold-l:#E3B44A;
+  --paper:#F6F1E6; --surface:#FFFDF8; --ink:#1B2A45; --ink-2:#5A6780;
+  --ink-3:#96A0B2; --rule:#E5DAC3; --ok:#3B7D57; --stop:#A5382D;
+  --r:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(150deg,var(--blue-d),var(--blue));color:#fff;
+  padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{margin:0;font-size:1.05rem;font-weight:800;letter-spacing:-.02em}
+header .sp{flex:1}
+#stat{font-size:.8rem;font-weight:800;opacity:.92;max-width:34ch;line-height:1.35}
+#stat.bad{color:#FFC9C2}
+button{font-family:inherit;font-weight:800;font-size:.86rem;cursor:pointer;
+  border:0;border-radius:9px;padding:9px 14px;background:var(--surface);color:var(--ink)}
+button.p{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff}
+button:disabled{opacity:.45;cursor:default}
+select{font-family:inherit;font-weight:800;font-size:.84rem;border:0;border-radius:9px;
+  padding:9px 11px;background:rgba(255,255,255,.14);color:#fff;cursor:pointer}
+select option{color:var(--ink);background:#fff}
+label.alt{font-size:.8rem;font-weight:800;cursor:pointer;opacity:.75;
+  border:1px solid rgba(255,255,255,.4);border-radius:9px;padding:8px 12px}
+
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;
+  padding:16px;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+
+.stage{background:var(--surface);border-radius:var(--r);padding:10px;
+  box-shadow:0 2px 4px rgba(37,29,12,.06),0 10px 26px rgba(37,29,12,.08);
+  overflow:auto;position:relative}
+#holder{position:relative;display:inline-block;line-height:0}
+#page{max-width:100%;height:auto;display:block}
+#ov{position:absolute;inset:0;width:100%;height:100%}
+
+aside{background:var(--surface);border-radius:var(--r);padding:14px;
+  box-shadow:0 2px 4px rgba(37,29,12,.06),0 10px 26px rgba(37,29,12,.08)}
+aside h2{margin:0 0 4px;font-size:.95rem;font-weight:800}
+aside p.h{margin:0 0 12px;font-size:.79rem;color:var(--ink-2);line-height:1.6;font-weight:600}
+.stat{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;
+  padding:5px 0;border-bottom:1px solid var(--rule)}
+.stat b{font-weight:800}
+.zone{border:1px solid var(--rule);border-radius:9px;padding:9px 10px;margin-top:8px;
+  font-size:.78rem;font-weight:700;line-height:1.55;cursor:pointer}
+.zone.on{border-color:var(--gold);background:#FFF8E8}
+.zone .t{font-weight:800;font-size:.83rem}
+.zone .d{color:var(--ink-2)}
+.zone .rm{float:left;color:var(--stop);font-weight:800;padding:0 4px}
+.zone .n{float:left;font-weight:800;color:var(--ink-3);font-size:.74rem}
+.ctl{margin-top:9px;border-top:1px solid var(--rule);padding-top:8px;display:grid;gap:6px}
+.cg{display:flex;align-items:center;gap:6px}
+.cg>span{flex:0 0 74px;font-size:.72rem;color:var(--ink-2);font-weight:800}
+button.c{flex:1;padding:9px 6px;font-size:.78rem;border:1px solid var(--rule);
+  background:#fff;border-radius:8px;min-height:40px}
+button.c.hot{background:linear-gradient(140deg,var(--gold-l),var(--gold));
+  color:#fff;border-color:transparent}
+/* זום: התמונה מוגדלת בטרנספורם ולא בשינוי גודל, כדי שהקואורדינטות
+   של הסימון יישארו זהות. פינץ' ושתי אצבעות מזיזים; הקשה אחת
+   נשארת בחירה, ולכן אין התנגשות. */
+#holder{transform-origin:0 0}
+.stage{touch-action:pan-x pan-y pinch-zoom}
+.zbar{position:absolute;inset-inline-end:10px;top:10px;z-index:5;display:flex;
+  flex-direction:column;gap:5px}
+.zbar button{width:38px;height:38px;padding:0;font-size:1.05rem;
+  box-shadow:0 2px 8px rgba(0,0,0,.18)}
+
+/* הפס התחתון: כל מה שנחוץ תוך כדי סימון, במקום אחד ונגיש לאגודל */
+.bar{position:fixed;inset-inline:0;bottom:0;z-index:60;display:none;
+  flex-direction:column;gap:7px;padding:8px 12px;
+  background:linear-gradient(150deg,var(--blue-d),var(--blue));
+  box-shadow:0 -6px 22px rgba(0,0,0,.22)}
+body.mark .bar{display:flex}
+.brow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#gfine{display:none;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:7px}
+body.mark.gsel #gfine{display:flex}
+.bar .gap{flex:1}
+.bar button{padding:10px 12px;font-size:.82rem}
+.bar .add{background:linear-gradient(140deg,var(--gold-l),var(--gold));color:#fff}
+.bar .gh{color:#fff;font-size:.76rem;font-weight:800;opacity:.85;line-height:1.3}
+.fg{display:flex;align-items:center;gap:4px;color:#fff;font-size:.76rem;font-weight:800}
+.fg button{padding:8px 12px;min-width:42px}
+
+/* פסקאות החברותא נבחרות בהקשה. בלי גרירה — גרירה באצבע נלחמת
+   בגלילה, וזו הייתה הסיבה שאי אפשר היה לסמן כלום בנייד. */
+.chb p.cp{cursor:pointer;border-radius:7px;padding:3px 6px;margin:0 -6px 9px;
+  transition:background .12s}
+.chb p.cp.hot{background:rgba(240,150,20,.28);
+  box-shadow:inset 3px 0 0 var(--gold)}
+.chb p.cp.used{opacity:.45}
+.chb p.cp.nextup{box-shadow:inset 3px 0 0 var(--ok)}
+
+/* שני מצבים לאותו מסך: כיול הדף, וסימון הקטעים.
+   בסימון צריך לראות את הגמרא ואת החברותא זו לצד זו ולתאם
+   ביניהן, ולכן שני חלונות. בנייד חצי מסך לכל אחד, כי אין ברירה
+   ובכל זאת צריך לראות את שניהם בבת אחת. */
+.chav{display:none;background:var(--surface);border-radius:var(--r);
+  box-shadow:0 2px 4px rgba(37,29,12,.06),0 10px 26px rgba(37,29,12,.08);
+  overflow:hidden;flex-direction:column}
+.chd{padding:9px 13px;font-weight:800;font-size:.85rem;background:var(--surface-2,#F7F1E4);
+  border-bottom:1px solid var(--rule);display:flex;justify-content:space-between}
+.chd span{font-weight:700;color:var(--ink-3);font-size:.76rem}
+.chb{overflow:auto;padding:14px 15px;font-size:.95rem;line-height:1.95;
+  -webkit-user-select:text;user-select:text}
+.chb p.cp{margin:0 0 13px}
+.chb p.cp b{font-weight:800}
+.chb ::selection{background:rgba(240,150,20,.42)}
+#marker{display:none}
+body.mark .chav{display:flex}
+body.mark #marker{display:block}
+body.mark aside:not(#marker){display:none}
+/* במצב סימון המסך נקי: הבוררים אינם נחוצים, ויציאה מחזירה אליהם */
+body.mark #mas,body.mark #daf,body.mark #src,body.mark #pg,
+body.mark #pick,body.mark #reset{display:none}
+body.mark .wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) 290px;
+  padding-bottom:70px}
+body.mark .stage,body.mark .chav{height:calc(100vh - 168px)}
+body.mark.swap .stage{order:2}
+@media (max-width:900px){
+  body.mark .wrap{grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 8px 70px}
+  body.mark .stage,body.mark .chav{height:41vh}
+  body.mark #marker{display:none}
+}
+/* מסך מלא לכל צד, להליכה ולעיניים עייפות */
+body.mark.solo .wrap{grid-template-columns:minmax(0,1fr);padding-bottom:70px}
+body.mark.solo #marker{display:none}
+body.mark.solo .stage,body.mark.solo .chav{height:calc(100vh - 132px)}
+body.mark.solo.on-chav .stage{display:none}
+body.mark.solo:not(.on-chav) .chav{display:none}
+.step{border:1px solid var(--rule);border-radius:9px;padding:8px 10px;margin-top:7px;
+  font-size:.77rem;font-weight:700;line-height:1.5}
+.step .x{float:left;color:var(--stop);font-weight:800;cursor:pointer;padding:0 5px}
+.step .q{color:var(--ink-2);display:block;margin-top:3px}
+#mcur{font-size:.79rem;font-weight:700;line-height:1.6}
+#mcur .ok{color:var(--ok)} #mcur .no{color:var(--ink-3)}
+.hint{margin-top:12px;font-size:.75rem;color:var(--ink-3);font-weight:700;line-height:1.6}
+#msg{font-size:.8rem;font-weight:800;margin-top:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>סטודיו הדף</h1>
+  <select id="mas"></select>
+  <select id="daf"></select>
+  <select id="src"></select>
+  <select id="pg"></select>
+  <span class="sp"></span>
+  <label class="alt" id="pick" title="קובץ PDF של דף, או תמונה">
+    פתיחת קובץ<input type="file" id="file" accept="application/pdf,image/*" hidden></label>
+  <span id="stat"></span>
+  <button id="mode">סימון קטעים ←</button>
+  <button id="reset">זיהוי מחדש</button>
+  <button class="p" id="save">שמירת JSON</button>
+</header>
+
+<div class="wrap">
+  <div class="stage">
+    <div class="zbar">
+      <button id="zin" title="הגדלה">+</button>
+      <button id="zout" title="הקטנה">−</button>
+      <button id="zfit" title="התאמה למסך">⤢</button>
+    </div>
+    <div id="holder">
+      <img id="page" alt="">
+      <svg id="ov" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
+  <div class="chav" id="chav">
+    <div class="chd">חברותא<span id="chpg"></span></div>
+    <div class="chb" id="chb"></div>
+  </div>
+
+  <aside>
+    <h2>מה שזוהה</h2>
+    <p class="h">הירוק המקווקו הוא גוש הכתב, הכחול הוא המסגרת
+      הפנימית של הגמרא. כל שינוי מחשב את השורות מחדש מיד.</p>
+    <div id="stats"></div>
+    <h2 style="margin-top:14px">אזורים</h2>
+    <div id="zones"></div>
+    <div class="hint">לחיצה על אזור פותחת את הכלים שלו.
+      <b>פנימי</b> = הגמרא לבדה, בין שני הרווחים הקבועים.
+      <b>חיצוני</b> = הורחבה עד קצה הגוש, כשטור פירוש נגמר.
+      אפשר גם לגרור את הקו העליון של אזור.</div>
+    <div id="msg"></div>
+  </aside>
+
+  <aside id="marker">
+    <h2>סימון קטעים</h2>
+    <p class="h" id="mhelp"></p>
+    <div id="mcur"></div>
+    <button class="p" id="addstep" style="width:100%;margin-top:10px" disabled>
+      הוספת הקטע</button>
+    <h2 style="margin-top:16px">הקטעים <span id="mcount"></span></h2>
+    <div id="steps"></div>
+  </aside>
+</div>
+
+<div class="bar">
+  <div class="brow" id="gfine">
+    <span class="gh">גמרא · כוונון במילים</span>
+    <span class="fg">התחלה
+      <button data-nudge="start,-1">◂</button><button data-nudge="start,1">▸</button></span>
+    <span class="fg">סוף
+      <button data-nudge="end,-1">◂</button><button data-nudge="end,1">▸</button></span>
+    <button id="clearsel">✕ ניקוי הסימון</button>
+  </div>
+  <div class="brow">
+    <button id="pgprev" title="העמוד הקודם">▸ עמוד</button>
+    <span class="gh" id="pglbl"></span>
+    <button id="pgnext" title="העמוד הבא">עמוד ◂</button>
+    <button id="undo">◂ ביטול הקטע האחרון</button>
+    <span class="gap"></span>
+    <span class="gh" id="ghint"></span>
+    <button id="swap" title="החלפת צדדים">⇄</button>
+    <button id="layout">מסך מלא</button>
+    <button class="add" id="addstep2">הוספת הקטע</button>
+    <button class="p" id="save2">שמירה</button>
+  </div>
+</div>
+
+<!-- לוח השנה וקישורי הדפים — אותם קבצים שהאפליקציה משתמשת בהם.
+     הבורר נשען עליהם ואינו מחזיק רשימה משלו. -->
+<script src="data.js"></script>
+<script src="links.js"></script>
+<script type="module">
+  /* pdf.js מצורף ולא נטען מרשת חיצונית. נטען כמודול כי זו הצורה
+     שבה הוא מפורסם, ומגושר ל-window כדי שהקוד הרגיל שלמטה ישתמש בו. */
+  import * as pdfjsLib from './vendor/pdfjs/pdf.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdfjs/pdf.worker.min.mjs';
+  window.pdfjsLib = pdfjsLib;
+  window.dispatchEvent(new Event('pdfjs-ready'));
+</script>
+<script>
+/* ============================================================
+   זיהוי. אותו אלגוריתם שנבדק בפייתון על ארבעה דפים, בדפדפן.
+   ============================================================ */
+var REF_W = 2539;              // הרוחב שבו נמדדו כל הקבועים
+var IMG = null, D = null, S = null;   // תמונה · נתוני פיקסלים · מצב
+
+function ink(data, w, h) {
+  /* מסכת דיו כמערך ביטים לפי שורות, לחישוב מהיר של ממוצעים */
+  var m = new Uint8Array(w * h);
+  for (var i = 0, p = 0; i < m.length; i++, p += 4) {
+    m[i] = (data[p] * .299 + data[p+1] * .587 + data[p+2] * .114) < 150 ? 1 : 0;
+  }
+  return m;
+}
+function colSum(m, w, h, x) { var s = 0; for (var y = 0; y < h; y++) s += m[y*w+x]; return s; }
+function rowMean(m, w, y, a, b) {
+  if (b <= a) return 0;
+  var s = 0, o = y * w;
+  for (var x = a; x < b; x++) s += m[o + x];
+  return s / (b - a);
+}
+function runs(arr, hmin) {
+  var out = [], s = null;
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] && s === null) s = i;
+    else if (!arr[i] && s !== null) { if (i - s >= hmin) out.push([s, i]); s = null; }
+  }
+  if (s !== null && arr.length - s >= hmin) out.push([s, arr.length]);
+  return out;
+}
+function smooth3(a) {
+  var o = new Float32Array(a.length);
+  for (var i = 0; i < a.length; i++) {
+    var s = a[i], n = 1;
+    if (i) { s += a[i-1]; n++; }
+    if (i < a.length-1) { s += a[i+1]; n++; }
+    o[i] = s / n;
+  }
+  return o;
+}
+function median(v) {
+  if (!v.length) return 0;
+  var s = v.slice().sort(function(a,b){return a-b;});
+  return s[s.length >> 1];
+}
+
+/* מרווח שורה = המרחק בין תחילות שורות, ולא גובה הרצף.
+   זה מה שמבדיל בין שלוש שכבות הטקסט בדף. */
+function pitchOf(m, w, a, b, y0, y1) {
+  var p = new Float32Array(y1 - y0);
+  for (var y = y0; y < y1; y++) p[y-y0] = rowMean(m, w, y, a, b);
+  p = smooth3(p);
+  var st = [], on = false;
+  for (var i = 0; i < p.length; i++) {
+    var v = p[i] > .02;
+    if (v && !on) st.push(i);
+    on = v;
+  }
+  if (st.length < 4) return null;
+  var d = [];
+  for (var i = 1; i < st.length; i++) { var q = st[i]-st[i-1]; if (q > 6 && q < 70) d.push(q); }
+  return d.length ? median(d) : null;
+}
+
+/* מילה מרחפת (קאצ'וורד).
+   בדפוס וילנא נהוג לשים בתחתית טור את המילה שפותחת את העמוד
+   הבא, מרחפת בתוך הרווח. "איזהו", "יתיב", "אליה".
+
+   היא הרסה את הזיהוי בשתי דרכים: מילאה את הרווח שאמור להפריד
+   בין הגמרא לגוש שמתחתיה, ולכן הגמרא נראתה כממשיכה; והיא יושבת
+   בטור אחר מהשורה שלידה, ולכן שורה צרה נמדדה כרחבה.
+
+   היא ניתנת להבחנה בלי לקרוא אותה: שורת טקסט אמיתית פרושה על
+   רוב רוחב הטור, ומילה בודדת מרוכזת בכתם צר אחד. */
+function isFloating(m, w, a, b, t, bt) {
+  var wide = b - a, cover = 0, xs = -1, xe = -1;
+  for (var x = a; x < b; x++) {
+    var any = 0;
+    for (var y = t; y < bt && !any; y++) if (m[y*w+x]) any = 1;
+    if (any) { cover++; if (xs < 0) xs = x; xe = x; }
+  }
+  if (!cover) return true;
+  var span = xe - xs + 1;
+  /* פרושה על פחות מרבע הטור, ומרוכזת בשליש ממנו — מילה, לא שורה */
+  return (cover / wide) < 0.25 && (span / wide) < 0.34;
+}
+
+function linesIn(m, w, a, b, y0, y1, pit, vilna) {
+  var p = new Float32Array(y1 - y0);
+  for (var y = y0; y < y1; y++) p[y-y0] = rowMean(m, w, y, a, b);
+  p = smooth3(p);
+  var on = new Uint8Array(p.length);
+  for (var i = 0; i < p.length; i++) on[i] = p[i] > .02 ? 1 : 0;
+  var out = [];
+  runs(on, 6).forEach(function (r) {
+    var s = r[0], e = r[1], h = e - s;
+    var n = pit ? Math.max(1, Math.round(h / pit)) : 1;
+    if (n === 1 || h < pit * 1.45) { out.push([s+y0, e+y0]); return; }
+    /* שורות שנדבקו. חותכים במינימום הדיו סביב הגבול הצפוי —
+       רצועה ברוחב כפול היא תמיד באג, לא שורה. */
+    var cuts = [s];
+    for (var k = 1; k < n; k++) {
+      var t = s + Math.round(h * k / n);
+      var lo = Math.max(s+3, t - Math.round(pit*.3)), hi = Math.min(e-3, t + Math.round(pit*.3));
+      if (hi <= lo) { cuts.push(t); continue; }
+      var bi = lo, bv = Infinity;
+      for (var q = lo; q < hi; q++) if (p[q] < bv) { bv = p[q]; bi = q; }
+      cuts.push(bi);
+    }
+    cuts.push(e);
+    for (var i = 0; i < cuts.length-1; i++)
+      if (cuts[i+1]-cuts[i] >= 5) out.push([cuts[i]+y0, cuts[i+1]+y0]);
+  });
+  /* הכלל הזה שייך לדף וילנא בלבד. בחברותא "א. מפתח של גשמים,"
+     הוא משפט לגיטימי שתופס חמישית מהשורה, והוא נמחק. */
+  if (!vilna) return out;
+  return out.filter(function (l) { return !isFloating(m, w, a, b, l[0], l[1]); });
+}
+
+/* הקבועים נגזרים ממרווח השורה של הדף ולא מרוחב התמונה.
+   הסיבה נתפסה כשהסטודיו התחיל לפתוח PDF: pdftoppm ו-pdf.js מציירים
+   את אותו עמוד בקנה מידה שונה, וקבועים שנקשרו לרוחב 2539 הפכו
+   שם לצרים מדי — המרזבים החלו להבהב ודף אחד יצא בשבעה אזורים.
+   מרווח השורה הוא היחידה הטבעית של הדף ואינו תלוי ברזולוציה.
+   היחסים כאן הם בדיוק הערכים שנמדדו ביחס למרווח 33px. */
+function K(pit) {
+  return { win: Math.max(9, Math.round(pit * 2.1)) | 1,   // החלקה אנכית ~2 שורות
+           wmin: Math.max(6, Math.round(pit * 0.60)),     // רוחב מרזב מינימלי
+           cmin: Math.round(pit * 2.7),                   // רוחב טור מינימלי
+           gmin: Math.max(4, Math.round(pit * 0.30)) };   // מרזב גלובלי
+}
+
+function analyse(m, w, h, pit0) {
+  var sc = w / REF_W;
+  /* מעבר ראשון נותן את מרווח השורה, והשני משתמש בו. שני מעברים
+     של 200ms זולים מזיהוי שנשען על רזולוציה מקרית. */
+  if (!pit0) {
+    var first = analyse(m, w, h, 33 * sc);
+    if (first && Math.abs(first.gpitch - 33 * sc) > 2) {
+      var second = analyse(m, w, h, first.gpitch);
+      if (second) return second;
+    }
+    return first;
+  }
+  var C = K(pit0);
+  /* --- גבולות הכתב --- */
+  var rs = [], cs = [];
+  for (var y = 0; y < h; y++) { var s=0,o=y*w; for (var x=0;x<w;x++) s+=m[o+x]; rs.push(s); }
+  for (var x = 0; x < w; x++) cs.push(colSum(m, w, h, x));
+  var y0=0,y1=h-1,x0=0,x1=w-1;
+  while (y0 < h && rs[y0] <= w*.004) y0++;
+  while (y1 > y0 && rs[y1] <= w*.004) y1--;
+  while (x0 < w && cs[x0] <= h*.004) x0++;
+  while (x1 > x0 && cs[x1] <= h*.004) x1--;
+
+  /* --- מרזבים: עמודה ריקה לאורך חלון של ~3 שורות ---
+     ההחלקה היא הלב. רווח בין מילים מזיז את מקומו משורה לשורה
+     ונמחק; מרזב בין טורים יושב באותו x לאורך שורות רבות ושורד. */
+  var win = C.win, half = win >> 1;
+  var emptyCnt = new Int32Array(w);
+  var empt = new Uint8Array(w * h);
+  for (var x = x0; x <= x1; x++) {
+    var acc = 0;
+    for (var y = 0; y < Math.min(win, h); y++) acc += m[y*w+x];
+    for (var y = 0; y < h; y++) {
+      var t = y - half, bt = t + win;
+      if (y > 0) {
+        if (bt-1 < h) acc += m[(bt-1)*w+x];
+        if (t-1 >= 0) acc -= m[(t-1)*w+x];
+      }
+      var e = (acc / win) < .004 ? 1 : 0;
+      empt[y*w+x] = e;
+      if (e && y >= y0 && y <= y1) emptyCnt[x]++;
+    }
+  }
+
+  /* --- טורים --- */
+  var gcand = new Uint8Array(w);
+  for (var x = x0; x <= x1; x++) gcand[x] = emptyCnt[x] > (y1-y0)*.25 ? 1 : 0;
+  var guts = runs(gcand, C.gmin);
+  var edges = [[x0,x0]].concat(guts).concat([[x1,x1]]);
+  var cols = [];
+  for (var i = 0; i < edges.length-1; i++) {
+    var a = edges[i][1], b = edges[i+1][0];
+    if (b - a < C.cmin) continue;
+    var pt = pitchOf(m, w, a, b, y0, y1);
+    if (pt) cols.push({a:a, b:b, pitch:pt});
+  }
+  if (cols.length < 3) return null;
+
+  /* --- הגוש המרכזי: שלושת הטורים, בלי השוליים ---
+     השוליים ב-21-22 מול 29-33 בגוש. פער של 35% אינו מטעה. */
+  var pmax = Math.max.apply(null, cols.map(function(c){return c.pitch;}));
+  var core = cols.filter(function(c){ return c.pitch > pmax*.80; });
+  var bx0 = Math.min.apply(null, core.map(function(c){return c.a;}));
+  var bx1 = Math.max.apply(null, core.map(function(c){return c.b;}));
+
+  /* --- השדרה, עם נפילה לרשת הידועה ---
+     בסדרה מוקלדת אחיד השדרה יושבת ב-0.298 עד 0.702 מרוחב הגוש.
+     בדף שבו תוספות קצר, המרזב שלידו אינו שורד את הסף והטור נבלע
+     בשדרה; אז היחס מחזיר את הגבול הנומינלי, וההתרחבות נרשמת
+     כאזור במקום להיטמע בגבול. */
+  var mid = (bx0+bx1)/2;
+  var spine = core.slice().sort(function(p,q){
+    return Math.abs((p.a+p.b)/2-mid) - Math.abs((q.a+q.b)/2-mid); })[0];
+  /* הפריסה זהה בכל הסדרה: השדרה יושבת ב-0.298 עד 0.702 מרוחב
+     הגוש, ונמדד כך בארבעה דפים בשני מנועי ציור שונים. לכן כל
+     קצה שסוטה מהיחס ביותר מ-6% מוחזר אליו.
+
+     קודם הגנתי רק על המקרה שהשדרה יצאה רחבה מדי — טור שכן נבלע
+     בה כשהמרזב שלידו לא שרד. המקרה ההפוך לא נתפס: בדף ב׳ ע"ב
+     נמצא מרזב מדומה בתוך הגמרא, השדרה יצאה צרה בחצי, וכל
+     האזורים נחתכו באמצע הדף. */
+  var cw = bx1 - bx0, gA = spine.a, gB = spine.b;
+  var nomA = Math.round(bx0 + cw*.298), nomB = Math.round(bx0 + cw*.702);
+  var tol = cw * 0.06;
+  if (Math.abs(gA - nomA) > tol) gA = nomA;
+  if (Math.abs(gB - nomB) > tol) gB = nomB;
+
+  /* --- נוכחות שני המרזבים, שורה אחר שורה --- */
+  var wmin = C.wmin;
+  var L = new Uint8Array(h), R = new Uint8Array(h);
+  var rowInk = new Float32Array(h);
+  for (var y = y0; y <= y1; y++) rowInk[y] = rowMean(m, w, y, bx0, bx1);
+  var thinInk = median(Array.prototype.slice.call(rowInk, y0, y1 + 1)
+                  .filter(function (v) { return v > 0.004; })) * 0.22;
+  for (var y = y0; y <= y1; y++) {
+    var row = [];
+    var s = null;
+    for (var x = x0; x <= x1; x++) {
+      var e = empt[y*w+x];
+      if (e && s === null) s = x;
+      else if (!e && s !== null) { if (x-s >= wmin) row.push([s,x]); s = null; }
+    }
+    if (s !== null && x1-s >= wmin) row.push([s,x1]);
+    row.forEach(function (g) {
+      if (Math.abs(g[1]-gA) <= wmin*2 && g[0] >= bx0-wmin) L[y] = 1;
+      if (Math.abs(g[0]-gB) <= wmin*2 && g[1] <= bx1+wmin) R[y] = 1;
+    });
+    /* שורה שכל תוכנה מילה בודדת אינה עדות לכלום — לא לקיום מרזב
+       ולא להיעדרו. מסמנים כ"לא ידוע" ומשאירים להחלקה למלא. */
+    if (rowInk[y] < thinInk) { L[y] = 2; R[y] = 2; }
+  }
+  var gpit = spine.pitch;
+  var mm = Math.round(gpit*1.2);
+  function sm(v) {
+    /* ממוצע נע ממורכז, שמדלג על שורות "לא ידוע" (מילה מרחפת)
+       במקום לספור אותן כהיעדר מרזב. */
+    var o = new Uint8Array(h), acc = 0, cnt = 0, half = mm >> 1;
+    var add = function (y, k) {
+      if (y < 0 || y >= h || v[y] === 2) return;
+      acc += k * v[y]; cnt += k;
+    };
+    for (var y = 0; y < h + half; y++) {
+      add(y, 1); add(y - mm, -1);
+      var c = y - half;
+      if (c >= 0 && c < h) o[c] = cnt ? ((acc / cnt) > .45 ? 1 : 0) : 0;
+    }
+    return o;
+  }
+  L = sm(L); R = sm(R);
+
+  /* --- היכן הגמרא מתחילה ---
+     לא לפי דיו אלא לפי מבנה: מעל הנקודה שבה שני המרזבים מופיעים,
+     רש"י ותוספות חוצים את המרכז ואין גמרא כלל. */
+  var gtop = y0;
+  for (var y = y0; y <= y1; y++) if (L[y] && R[y]) { gtop = y; break; }
+
+  /* --- אזורים: רצפים שבהם צמד המרזבים אינו משתנה --- */
+  var zones = [], cur = null, st = gtop;
+  for (var y = gtop; y <= y1+1; y++) {
+    var k = (y <= y1) ? (L[y]?1:0)*2 + (R[y]?1:0) : -1;
+    if (cur === null) { cur = k; st = y; }
+    else if (k !== cur) { zones.push({y0:st, y1:y-1, k:cur}); cur = k; st = y; }
+  }
+  zones = zones.filter(function(z){ return z.y1-z.y0 > gpit; });
+  zones.forEach(function (z) {
+    /* inA/inB = הצד נמצא על המסגרת הפנימית. שני מצבים בלבד לכל
+       צד, ולכן זה מתגים ולא גרירה. */
+    z.inA = !!(z.k & 2); z.inB = !!(z.k & 1);
+    z.a = z.inA ? gA : bx0;
+    z.b = z.inB ? gB : bx1;
+    z.pitch = pitchOf(m, w, z.a, z.b, z.y0, z.y1) || gpit;
+  });
+
+  /* --- האם האזור האחרון עדיין גמרא ---
+     כשהגמרא נגמרת, הפירושים מתפרשים ברוחב מלא במרווח שלהם.
+     11% הפרש, ולכן משווים לשני העוגנים ולא לסף שרירותי. */
+  var others = core.filter(function(c){ return c !== spine; });
+  var cpit = median(others.map(function(c){return c.pitch;})) || gpit*.88;
+  /* הגמרא נגמרת לפעמים באמצע הדף, ורש"י או תוספות נכתבים
+     מתחתיה. אזור שמרווח השורה בו קרוב לפירוש ולא לגמרא אינו
+     גמרא — גם אם הוא לא האחרון. 33 מול 29-30, ולכן משווים
+     לשני העוגנים ולא לסף שרירותי. */
+  zones = zones.filter(function (z) {
+    if (z.k !== 0) return true;                 /* טור צר — ודאי גמרא */
+    return Math.abs(z.pitch - gpit) <= Math.abs(z.pitch - cpit);
+  });
+
+  return { w:w, h:h, sc:sc, bbox:[x0,y0,x1,y1],
+           outer:[bx0,bx1], inner:[gA,gB],
+           core:[bx0,bx1], spine:[gA,gB],
+           gpitch:gpit, cpitch:cpit, zones:zones, grid:[bx0, gA, gB, bx1] };
+}
+
+/* חברותא אינו דף וילנא אלא A4 בטור אחד עם פסקאות. אין בו מרזבים
+   ואין מה לחפש — הטור כולו הוא התוכן, והפסקאות הן היחידה הטבעית.
+   רווח גדול משורה וחצי נחשב גבול פסקה, וכל פסקה היא אזור. */
+function analyseSimple(m, w, h) {
+  var rs = [], cs = [];
+  for (var y = 0; y < h; y++) { var s=0,o=y*w; for (var x=0;x<w;x++) s+=m[o+x]; rs.push(s); }
+  for (var x = 0; x < w; x++) cs.push(colSum(m, w, h, x));
+  var y0=0,y1=h-1,x0=0,x1=w-1;
+  while (y0 < h && rs[y0] <= w*.003) y0++;
+  while (y1 > y0 && rs[y1] <= w*.003) y1--;
+  while (x0 < w && cs[x0] <= h*.003) x0++;
+  while (x1 > x0 && cs[x1] <= h*.003) x1--;
+  if (y1 - y0 < 40) return null;
+
+  var pit = pitchOf(m, w, x0, x1, y0, y1) || 30;
+  var ln = linesIn(m, w, x0, x1, y0, y1, pit, false);
+  if (!ln.length) return null;
+
+  var zones = [], cur = null;
+  ln.forEach(function (l) {
+    if (cur && l[0] - cur.last <= pit * 1.55) { cur.y1 = l[1]; cur.last = l[1]; }
+    else { cur = { y0:l[0], y1:l[1], last:l[1], k:3, a:x0, b:x1, pitch:pit }; zones.push(cur); }
+  });
+  zones.forEach(function (z) { delete z.last; });
+  zones.forEach(function (z) { z.inA = z.inB = true; });
+  return { w:w, h:h, sc:w/REF_W, bbox:[x0,y0,x1,y1],
+           outer:[x0,x1], inner:[x0,x1], core:[x0,x1], spine:[x0,x1],
+           gpitch:pit, cpitch:pit, zones:zones, grid:[x0,x1], simple:true };
+}
+
+function relines() {
+  S.zones.forEach(function (z) {
+    z.lines = linesIn(D.m, D.w, z.a, z.b, z.y0, z.y1, S.gpitch, !S.simple);
+  });
+}
+
+/* ============================================================
+   ציור ואינטראקציה
+   ============================================================ */
+var sel = 0;
+
+/* ============================================================
+   הצגה ועריכה.
+
+   הגמרא נמצאת בכל אזור, בכל צד בנפרד, באחד משני מצבים בלבד:
+   על **המסגרת הפנימית** — שני הרווחים הקבועים שמשני צדי הגמרא,
+   שמתחילים אחרי ארבע שורות של רש"י ותוספות — או מורחבת אל
+   **המסגרת החיצונית**, כשטור פירוש נגמר.
+
+   לכן אין כאן גרירה חופשית של הרוחב אלא שני מתגים לאזור. זה
+   מדויק יותר, זה בלחיצה אחת, וזה עובד באצבע.
+   הגובה נערך שורה־שורה מאותה סיבה.
+   ============================================================ */
+function zoneName(z) {
+  var i = z.inA, o = z.inB;
+  return S.simple ? 'פסקה'
+       : (i && o) ? 'הגמרא בלבד'
+       : (!i && !o) ? 'מורחב לשני הצדדים'
+       : i ? 'מורחב ימינה' : 'מורחב שמאלה';
+}
+function applySides(z) {
+  z.a = z.inA ? S.inner[0] : S.outer[0];
+  z.b = z.inB ? S.inner[1] : S.outer[1];
+}
+function lineCount(z) { return (z.lines || []).length; }
+
+function draw() {
+  var ov = document.getElementById('ov');
+  ov.setAttribute('viewBox', '0 0 ' + S.w + ' ' + S.h);
+  var s = '';
+  /* המסגרות עצמן, כדי שיהיה ברור לאן אפשר להרחיב */
+  s += box(S.outer[0], S.bbox[1], S.outer[1], S.bbox[3], '#3B7D57', 3, '16 12');
+  if (!S.simple)
+    s += box(S.inner[0], S.bbox[1], S.inner[1], S.bbox[3], '#17468F', 2, '6 9');
+
+  S.zones.forEach(function (z, i) {
+    var on = i === sel;
+    s += '<rect x="'+z.a+'" y="'+z.y0+'" width="'+(z.b-z.a)+'" height="'+(z.y1-z.y0)+
+         '" fill="rgba(192,143,43,'+(on?.16:.04)+')" stroke="'+(on?'#C08F2B':'#C9B79A')+
+         '" stroke-width="'+(on?7:3)+'"/>';
+    (z.lines||[]).forEach(function (ln, j) {
+      s += '<rect x="'+z.a+'" y="'+ln[0]+'" width="'+(z.b-z.a)+'" height="'+(ln[1]-ln[0])+
+           '" fill="'+(j%2?'rgba(240,150,20,'+(on?.5:.22)+')'
+                          :'rgba(30,120,225,'+(on?.5:.22)+')')+'"/>';
+    });
+    if (on) s += '<text x="'+((z.a+z.b)/2)+'" y="'+(z.y0+S.gpitch*1.4)+
+      '" text-anchor="middle" font-size="'+(S.gpitch*1.5)+
+      '" font-weight="700" fill="#8A5A00">'+(i+1)+'</text>';
+    /* ידית הגבול העליון. העובי נקבע לפי גודל התצוגה בפועל, כדי
+       שיהיה ~44 פיקסלים של מסך גם בנייד. */
+    s += '<line class="hy" data-i="'+i+'" x1="'+S.bbox[0]+'" y1="'+z.y0+
+         '" x2="'+S.bbox[2]+'" y2="'+z.y0+'" stroke="rgba(0,0,0,0)" stroke-width="'+
+         handleW() + '"/>';
+  });
+  ov.innerHTML = s;
+  bindHandles();
+  panel();
+}
+function box(a, t, b, bt, col, w, dash) {
+  return '<rect x="'+a+'" y="'+t+'" width="'+(b-a)+'" height="'+(bt-t)+
+         '" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-dasharray="'+dash+'"/>';
+}
+function handleW() {
+  var r = document.getElementById('ov').getBoundingClientRect();
+  return Math.max(20, Math.round(44 * S.w / (r.width || S.w)));
+}
+
+function panel() {
+  var n = S.zones.reduce(function (a, z) { return a + lineCount(z); }, 0);
+  document.getElementById('stats').innerHTML =
+    (shown ? row('מוצג כעת', shown) : '') +
+    row('שורות גמרא בסך הכול', n) +
+    row('אזורים', S.zones.length) +
+    (S.simple ? '' : row('מרווח שורה', Math.round(S.gpitch) + 'px'));
+
+  document.getElementById('zones').innerHTML = S.zones.map(function (z, i) {
+    var on = i === sel;
+    var pct = function (v) { return Math.round(v / S.h * 100); };
+    return '<div class="zone'+(on?' on':'')+'" data-i="'+i+'">' +
+      '<div class="t">' + (i+1) + '. ' + zoneName(z) +
+        '<span class="n">' + lineCount(z) + ' שורות</span></div>' +
+      '<div class="d">מ-' + pct(z.y0) + '% עד ' + pct(z.y1) + '% מגובה הדף</div>' +
+      (on ? ctrls(i) : '') + '</div>';
+  }).join('') || '<div class="hint">לא נמצאו אזורים.</div>';
+
+  [].forEach.call(document.querySelectorAll('.zone'), function (el) {
+    el.onclick = function (e) {
+      if (e.target.closest('[data-act]')) return;
+      sel = +el.dataset.i; draw(); scrollToZone();
+    };
+  });
+  [].forEach.call(document.querySelectorAll('[data-act]'), function (b) {
+    b.onclick = function (e) { e.stopPropagation(); act(b.dataset.act, +b.dataset.i); };
+  });
+}
+function ctrls(i) {
+  var z = S.zones[i];
+  var t = function (a, lbl, hot) {
+    return '<button class="c'+(hot?' hot':'')+'" data-act="'+a+'" data-i="'+i+'">'+lbl+'</button>';
+  };
+  return '<div class="ctl">' +
+    (S.simple ? '' :
+      '<div class="cg"><span>ימין</span>' +
+        t('rin', 'פנימי', z.inB) + t('rout', 'חיצוני', !z.inB) + '</div>' +
+      '<div class="cg"><span>שמאל</span>' +
+        t('lin', 'פנימי', z.inA) + t('lout', 'חיצוני', !z.inA) + '</div>') +
+    '<div class="cg"><span>גבול עליון</span>' +
+      t('up', '▲ שורה') + t('down', '▼ שורה') + '</div>' +
+    '<div class="cg"><span>גבול תחתון</span>' +
+      t('bup', '▲ שורה') + t('bdown', '▼ שורה') + '</div>' +
+    '<div class="cg"><span></span>' +
+      t('split', 'פיצול') + t('del', 'מחיקה') + '</div>' +
+    '</div>';
+}
+function row(k, v) { return '<div class="stat"><span>'+k+'</span><b>'+v+'</b></div>'; }
+
+/* צעד של שורה אחת: קופצים לשורה הסמוכה בפועל ולא מזיזים
+   בפיקסלים. בדף צפוף זה ההבדל בין מדויק למקרי.
+
+   `edge` קובע איזה קצה של השורה מעניין: הגבול העליון נצמד
+   לתחילות שורות, והתחתון לסופיהן. כשהתחתון נצמד לתחילות, כל
+   צעד בלע גם את הרווח שאחרי השורה — ואז שורה אחת והמילה
+   המרחפת שאחריה נכנסו או יצאו תמיד ביחד, בלי דרך להפריד. */
+function stepLine(y, dir, z, edge) {
+  var k = edge === 'end' ? 1 : 0;
+  var best = null;
+  allLines(z).forEach(function (l) {
+    var v = l[k];
+    if (dir < 0 && v < y - 2 && (best === null || v > best)) best = v;
+    if (dir > 0 && v > y + 2 && (best === null || v < best)) best = v;
+  });
+  return best === null ? null : best;
+}
+function allLines(z) {
+  return linesIn(D.m, D.w, z.a, z.b, S.bbox[1], S.bbox[3], S.gpitch, !S.simple);
+}
+
+function act(a, i) {
+  var z = S.zones[i], prev = S.zones[i-1], next = S.zones[i+1];
+  if (a === 'rin')  { z.inB = true;  applySides(z); }
+  if (a === 'rout') { z.inB = false; applySides(z); }
+  if (a === 'lin')  { z.inA = true;  applySides(z); }
+  if (a === 'lout') { z.inA = false; applySides(z); }
+  if (a === 'up' || a === 'down') {
+    var y = stepLine(z.y0, a === 'up' ? -1 : 1, z, 'start');
+    if (y === null) return;
+    y = Math.max(S.bbox[1], Math.min(z.y1 - S.gpitch, y));
+    z.y0 = y; if (prev) prev.y1 = y - 1;
+  }
+  if (a === 'bup' || a === 'bdown') {
+    /* נספר לפי שורות שנכללות בפועל, ולא לפי המרחק מהגבול.
+       הגבול התחתון יושב בדרך כלל מתחת לשורה האחרונה, ולכן צעד
+       "לפי הסוף הקרוב" רק היה מהדק אליה בלי להסיר אותה — לחיצה
+       ראשונה לא עשתה כלום. */
+    var inside = allLines(z).filter(function (l) { return l[1] <= z.y1 + 2; });
+    var after  = allLines(z).filter(function (l) { return l[1] >  z.y1 + 2; });
+    var y2 = a === 'bup'
+      ? (inside.length > 1 ? inside[inside.length - 2][1] : null)
+      : (after.length ? after[0][1] : null);
+    if (y2 === null) return;              /* אין שורה נוספת — לא זזים */
+    y2 = Math.max(z.y0 + S.gpitch, Math.min(S.bbox[3], y2));
+    z.y1 = y2; if (next) next.y0 = y2 + 1;
+  }
+  if (a === 'split') {
+    if (z.y1 - z.y0 < S.gpitch * 2) return;
+    var mid = stepLine((z.y0 + z.y1) >> 1, 1, z, 'start');
+    if (mid === null) return;
+    S.zones.splice(i+1, 0, { y0:mid, y1:z.y1, inA:z.inA, inB:z.inB, a:z.a, b:z.b });
+    z.y1 = mid - 1;
+  }
+  if (a === 'del') {
+    if (S.zones.length < 2) return;
+    S.zones.splice(i, 1);
+    if (prev && next) prev.y1 = next.y0 - 1;
+    sel = Math.max(0, i - 1);
+  }
+  relines(); draw();
+}
+
+function scrollToZone() {
+  var z = S.zones[sel]; if (!z) return;
+  var st = document.querySelector('.stage'), ov = document.getElementById('ov');
+  var r = ov.getBoundingClientRect();
+  st.scrollTop = Math.max(0, z.y0 / S.h * r.height - st.clientHeight * 0.3);
+}
+
+/* הגרירה נשברה קודם מסיבה מביכה: כל תזוזה בנתה מחדש את כל
+   השכבה הגרפית, וזה מחק את הקו שהאצבע מחזיקה. עכשיו האזנה על
+   החלון עצמו, כך שבנייה מחדש אינה מפריעה. */
+function bindHandles() {
+  var ov = document.getElementById('ov');
+  [].forEach.call(ov.querySelectorAll('.hy'), function (el) {
+    el.style.touchAction = 'none';
+    el.style.cursor = 'ns-resize';
+    el.onpointerdown = function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      var i = +el.dataset.i;
+      sel = i;
+      var stage = document.querySelector('.stage');
+      var wasOverflow = stage.style.overflow;
+      stage.style.overflow = 'hidden';        /* שלא ייגלל מתחת לאצבע */
+
+      var move = function (m) {
+        var r = ov.getBoundingClientRect();
+        var y = Math.round((m.clientY - r.top) / r.height * S.h);
+        var lo = i ? S.zones[i-1].y0 + S.gpitch : S.bbox[1];
+        var hi = S.zones[i].y1 - S.gpitch;
+        y = Math.max(lo, Math.min(hi, y));
+        S.zones[i].y0 = y;
+        if (i) S.zones[i-1].y1 = y - 1;
+        relines(); draw();
+      };
+      var up = function () {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        stage.style.overflow = wasOverflow;
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    };
+  });
+}
+
+
+document.getElementById('reset').onclick = function () { if (D) run(); };
+
+document.getElementById('save').onclick = function () {
+  keepPageState();
+  var mas = selVal('mas') || 'file', daf = selVal('daf') || '';
+  var out = { masechet: mas, daf: daf, savedAt: new Date().toISOString(),
+              pages: BOOK };
+  var n = 0;
+  for (var k in BOOK) n += (BOOK[k].steps || []).length;
+  var pages = Object.keys(BOOK).length;
+
+  var blob = new Blob([JSON.stringify(out, null, 1)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = ('daf-' + mas + '-' + daf).replace(/["'\u05f3\u05f4\s]/g,'') + '.json';
+  a.click();
+  /* ההודעה נוקבת בקטעים, כי זה מה שמעניין אחרי שעה של סימון —
+     וקודם היא דיווחה רק על אזורים ושורות, והמשתמש לא ידע אם
+     הסימונים בכלל נשמרו. */
+  say('נשמר · ' + n + ' קטעים ב-' + pages + ' עמודים · ' + a.download);
+};
+
+/* ============================================================
+   פתיחת PDF ישירות.
+   מה שיושב בדרייב של הרכז הוא PDF, וזו הצורה שהוא כבר עובד איתה.
+   המרה מראש הייתה מחייבת לארח עמודים של פירוש מסחרי במאגר
+   ציבורי; כאן הקובץ נפתח מהמחשב, מצויר לקנבס, ואינו עוזב את
+   המכשיר. pdf.js מצורף ב-vendor/ ולא נטען מרשת חיצונית, כדי
+   שהסטודיו יעבוד גם בלי חיבור.
+   ============================================================ */
+var TARGET_W = 2000;    // הרוחב שאליו מצוירים עמודי PDF
+var PDF = null;
+
+function pdfReady() {
+  if (window.pdfjsLib) return Promise.resolve();
+  return new Promise(function (ok) {
+    window.addEventListener('pdfjs-ready', function () { ok(); }, { once:true });
+  });
+}
+
+function openPdf(file) {
+  say('טוען את הקובץ…');
+  return pdfReady()
+    .then(function () { return file.arrayBuffer(); })
+    .then(function (buf) { return renderDoc(buf); });
+}
+function openPdfBytes(buf) {
+  say('פותח את הקובץ…');
+  /* עותק, כי pdf.js משתלט על המאגר ומרוקן אותו — והמטמון שלנו
+     צריך להישאר שמיש למעבר הבא לאותו דף. */
+  return pdfReady().then(function () { return renderDoc(buf.slice(0)); });
+}
+function renderDoc(buf) {
+  return Promise.resolve()
+    .then(function () { return pdfjsLib.getDocument({ data: buf }).promise; })
+    .then(function (doc) {
+    PDF = doc;
+    var pages = [];
+    for (var i = 1; i <= doc.numPages; i++) {
+      /* צורת הדף באה בשני עמודים, חברותא בעשרה. אין צורך לנחש —
+         כשיש בדיוק שניים אלה שני העמודים של הדף. */
+      pages.push([i, doc.numPages === 2
+        ? 'צורת הדף · עמוד ' + (i === 1 ? 'א׳' : 'ב׳')
+        : 'עמוד ' + i]);
+    }
+    fillSel(document.getElementById('pg'), pages);
+    document.getElementById('pg').style.display = '';
+    return showPdfPage(1);
+  }).catch(function () {
+    say('לא הצלחתי לפתוח את הקובץ.', 1);
+  });
+}
+
+function showPdfPage(n) {
+  if (!PDF) return Promise.resolve();
+  say('מצייר עמוד ' + n + '…');
+  return PDF.getPage(n).then(function (pg) {
+    var base = pg.getViewport({ scale: 1 });
+    var vp = pg.getViewport({ scale: TARGET_W / base.width });
+    var c = document.createElement('canvas');
+    c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    return pg.render({ canvasContext: c.getContext('2d', {willReadFrequently:true}),
+                       viewport: vp }).promise.then(function () { return c; });
+  }).then(useCanvas);
+}
+
+/* ============================================================
+   חברותא כטקסט.
+   ה-PDF אינו סריקה — יש בו שכבת טקסט מלאה, והגופנים מבחינים בין
+   David ל-David-Bold. לכן אפשר לשחזר גם את המילים המודגשות
+   שפותחות כל פסקה, אלה שמצטטות את לשון הגמרא.
+
+   טקסט ולא תמונה, כי חלון ההסבר צריך להימתח לפי אורכו, להישבר
+   לפי רוחב המסך ולהיות קריא בטלפון בלי זום — ובעיקר כדי שסימון
+   קטע יהיה בחירת טקסט רגילה ולא סימון שורות על תמונה.
+   ============================================================ */
+function chavItems(pg) {
+  return pg.getTextContent().then(function (tc) {
+    return tc.items.filter(function (it) { return it.str.trim() !== ''; });
+  });
+}
+
+/* ההדגשה לפי גובה הגליף, ולא לפי שם הגופן.
+   pdf.js מחזיר fontFamily גנרי ("sans-serif") לשני הגופנים, ושם
+   הגופן האמיתי זמין רק אחרי ציור העמוד — יקר מדי לעשרה עמודים.
+   הגובה לעומת זאת חד-משמעי ונמדד על כל הדף:
+     12.96px  גוף הטקסט      8818 תווים
+     15px     המילים המודגשות 3403 תווים
+     18.96px  כותרות
+   הסף נגזר מהגובה השכיח בפועל, ולא מקבוע — כך שינוי גודל
+   בקובץ אחר לא ישבור אותו. */
+function bodyHeight(items) {
+  var hist = {};
+  items.forEach(function (it) {
+    var h = Math.round(it.height * 20) / 20;
+    hist[h] = (hist[h] || 0) + it.str.length;
+  });
+  var best = 0, n = -1;
+  for (var h in hist) if (hist[h] > n) { n = hist[h]; best = +h; }
+  return best;
+}
+
+function chavBuild(items, body) {
+  var lim = body * 1.10, paras = [], cur = null, lastY = null, prev = null;
+  items.forEach(function (it) {
+    var y = Math.round(it.transform[5]);
+    var x = it.transform[4];
+    var bold = it.height >= lim;
+    var newPara = (lastY === null || lastY - y > 26 || y > lastY + 8);
+    if (newPara) { cur = { runs: [] }; paras.push(cur); prev = null; }
+
+    /* ה-PDF אינו שומר רווחים בין קטעי טקסט, ולכן המילים נדבקו.
+       הרווח מוסק מהמרחק: עברית נקראת מימין לשמאל, ולכן הקטע
+       הבא מתחיל שמאלה מקודמו, והפער ביניהם הוא הרווח. גם מעבר
+       שורה בתוך פסקה מפריד בין מילים. */
+    var gap = '';
+    if (prev) {
+      if (y !== prev.y) gap = ' ';
+      /* נמדד בקובץ: רווח בין מילים הוא ~2.9 יחידות, ובתוך
+         מילה או בין "(" ל-"1" הפער הוא 0 או שלילי. 0.15 מגובה
+         הגליף נופל בין השניים בבירור. */
+      else if (prev.x - (x + it.width) > it.height * 0.15) gap = ' ';
+    }
+    prev = { x: x, y: y };
+    lastY = y;
+
+    var last = cur.runs[cur.runs.length - 1];
+    if (last && last.b === bold) last.t += gap + it.str;
+    else { if (last && gap) last.t += gap; cur.runs.push({ t: it.str, b: bold }); }
+  });
+  return paras.filter(function (p) {
+    return p.runs.map(function (r) { return r.t; }).join('').trim().length > 1;
+  });
+}
+
+function chavHtml(paras) {
+  var n = 0;
+  return paras.map(function (p, i) {
+    var html = p.runs.map(function (r) {
+      var t = esc(r.t);
+      return r.b ? '<b>' + t + '</b>' : t;
+    }).join('');
+    return '<p class="cp" data-p="' + i + '">' + html + '</p>';
+  }).join('');
+}
+
+function useCanvas(c) {
+  var px = c.getContext('2d', {willReadFrequently:true})
+            .getImageData(0, 0, c.width, c.height).data;
+  D = { m: ink(px, c.width, c.height), w: c.width, h: c.height };
+  document.getElementById('page').src = c.toDataURL('image/webp', 0.85);
+  run();
+}
+/* ההודעה יושבת בראש המסך ליד הבורר, ולא בתחתית העמוד: היא
+   התשובה לבחירה שזה עתה נעשתה, וצריך לראות אותה במקום שבו
+   הבחירה נעשתה. */
+function say(t, bad) {
+  var el = document.getElementById('stat');
+  el.className = bad ? 'bad' : '';
+  el.innerHTML = t;
+  document.getElementById('msg').innerHTML = '';
+}
+
+document.getElementById('file').onchange = function (e) {
+  var f = e.target.files[0]; if (!f) return;
+  ['mas','daf','src'].forEach(function (id) {
+    document.getElementById(id).style.display = 'none'; });
+  if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) return openPdf(f);
+  PDF = null;
+  var img = new Image();
+  img.onload = function () { IMG = img; load(img); };
+  img.src = URL.createObjectURL(f);
+};
+
+/* ============================================================
+   הבורר — שבוע, דף, וקובץ.
+   הנתונים כבר קיימים באפליקציה: CAL_TAANIT ו-CAL_MEGILA ממפים
+   שבוע לפרשה ולדף, ו-DAF_LINKS נותן לכל דף את שני הקבצים
+   שבדרייב. אין כאן מאגר חדש — רק שימוש במה שיש.
+
+   הקובץ עצמו מגיע דרך ה-Apps Script. הדפדפן אינו מרשה לקוד שלנו
+   למשוך בייטים מ-drive.google.com כי גוגל אינה שולחת שם כותרת
+   CORS; הסקריפט רץ בחשבון של הרכז, קורא מהדרייב שלו ומעביר.
+   הקבצים נשארים פרטיים ואינם מתפרסמים בשום מקום.
+   ============================================================ */
+var MAS = [['taanit','תענית'], ['megila','מגילה']];
+var CAL = {};
+var API = '';
+var SCRIPT_MIN_STUDIO = 4;
+
+/* שמות הדפים מכילים גרשיים — י"ט — וכשהם נכתבו כערך האפשרות
+   המרכאה סגרה את הערך באמצע, והדפדפן קרא "י" בלבד. לכן כל דף
+   עם גרשיים נטען כדף חד-אותי. הערך הוא עכשיו האינדקס, והמחרוזת
+   נשמרת בצד; טקסט הכותרת עובר בריחה ממילא. */
+function esc(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fillSel(el, items) {
+  el._items = items;
+  el.innerHTML = items.map(function (v, i) {
+    return '<option value="' + i + '">' + esc(v[1]) + '</option>';
+  }).join('');
+  el.disabled = items.length < 2;
+}
+function selVal(id) {
+  var el = document.getElementById(id);
+  var it = el._items && el._items[+el.value];
+  return it ? it[0] : '';
+}
+/* אותה נורמליזציה שבאפליקציה: מפתחות הקישורים בלי גרשיים,
+   כדי שיתאימו לכל וריאציות הכתיב שבלוח השנה. */
+function dafKey(d) { return String(d).replace(/["'\u05f3\u05f4\s]/g, ''); }
+
+function fileId(url) {
+  var m = /\/d\/([-\w]{20,})/.exec(url || '');
+  return m ? m[1] : null;
+}
+function curDaf() {
+  var m = selVal('mas');
+  var d = selVal('daf');
+  var links = (window.DAF_LINKS || {})[m] || {};
+  return { mas:m, daf:d, links: links[dafKey(d)] || [] };
+}
+
+function onMas() {
+  var m = selVal('mas');
+  var cal = CAL[m] || [];
+  var links = (window.DAF_LINKS || {})[m] || {};
+  var opts = [];
+  cal.forEach(function (row, i) {
+    var d = row[2];
+    if (!d || d === 'סיום' || !links[dafKey(d)]) return;
+    opts.push([d, 'שבוע ' + (i + 1) + ' · ' + row[1] + ' · דף ' + d]);
+  });
+  if (!opts.length) { say('אין קישורי דפים למסכת הזו.', 1); return; }
+  fillSel(document.getElementById('daf'), opts);
+  onDaf();
+}
+function onDaf() {
+  var c = curDaf();
+  var opts = [];
+  if (fileId(c.links[0])) opts.push(['0', 'צורת הדף']);
+  if (fileId(c.links[1])) opts.push(['1', 'חברותא']);
+  fillSel(document.getElementById('src'), opts);
+  onSrc();
+}
+function onSrc() {
+  var c = curDaf();
+  var si = +selVal('src');
+  var id = fileId(c.links[si]);
+  if (!id) { say('אין קובץ לדף הזה.', 1); return; }
+  var mas = document.getElementById('mas');
+  fetchDaf(id, mas.options[mas.selectedIndex].text + ' · דף ' + c.daf +
+               ' · ' + (si ? 'חברותא' : 'צורת הדף'));
+}
+function onPage() {
+  if (PDF) return showPdfPage(+selVal('pg'));
+}
+
+/* משיכת הקובץ דרך הסקריפט. מנסים fetch, ואם ה-CORS חוסם נופלים
+   ל-JSONP — בדיוק כמו בבדיקת החיבור שבמסך הניהול. */
+var CACHE = {};
+var reqId = 0;          /* כל בקשה מקבלת מספר; רק האחרונה מתקבלת */
+var shown = '';         /* מה מוצג בפועל, כדי שאי-התאמה תיראה */
+
+function fetchDaf(id, label) {
+  /* בלי המספר הזה, החלפת דף בזמן שהקודם עדיין בדרך הציגה את מי
+     שהגיע אחרון ולא את מי שנבחר אחרון — ולפעמים כלום, כשהראשון
+     דרס את השני. משיכה מהדרייב לוקחת שניות, ולכן זה קרה תדיר. */
+  var mine = ++reqId;
+  var done = function (buf) {
+    if (mine !== reqId) return;               /* בחירה חדשה גברה */
+    shown = label || '';
+    openPdfBytes(buf);
+  };
+  if (CACHE[id]) return done(CACHE[id]);
+  if (!API) { say('אין כתובת שרת. הגדירו אותה ב-/admin ← הגדרות.', 1); return; }
+  say('מביא מהדרייב: ' + (label || '') + '…');
+  var url = API + (API.indexOf('?') < 0 ? '?' : '&') + 'file=' + encodeURIComponent(id);
+  fetch(url).then(function (r) { return r.json(); })
+    .catch(function () { return jsonp(url); })
+    .then(function (d) {
+      if (!d || d.status !== 'ok' || !d.data) throw new Error(d && d.message || 'no data');
+      var bin = atob(d.data), buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      CACHE[id] = buf;
+      done(buf);
+    })
+    .catch(function () {
+      if (mine !== reqId) return;
+      say('לא הצלחתי להביא את הקובץ. ודאו שהסקריפט פרוס בגרסה ' +
+          SCRIPT_MIN_STUDIO + ' ומעלה.', 1);
+    });
+}
+function jsonp(url) {
+  return new Promise(function (ok, fail) {
+    var n = '__daf' + Date.now(), sc = document.createElement('script');
+    var done = function (v) {
+      try { delete window[n]; } catch (e) { window[n] = undefined; }
+      clearTimeout(t); sc.remove(); v ? ok(v) : fail(new Error('timeout'));
+    };
+    var t = setTimeout(function () { done(null); }, 60000);
+    window[n] = done;
+    sc.onerror = function () { done(null); };
+    sc.src = url + '&callback=' + n;
+    document.body.appendChild(sc);
+  });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  CAL = { taanit: window.CAL_TAANIT || [], megila: window.CAL_MEGILA || [] };
+  API = (window.APPS_SCRIPT_URL || '').trim();
+  try {
+    var cfg = JSON.parse(localStorage.getItem('df:cfg') || '{}');
+    if (cfg.api) API = cfg.api;            /* דריסה מקומית, אם הוגדרה */
+  } catch (e) {}
+
+  if (!window.DAF_LINKS || !CAL.taanit.length) {
+    ['mas','daf','src','pg'].forEach(function (id) {
+      document.getElementById(id).style.display = 'none'; });
+    say('פתחו קובץ PDF של דף.');
+    return;
+  }
+  fillSel(document.getElementById('mas'), MAS);
+  ['mas','daf','src','pg'].forEach(function (id, i) {
+    document.getElementById(id).onchange = [onMas, onDaf, onSrc, onPage][i];
+  });
+  onMas();
+});
+
+/* טעינת תמונה רגילה (לא PDF) */
+function load(img) {
+  var c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  c.getContext('2d', {willReadFrequently:true}).drawImage(img, 0, 0);
+  useCanvas(c);
+}
+function run() {
+  var t = performance.now();
+  keepPageState();
+  loadPageState();
+  S = analyse(D.m, D.w, D.h) || analyseSimple(D.m, D.w, D.h);
+  if (!S) { say('לא זיהיתי טקסט בעמוד הזה.', 1); return; }
+  relines(); sel = 0;
+  if (MODE === 'mark') markDraw(); else draw();
+  /* לא לדרוס את שם הדף בזמן הריצה — זו התשובה לבחירה, והיא
+     צריכה להישאר על המסך. */
+  say((shown ? shown + ' · ' : '') +
+      'זוהה ב-' + Math.round(performance.now() - t) + 'ms');
+}
+
+/* ============================================================
+   סימון קטעים — חיבור בין הגמרא לחברותא.
+
+   קטע נסגר בנקודה `(שורה, מיקום בשורה)` ולא בשורה שלמה: הקטע
+   שאליו מתייחסים לא תמיד מתחיל בתחילת שורה ולא תמיד נגמר בסופה.
+   ההדגשה נראית כמו בחירת טקסט — מהנקודה עד קצה השורה, שורות
+   מלאות באמצע, ובאחרונה עד הנקודה. בעברית זה מימין לשמאל.
+
+   החברותא היא טקסט אמיתי, ולכן שם הבחירה היא בחירת טקסט רגילה.
+   ============================================================ */
+var MODE = 'cal';
+var CHV = null;          // פסקאות החברותא
+var STEPS = [];
+
+/* ============================================================
+   הקטעים נשמרים לפי עמוד.
+   מספרי השורות הם ביחס לעמוד שעליו סומנו, ולכן רשימה אחת
+   משותפת לשני עמודי הדף היא נתון שבור: מעבר מעמוד א׳ לעמוד ב׳
+   השאיר את הקטעים הקודמים ואת נקודת ההמשך שלהם, ושורה 5 של
+   עמוד אחד נראתה כשורה 5 של השני.
+   ============================================================ */
+var BOOK = {};
+var PKEY = '';
+
+function pageKey() {
+  if (PDF && !LIB_OK()) return 'file|' + (selVal('pg') || 1);
+  return [selVal('mas'), selVal('daf'), selVal('src'), selVal('pg')].join('|');
+}
+function LIB_OK() { return !!(window.DAF_LINKS && document.getElementById('mas').options.length); }
+
+function loadPageState() {
+  var k = pageKey();
+  if (k === PKEY) return;
+  PKEY = k;
+  var rec = BOOK[k];
+  STEPS = rec ? rec.steps : [];
+  var last = STEPS[STEPS.length - 1];
+  USED_G = last ? { line: last.g.to.line, x: last.g.to.x } : null;
+  USED_C = last ? last.c.to : -1;
+  GSEL = null; CSEL_P = null;
+}
+function keepPageState() {
+  if (!PKEY || !S) return;
+  BOOK[PKEY] = { w:S.w, h:S.h, label: shown,
+    core:[S.core[0]/S.w, S.core[1]/S.w],
+    zones: S.zones.map(function (z) {
+      return { y0:z.y0/S.h, y1:z.y1/S.h, a:z.a/S.w, b:z.b/S.w,
+               lines:(z.lines||[]).map(function(l){ return [l[0]/S.h, l[1]/S.h]; }) };
+    }),
+    steps: STEPS };
+}
+var GSEL = null;         // { a:{i,x}, b:{i,x} } לפי אינדקס שורה
+function flatLines() {
+  var out = [];
+  (S ? S.zones : []).forEach(function (z) {
+    (z.lines || []).forEach(function (l) {
+      out.push({ t: l[0], b: l[1], a: z.a, x2: z.b });
+    });
+  });
+  return out.sort(function (p, q) { return p.t - q.t; });
+}
+
+/* ההדגשה של קטע: הראשונה חלקית מימין, האחרונה חלקית משמאל.
+   x הוא שבר מרוחב השורה, 0 = הקצה הימני (תחילת הקריאה). */
+function selShapes(sel) {
+  var ls = flatLines(), out = [];
+  if (!sel) return out;
+  var i0 = Math.min(sel.a.i, sel.b.i), i1 = Math.max(sel.a.i, sel.b.i);
+  var xa = sel.a.i <= sel.b.i ? sel.a.x : sel.b.x;
+  var xb = sel.a.i <= sel.b.i ? sel.b.x : sel.a.x;
+  for (var i = i0; i <= i1 && i < ls.length; i++) {
+    var l = ls[i], w = l.x2 - l.a;
+    var from = (i === i0) ? l.x2 - w * xa : l.x2;      // ימין = התחלה
+    var to   = (i === i1) ? l.x2 - w * xb : l.a;
+    out.push([Math.min(from, to), l.t, Math.abs(to - from), l.b - l.t]);
+  }
+  return out;
+}
+
+function markDraw() {
+  var ov = document.getElementById('ov');
+  ov.setAttribute('viewBox', '0 0 ' + S.w + ' ' + S.h);
+  var s = '';
+  var ls = flatLines();
+  ls.forEach(function (l, i) {
+    s += '<rect class="ml" data-i="' + i + '" x="' + l.a + '" y="' + l.t +
+         '" width="' + (l.x2 - l.a) + '" height="' + (l.b - l.t) +
+         '" fill="rgba(30,120,225,.07)" style="cursor:pointer"/>';
+  });
+  selShapes(GSEL).forEach(function (r) {
+    s += '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] +
+         '" fill="rgba(240,150,20,.45)" stroke="#C08F2B" stroke-width="2"/>';
+  });
+  /* ידיות לכוונון בתוך השורה */
+  if (GSEL) {
+    var sh = selShapes(GSEL);
+    if (sh.length) {
+      s += hand(sh[0][0] + sh[0][2], sh[0][1], sh[0][3], 'a');
+      var last = sh[sh.length - 1];
+      s += hand(last[0], last[1], last[3], 'b');
+    }
+  }
+  /* קו דק במקום שממנו ימשיך הקטע הבא */
+  var ls2 = flatLines();
+  if (!GSEL && USED_G) {
+    var st2 = nextStart(), nx = ls2[st2.i];
+    if (nx) {
+      /* אם נותר חצי שורה, מסמנים בדיוק את החצי הזה */
+      var w2 = nx.x2 - nx.a, from = nx.x2 - w2 * st2.x;
+      s += '<rect x="' + nx.a + '" y="' + nx.t + '" width="' + (from - nx.a) +
+           '" height="' + (nx.b - nx.t) + '" fill="rgba(59,125,87,.22)"/>';
+    }
+  }
+  ov.innerHTML = s;
+  [].forEach.call(ov.querySelectorAll('.ml'), function (el) {
+    var t = null;
+    el.onpointerdown = function () { t = setTimeout(function () {
+      t = null; pickLine(+el.dataset.i, true); }, 550); };
+    el.onpointerup = function () {
+      if (t) { clearTimeout(t); t = null; pickLine(+el.dataset.i); } };
+    el.onpointercancel = function () { if (t) clearTimeout(t); t = null; };
+  });
+  bindMarkHandles();
+  markPanel();
+}
+function hand(x, y, h, which) {
+  return '<g class="mh" data-e="' + which + '" style="cursor:ew-resize">' +
+    '<rect x="' + (x - 26) + '" y="' + (y - 6) + '" width="52" height="' + (h + 12) +
+    '" fill="rgba(0,0,0,0)"/>' +
+    '<rect x="' + (x - 3) + '" y="' + (y - 4) + '" width="6" height="' + (h + 8) +
+    '" fill="#C08F2B" rx="3"/></g>';
+}
+
+/* הקטעים רצים ברצף ואין דילוגים, ולכן ההתחלה כבר ידועה והקשה
+   אחת על הסוף מספיקה. הקשה ארוכה קובעת התחלה חדשה, למקרה
+   שבכל זאת צריך לדלג. */
+function pickLine(i, longPress) {
+  var st = nextStart();
+  if (longPress || i < st.i) { GSEL = { a: { i: i, x: 0 }, b: { i: i, x: 1 } }; }
+  else { GSEL = { a: { i: st.i, x: st.x }, b: { i: i, x: 1 } }; }
+  markDraw();
+}
+
+function bindMarkHandles() {
+  var ov = document.getElementById('ov');
+  [].forEach.call(ov.querySelectorAll('.mh'), function (g) {
+    g.style.touchAction = 'none';
+    g.onpointerdown = function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      var which = g.dataset.e;
+      var move = function (m) {
+        var r = ov.getBoundingClientRect();
+        var px = (m.clientX - r.left) / r.width * S.w;
+        var sh = selShapes(GSEL);
+        var idx = which === 'a' ? 0 : sh.length - 1;
+        var ls = flatLines();
+        var li = (which === 'a' ? Math.min(GSEL.a.i, GSEL.b.i)
+                                : Math.max(GSEL.a.i, GSEL.b.i));
+        var l = ls[li]; if (!l) return;
+        var f = (l.x2 - px) / (l.x2 - l.a);
+        f = Math.max(0, Math.min(1, f));
+        if (which === 'a') (GSEL.a.i <= GSEL.b.i ? GSEL.a : GSEL.b).x = f;
+        else               (GSEL.a.i <= GSEL.b.i ? GSEL.b : GSEL.a).x = f;
+        markDraw();
+      };
+      var up = function () {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    };
+  });
+}
+
+function markPanel() {
+  var g = GSEL ? (Math.min(GSEL.a.i, GSEL.b.i) + 1) + '–' + (Math.max(GSEL.a.i, GSEL.b.i) + 1) : null;
+  var c = CSEL_P ? (CSEL_P.a + 1) + (CSEL_P.b > CSEL_P.a ? '–' + (CSEL_P.b + 1) : '') : null;
+  var ready = !!(GSEL && CSEL_P);
+
+  document.body.classList.toggle('gsel', !!GSEL);
+  var hint = document.getElementById('ghint');
+  if (hint) hint.innerHTML = ready ? 'מוכן להוספה'
+    : (g ? 'נותר לסמן בחברותא' : c ? 'נותר לסמן בגמרא' : 'סמנו בשני הצדדים');
+  ['addstep','addstep2'].forEach(function (id) {
+    var b = document.getElementById(id); if (b) b.disabled = !ready;
+  });
+  var mc = document.getElementById('mcur');
+  if (mc) mc.innerHTML =
+    '<div class="' + (g ? 'ok' : 'no') + '">גמרא: ' + (g ? 'שורות ' + g : 'טרם נבחר') + '</div>' +
+    '<div class="' + (c ? 'ok' : 'no') + '">חברותא: ' + (c ? 'פסקה ' + c : 'טרם נבחר') + '</div>';
+  var mh = document.getElementById('mhelp');
+  if (mh) mh.innerHTML = 'הקשה על שורה בגמרא ועל פסקה בחברותא — הקטע ממשיך ' +
+    'מהמקום שהקודם נגמר. <b>הקשה על שורה אחרת מזיזה את הסוף</b>, ולכן ' +
+    'סימנתם שורה אחת יותר מדי — הקישו על הקודמת. הקשה ארוכה מתחילה מחדש.';
+
+  var pl = document.getElementById('pglbl');
+  if (pl) {
+    var el = document.getElementById('pg');
+    var it = el._items && el._items[+el.value];
+    pl.textContent = it ? it[1] : '';
+    document.getElementById('pgprev').disabled = +el.value <= 0;
+    document.getElementById('pgnext').disabled = +el.value >= el.options.length - 1;
+  }
+  var cnt = document.getElementById('mcount');
+  if (cnt) cnt.textContent = STEPS.length ? '· ' + STEPS.length : '';
+  var box = document.getElementById('steps');
+  if (box) {
+    box.innerHTML = STEPS.map(function (st, i) {
+      return '<div class="step"><span class="x" data-x="' + i + '">✕</span>' +
+        '<b>' + (i + 1) + '.</b> שורות ' + (st.g.from.line + 1) + '–' + (st.g.to.line + 1) +
+        ' · פסקה ' + (st.c.from + 1) + (st.c.to > st.c.from ? '–' + (st.c.to + 1) : '') +
+        '<span class="q">' + esc((st.c.text || '').slice(0, 55)) + '…</span></div>';
+    }).join('') || '<div class="hint">עדיין אין קטעים.</div>';
+    [].forEach.call(document.querySelectorAll('[data-x]'), function (b) {
+      b.onclick = function () { removeStep(+b.dataset.x); };
+    });
+  }
+  var u = document.getElementById('undo');
+  if (u) u.disabled = !STEPS.length;
+}
+
+function addStep() {
+  if (!GSEL || !CSEL_P) return;
+  var i0 = Math.min(GSEL.a.i, GSEL.b.i), i1 = Math.max(GSEL.a.i, GSEL.b.i);
+  var xa = GSEL.a.i <= GSEL.b.i ? GSEL.a.x : GSEL.b.x;
+  var xb = GSEL.a.i <= GSEL.b.i ? GSEL.b.x : GSEL.a.x;
+  STEPS.push({ g: { from: { line: i0, x: +xa.toFixed(3) },
+                    to:   { line: i1, x: +xb.toFixed(3) } },
+               c: { from: CSEL_P.a, to: CSEL_P.b, text: chavText() } });
+  USED_G = { line: i1, x: +xb.toFixed(3) };
+  USED_C = CSEL_P.b;
+  keepPageState();
+  GSEL = null; CSEL_P = null;
+  paintChav(); markDraw();
+}
+function removeStep(i) {
+  STEPS.splice(i, 1);
+  var last = STEPS[STEPS.length - 1];
+  USED_G = last ? { line: last.g.to.line, x: last.g.to.x } : null;
+  USED_C = last ? last.c.to : -1;
+  keepPageState();
+  paintChav(); markDraw();
+}
+
+function setMode(m) {
+  MODE = m;
+  document.body.classList.toggle('mark', m === 'mark');
+  document.getElementById('mode').textContent =
+    m === 'mark' ? '→ חזרה לכיול' : 'סימון קטעים ←';
+  if (m === 'mark') {
+    loadChav();
+    /* מה שכבר סומן בדף הזה בפעם קודמת חוזר מהגיליון */
+    loadFromSheet().then(function (n) {
+      if (n) { PKEY = ''; loadPageState(); paintChav(); markDraw();
+               say('נטענו סימונים קודמים מ-' + n + ' עמודים'); }
+    });
+    markDraw();
+  } else if (S) draw();
+  markPanel();
+}
+
+/* בסימון צריך את שני הקבצים בבת אחת: צורת הדף מוצגת, והחברותא
+   נטענת לצידה כטקסט. */
+function loadChav() {
+  var c = curDaf();
+  var id = fileId(c.links[1]);
+  if (!id) { document.getElementById('chb').innerHTML =
+    '<div class="hint">אין קובץ חברותא לדף הזה.</div>'; return; }
+  var box = document.getElementById('chb');
+  box.innerHTML = '<div class="hint">טוען את החברותא…</div>';
+  var render = function (buf) {
+    pdfReady()
+      .then(function () { return pdfjsLib.getDocument({ data: buf.slice(0) }).promise; })
+      .then(function (doc) {
+        var jobs = [];
+        for (var i = 1; i <= doc.numPages; i++) jobs.push(doc.getPage(i).then(chavItems));
+        return Promise.all(jobs);
+      })
+      .then(function (pages) {
+        /* הסף נקבע על כל הקובץ ולא לעמוד, כדי שעמוד שכולו כותרות
+           לא יסיט אותו. */
+        var all = [].concat.apply([], pages);
+        var body = bodyHeight(all);
+        CHV = [].concat.apply([], pages.map(function (it) {
+          return chavBuild(it, body);
+        }));
+        box.innerHTML = chavHtml(CHV);
+        document.getElementById('chpg').textContent = CHV.length + ' פסקאות';
+        chavBind(); paintChav();
+      })
+      .catch(function () { box.innerHTML = '<div class="hint">לא הצלחתי לקרוא.</div>'; });
+  };
+  if (CACHE[id]) return render(CACHE[id]);
+  var url = API + (API.indexOf('?') < 0 ? '?' : '&') + 'file=' + encodeURIComponent(id);
+  fetch(url).then(function (r) { return r.json(); }).catch(function () { return jsonp(url); })
+    .then(function (d) {
+      var bin = atob(d.data), buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      CACHE[id] = buf; render(buf);
+    })
+    .catch(function () { box.innerHTML = '<div class="hint">לא הצלחתי להביא.</div>'; });
+}
+
+/* ============================================================
+   שמירה לגיליון.
+   הכל חייב לשבת ברשת ולא במכשיר: שעה של סימון שנמחקת בריענון
+   היא נזק אמיתי. הכתיבה עוברת באותו Apps Script, בפעולת `table`
+   שכבר קיימת בו — לשונית שלמה נכתבת מחדש בכל שמירה.
+
+   ומכיוון ש-`table` כותב מחדש, חייבים למזג: קוראים קודם את מה
+   שכבר בגיליון, מחליפים רק את הדף שעליו עבדנו, וכותבים הכל
+   בחזרה. בלי זה שמירה של דף אחד הייתה מוחקת את כל השאר.
+   ============================================================ */
+var MARK_TAB = 'סימוני הדף';
+
+function sheetCsv(tab) {
+  var id = (window.CFG && CFG.sheetId) || window.SHEET_ID;
+  if (!id) return Promise.resolve(null);
+  return fetch('https://docs.google.com/spreadsheets/d/' + id +
+      '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(tab) + '&t=' + Date.now())
+    .then(function (r) { return r.ok ? r.text() : null; })
+    .then(function (t) { return t ? csvRows(t) : null; })
+    .catch(function () { return null; });
+}
+function csvRows(text) {
+  var rows = [], row = [], f = '', q = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (q) {
+      if (c === '"' && text[i+1] === '"') { f += '"'; i++; }
+      else if (c === '"') q = false; else f += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
+    else if (c !== '\r') f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(function (r) { return r.join('').trim() !== ''; });
+}
+
+var COLS = ['מסכת', 'דף', 'עמוד', 'נתונים'];
+
+function saveToSheet() {
+  if (!API) { say('אין כתובת שרת.', 1); return Promise.resolve(false); }
+  keepPageState();
+  say('שומר בגיליון…');
+  return sheetCsv(MARK_TAB).then(function (rows) {
+    var keep = [];
+    (rows || []).slice(1).forEach(function (r) {
+      /* שומרים כל מה ששייך לדפים אחרים, ומחליפים רק את שלנו */
+      if (!BOOK[r[0] + '|' + r[1] + '|' + r[2]]) keep.push(r.slice(0, 4));
+    });
+    for (var k in BOOK) {
+      var a = k.split('|');
+      keep.push([a[0] || '', a[1] || '', a.slice(2).join('|'),
+                 JSON.stringify(BOOK[k])]);
+    }
+    return fetch(API, { method:'POST', mode:'no-cors',
+      body: JSON.stringify({ action:'table', tab: MARK_TAB,
+        cols: JSON.stringify(COLS), rows: JSON.stringify(keep) }) })
+      .then(function () {
+        var n = 0; for (var q in BOOK) n += (BOOK[q].steps || []).length;
+        say('נשמר בגיליון · ' + n + ' קטעים · לשונית "' + MARK_TAB + '"');
+        return true;
+      });
+  }).catch(function () { say('השמירה נכשלה.', 1); return false; });
+}
+
+function loadFromSheet() {
+  return sheetCsv(MARK_TAB).then(function (rows) {
+    if (!rows || rows.length < 2) return 0;
+    var mas = selVal('mas'), daf = selVal('daf'), n = 0;
+    rows.slice(1).forEach(function (r) {
+      if (r[0] !== mas || r[1] !== daf) return;
+      try { BOOK[r[0] + '|' + r[1] + '|' + r[2]] = JSON.parse(r[3]); n++; } catch (e) {}
+    });
+    return n;
+  }).catch(function () { return 0; });
+}
+
+/* ============================================================
+   זום ופאן.
+   הקשה נשארת בחירה, ולכן הזום חייב להיות פינץ' או כפתורים —
+   לא גרירה. הטרנספורם על המכל בלבד, כדי שהקואורדינטות של
+   הסימון לא ישתנו.
+   ============================================================ */
+var ZOOM = 1, PANX = 0, PANY = 0;
+function applyZoom() {
+  var h = document.getElementById('holder');
+  h.style.transform = 'translate(' + PANX + 'px,' + PANY + 'px) scale(' + ZOOM + ')';
+}
+function setZoom(z, cx, cy) {
+  var st = document.querySelector('.stage'), r = st.getBoundingClientRect();
+  cx = cx === undefined ? r.width / 2 : cx;
+  cy = cy === undefined ? r.height / 2 : cy;
+  var k = Math.max(1, Math.min(6, z)) / ZOOM;
+  PANX = cx - (cx - PANX) * k;
+  PANY = cy - (cy - PANY) * k;
+  ZOOM = Math.max(1, Math.min(6, z));
+  if (ZOOM === 1) { PANX = PANY = 0; }
+  applyZoom();
+}
+function zoomToSel() {
+  var sh = selShapes(GSEL); if (!sh.length) return;
+  var st = document.querySelector('.stage'), r = st.getBoundingClientRect();
+  var top = sh[0][1], bot = sh[sh.length - 1][1] + sh[sh.length - 1][3];
+  var img = document.getElementById('page');
+  var base = img.clientWidth / S.w;                 /* פיקסל תמונה → מסך */
+  var want = Math.min(4, r.height / ((bot - top) * base * 2.2));
+  ZOOM = Math.max(1, want);
+  PANX = 0;
+  PANY = -((top + bot) / 2 * base * ZOOM) + r.height / 2;
+  applyZoom();
+}
+document.getElementById('zin').onclick  = function () { setZoom(ZOOM * 1.5); };
+document.getElementById('zout').onclick = function () { setZoom(ZOOM / 1.5); };
+document.getElementById('zfit').onclick = function () { setZoom(1); };
+(function pinch() {
+  var st = document.querySelector('.stage'), pts = {}, base = null;
+  st.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse') return;
+    pts[e.pointerId] = e;
+    var k = Object.keys(pts);
+    if (k.length === 2) {
+      var a = pts[k[0]], b = pts[k[1]];
+      base = { d: Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY), z: ZOOM,
+               x: PANX, y: PANY };
+    }
+  });
+  st.addEventListener('pointermove', function (e) {
+    if (!pts[e.pointerId]) return;
+    var was = pts[e.pointerId]; pts[e.pointerId] = e;
+    var k = Object.keys(pts);
+    if (k.length === 2 && base) {
+      var a = pts[k[0]], b = pts[k[1]];
+      var d = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+      var r = st.getBoundingClientRect();
+      setZoom(base.z * d / base.d, (a.clientX+b.clientX)/2 - r.left,
+                                   (a.clientY+b.clientY)/2 - r.top);
+    } else if (k.length === 1 && ZOOM > 1) {
+      PANX += e.clientX - was.clientX; PANY += e.clientY - was.clientY;
+      applyZoom();
+    }
+  });
+  var drop = function (e) { delete pts[e.pointerId]; if (Object.keys(pts).length < 2) base = null; };
+  st.addEventListener('pointerup', drop);
+  st.addEventListener('pointercancel', drop);
+})();
+
+/* ============================================================
+   בחירת פסקאות בחברותא — בהקשה, לא בגרירה.
+   ============================================================ */
+var CSEL_P = null;      // { a, b } אינדקסי פסקאות
+var USED_C = -1;        // הפסקה האחרונה שכבר שובצה
+var USED_G = null;      // הנקודה שבה נגמר הקטע הקודם: {line, x}
+
+/* היכן מתחיל הקטע הבא. לא די במספר השורה: קטע שנעצר באמצע שורה
+   משאיר את חציה, והחצי הזה שייך לקטע הבא. אם הקודם מיצה את
+   השורה — מתחילים בשורה שאחריה. */
+function nextStart() {
+  if (!USED_G) return { i: 0, x: 0 };
+  if (USED_G.x >= 0.98) return { i: USED_G.line + 1, x: 0 };
+  return { i: USED_G.line, x: USED_G.x };
+}
+
+function chavBind() {
+  [].forEach.call(document.querySelectorAll('#chb p.cp'), function (el) {
+    el.onclick = function () { pickPara(+el.dataset.p); };
+  });
+}
+function pickPara(i) {
+  /* הקטע ממשיך מהמקום שהקודם נגמר, ולכן די בהקשה על הסוף.
+     הקשה על פסקה שכבר בתוך הבחירה מבטלת. */
+  if (CSEL_P && i >= CSEL_P.a && i <= CSEL_P.b && CSEL_P.b > CSEL_P.a) {
+    CSEL_P = { a: CSEL_P.a, b: i };
+  } else if (!CSEL_P) {
+    CSEL_P = { a: Math.max(0, USED_C + 1), b: i };
+    if (CSEL_P.a > i) CSEL_P.a = i;
+  } else {
+    CSEL_P = { a: CSEL_P.a, b: i };
+    if (CSEL_P.b < CSEL_P.a) { CSEL_P = { a: i, b: i }; }
+  }
+  paintChav(); markPanel();
+}
+function paintChav() {
+  [].forEach.call(document.querySelectorAll('#chb p.cp'), function (el) {
+    var i = +el.dataset.p;
+    el.classList.toggle('hot', !!CSEL_P && i >= CSEL_P.a && i <= CSEL_P.b);
+    el.classList.toggle('used', i <= USED_C);
+    el.classList.toggle('nextup', !CSEL_P && i === USED_C + 1);
+  });
+}
+function chavText() {
+  if (!CSEL_P || !CHV) return '';
+  var out = [];
+  for (var i = CSEL_P.a; i <= CSEL_P.b && i < CHV.length; i++)
+    out.push(CHV[i].runs.map(function (r) { return r.t; }).join(''));
+  return out.join(' ');
+}
+
+/* ============================================================
+   כוונון בתוך שורה — לפי מילים.
+   גבולות המילים מזוהים באותה שיטה כמו הכול כאן: הטלת דיו, והפער
+   בין מילים הוא רווח. הכוונון נצמד למילה ולא למקום שהאצבע נחתה בו.
+   ============================================================ */
+function wordEdges(li) {
+  var ls = flatLines(), l = ls[li];
+  if (!l) return [];
+  var gapMin = Math.max(3, Math.round(S.gpitch * 0.18)), col = [];
+  for (var x = l.a; x < l.x2; x++) {
+    var any = 0;
+    for (var y = l.t; y < l.b && !any; y++) if (D.m[y*D.w+x]) any = 1;
+    col.push(any);
+  }
+  var edges = [l.x2], run = 0;
+  for (var i = col.length - 1; i >= 0; i--) {     /* מימין לשמאל */
+    if (!col[i]) { run++; }
+    else { if (run >= gapMin) edges.push(l.a + i + run); run = 0; }
+  }
+  edges.push(l.a);
+  return edges.map(function (x) { return (l.x2 - x) / (l.x2 - l.a); })
+              .sort(function (p, q) { return p - q; });
+}
+function nudge(which, dir) {
+  if (!GSEL) return;
+  var first = GSEL.a.i <= GSEL.b.i ? GSEL.a : GSEL.b;
+  var last  = GSEL.a.i <= GSEL.b.i ? GSEL.b : GSEL.a;
+  var pt = which === 'start' ? first : last;
+  var es = wordEdges(pt.i);
+  if (!es.length) return;
+  var cur = pt.x, best = null;
+  es.forEach(function (e) {
+    if (dir > 0 && e > cur + 0.005 && (best === null || e < best)) best = e;
+    if (dir < 0 && e < cur - 0.005 && (best === null || e > best)) best = e;
+  });
+  if (best === null) return;
+  pt.x = best;
+  markDraw();
+}
+
+document.getElementById('mode').onclick = function () {
+  setMode(MODE === 'mark' ? 'cal' : 'mark');
+};
+['addstep','addstep2'].forEach(function (id) {
+  var b = document.getElementById(id); if (b) b.onclick = addStep;
+});
+document.getElementById('undo').onclick = function () {
+  if (STEPS.length) removeStep(STEPS.length - 1);
+};
+[].forEach.call(document.querySelectorAll('[data-nudge]'), function (b) {
+  b.onclick = function () {
+    var a = b.dataset.nudge.split(',');
+    nudge(a[0], +a[1]);
+  };
+});
+document.getElementById('clearsel').onclick = function () {
+  GSEL = null; markDraw();
+};
+function stepPage(d) {
+  var el = document.getElementById('pg');
+  var i = +el.value + d;
+  if (i < 0 || i >= el.options.length) return;
+  el.value = i; el.dispatchEvent(new Event('change'));
+}
+document.getElementById('pgprev').onclick = function () { stepPage(-1); };
+document.getElementById('pgnext').onclick = function () { stepPage(1); };
+document.getElementById('save2').onclick = function () { saveToSheet(); };
+document.getElementById('swap').onclick = function () {
+  if (document.body.classList.contains('solo'))
+    document.body.classList.toggle('on-chav');
+  else document.body.classList.toggle('swap');
+};
+document.getElementById('layout').onclick = function () {
+  var solo = document.body.classList.toggle('solo');
+  this.textContent = solo ? 'מקביל' : 'מסך מלא';
+  document.getElementById('swap').textContent = solo ? '⇄ הצד השני' : '⇄';
+};
+
+window.studioLoad = load;      // לבדיקות
+</script>
+</body>
+</html>
